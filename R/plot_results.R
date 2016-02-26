@@ -61,5 +61,48 @@ combiNEM.PlotResults <- function(results) {
   plot.igraph(g, vertex.color=c(geneColor, logicColor, EGeneColor), vertex.size=c(geneSize, logicSize, EGeneSize),
        vertex.size2=c(rep(30,nGenes), rep(15,nLogics), rep(30, nEGenes)),
        vertex.shape=c(geneShape, logicShape, EGeneShape), edge.arrow.size=c(rep(0.3, nGenes+nLogics+nEGenes)),
-       vertex.label=labels)#, layout = layout.fruchterman.reingold)
+       vertex.label=labels, layout = layout.fruchterman.reingold)
+}
+
+
+#' @noRd
+PlotTopo <- function(results, title="") {
+  result <- results$origModel
+  logics <- results$logics
+  #Egeneset <- results$EGeneset
+  diag(result) <- 0
+  nGenes    <- ncol(result)
+  geneColor <- rep("lightpink", nGenes)
+  geneShape <- rep("circle", nGenes)
+  #EGenes     <- rownames(Egeneset)
+  #nEGenes    <- nrow(Egeneset)
+  #EGeneShape <- rep("circle", nEGenes)
+  #EGeneColor <- rep("lightgrey", nEGenes)
+  child <- colnames(result)[results$column]
+  for (i in 1:length(logics)){
+    result <- AddLogicGates(child[i], logics[i], result)
+  }
+#   for (i in 1:nEGenes){
+#     result <- cbind(result, rep(0, dim(result)[1]))
+#     result <- rbind(result, rep(0, dim(result)[2]))
+#     rownames(result)[dim(result)[1]] <- Egeneset[i]
+#     colnames(result)[dim(result)[1]] <- Egeneset[i]
+#     #if for unconnected node summarizing non-attached E-Genes
+#     if(i < nEGenes) {
+#       result[rownames(Egeneset)[i], ncol(result)]   <- 1
+#     }
+#   }
+  labels     <- colnames(result)
+  nLogics    <- length(logics)
+  logicColor <- rep("lightgreen", nLogics)
+  logicShape <- rep("rectangle", nLogics)
+  geneSize   <- rep(30, nGenes)
+  logicSize  <- unlist(lapply(logics, function(l) (nchar(l) + 5) * 3))
+  #EGeneSize  <- rep(30, nEGenes)
+  ## lay3 as layout
+  g <- graph.adjacency(result)
+  plot.igraph(g, vertex.color=c(geneColor, logicColor), vertex.size=c(geneSize, logicSize),
+              vertex.size2=c(rep(30,nGenes), rep(15,nLogics)),
+              vertex.shape=c(geneShape, logicShape), edge.arrow.size=c(rep(0.3, nGenes+nLogics)),
+              vertex.label=labels, layout = layout.fruchterman.reingold, main=title)
 }

@@ -38,6 +38,7 @@ MLL <- function(Phi, D1, D0) {
               para=para))
 }
 
+#' @noRd
 colours <- function(logic, parents2){
   #defines colorcode for results
   #logic=as.character(logic[2])
@@ -241,6 +242,7 @@ getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, exp
   return(list(list(origModel=adj, model=extadj2, logics=logicmatrix[modelno,], column=column)))
 }
 
+#' @noRd
 AttachEGenes <- function(posterior, experiments){
   maxpost <- lapply(1:nrow(posterior), function(x) length(which(posterior[x,]==max(posterior[x,]))))
   attachedEs <- matrix()
@@ -365,7 +367,8 @@ GenerateDoubleKO <- function(singleKOs) {
   return(doubleKO)
 }
 
-combiNEM.Simulations <- function(random, nSim){
+#' @noRd
+epiNEM.Simulations <- function(random, nSim){
   #perform simulation experiments for LogicNEM, Correlation and Mutual Information
   count <- rep(0, length(random$FNrate))
   log <- rep(0, length(random$FNrate))
@@ -450,7 +453,7 @@ combiNEM.Simulations <- function(random, nSim){
 #, LogicNEM=avgErrorLOG, MutualInfo=avgErrorMUT, Correlation=avgErrorCOR, alpha=alpha))#, log=log))#, modTip=modTip, modTop=modTop))
 }
 
-
+#' @noRd
 getGeneName <- function(symbol){
   name <- as.character(unlist(xx[which(xx==symbol)], recursive=FALSE))
   if (length(name)==0){
