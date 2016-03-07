@@ -8,6 +8,10 @@ includeLogic(adj, experiments, mutants)
 }
 \arguments{
 \item{adj:}{adjacency matrix of graph}
+
+\item{experiments:}{vector of all knockouts}
+
+\item{mutants:}{vector of single knockouts}
 }
 \description{
 include logics into network. Returns an extended adjacency matrix.

@@ -113,7 +113,7 @@ getStarters <- function(mutants, experiments){
 #' is computed yu using BoolNet.
 #' @param network: network created by BoolNet from file
 #' @param mutants: vector of single knockouts
-#' @param experiments: vector of all knockouts
+#' @param experiments: vector of all knockouts haha
 #' @importFrom BoolNet getPathToAttractor
 createExtendedAdjacency <- function(network, mutants, experiments){
   starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
@@ -135,6 +135,8 @@ createExtendedAdjacency <- function(network, mutants, experiments){
 
 #' include logics into network. Returns an extended adjacency matrix.
 #' @param adj: adjacency matrix of graph
+#' @param experiments: vector of all knockouts
+#' @param mutants: vector of single knockouts
 #' @export
 includeLogic <- function(adj, experiments, mutants){
   adj=matrix(unlist(adj),length(experiments), byrow=FALSE)

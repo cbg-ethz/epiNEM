@@ -23,7 +23,7 @@ AddLogicGates <- function(child, logic, model) {
 #' Plots the winning pathway structure
 #' @importFrom igraph graph.adjacency plot.igraph
 #' @param LogiNEM object created by LogicNEM
-combiNEM.PlotResults <- function(results) {
+epiNEM.PlotResults <- function(results) {
   result <- results$origModel
   logics <- results$logics
   Egeneset <- results$EGeneset
