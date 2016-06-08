@@ -2,7 +2,8 @@ Package: epiNEM
 Type: Package
 Title: epiNEM
 Version: 0.1
-Authors@R: person("Madeline", "Diekmann", email = "tabea-madeline.diekmann@bsse.ethz.ch", role = c("aut", "cre"))
+Author: Madeline Diekmann
+Maintainer: Mathias Cardner <mathias.cardner@bsse.ethz.ch>
 Description: epiNEM is an extension of the NEM package which is able to take into account double knockouts.
 Depends: 
     R (>= 3.2.0), BoolNet, e1071, gtools, igraph

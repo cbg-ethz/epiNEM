@@ -4,6 +4,7 @@
 #' @description Returns a model graph with randomly sampled edges. Every possible edge has a probability to exist in the graph.
 #' @param pathwayGenes: vector of genes in the pathway
 #' @param edgeProb: probability of random edge
+#' @export
 CreateRandomGraph <- function(pathwayGenes, edgeProb=0.5) {
   size     <- length(pathwayGenes)
   model    <- diag(size)
@@ -21,6 +22,7 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' @param D1: observed data matrix
 #' @param D0: complementary D1
 #' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
+#' @export
 MLL <- function(Phi, D1, D0) {
   # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
   # complementary data matrix D0
@@ -70,6 +72,7 @@ colours <- function(logic, parents2){
 #' @description get mutant vectors for simulating boolean network
 #' @param mutants: vector of single knockouts
 #' @param experiments: vector of all knockouts
+#' @export
 getStarters <- function(mutants, experiments){
   ## get positions of doublemutants
   mutantslist <- strsplit(mutants, ".", fixed=TRUE)
@@ -113,8 +116,9 @@ getStarters <- function(mutants, experiments){
 #' is computed yu using BoolNet.
 #' @param network: network created by BoolNet from file
 #' @param mutants: vector of single knockouts
-#' @param experiments: vector of all knockouts haha
+#' @param experiments: vector of all knockouts
 #' @importFrom BoolNet getPathToAttractor
+#' @export
 createExtendedAdjacency <- function(network, mutants, experiments){
   starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
   rownames(starters) <- mutants
@@ -235,6 +239,7 @@ includeLogic <- function(adj, experiments, mutants){
 ## to do: sehr unschoen!!!
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
+#' @export
 getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments){
   #creates file read by boolNet
   path <- paste("outfile_", modelno, ".txt", sep="")
@@ -245,6 +250,7 @@ getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, exp
 }
 
 #' @noRd
+#' @export
 AttachEGenes <- function(posterior, experiments){
   maxpost <- lapply(1:nrow(posterior), function(x) length(which(posterior[x,]==max(posterior[x,]))))
   attachedEs <- matrix()
@@ -340,6 +346,7 @@ AttachEGenes <- function(posterior, experiments){
 #' create topology for a randomly generated pathway topology
 #' @param single: number of single knockouts
 #' @param double: number of double knockouts
+#' @export
 CreateTopology <- function(single, double) {
   extendedModels <- list()
   singleKOs <- LETTERS[1:single]
@@ -361,6 +368,7 @@ CreateTopology <- function(single, double) {
 #' generate a random double mutant for artificial data
 #' @param singleKOs: vector of single mutants
 #' @importFrom gtools combinations
+#' @export
 GenerateDoubleKO <- function(singleKOs) {
   allDoubles    <- combinations(length(singleKOs), 2, singleKOs)
   randomDoubles <- sample(1:choose(length(singleKOs), 2), 1)
@@ -370,6 +378,7 @@ GenerateDoubleKO <- function(singleKOs) {
 }
 
 #' @noRd
+#' @export
 epiNEM.Simulations <- function(random, nSim){
   #perform simulation experiments for LogicNEM, Correlation and Mutual Information
   count <- rep(0, length(random$FNrate))
@@ -456,6 +465,7 @@ epiNEM.Simulations <- function(random, nSim){
 }
 
 #' @noRd
+#' @export
 getGeneName <- function(symbol){
   name <- as.character(unlist(xx[which(xx==symbol)], recursive=FALSE))
   if (length(name)==0){

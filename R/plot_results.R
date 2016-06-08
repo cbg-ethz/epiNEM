@@ -1,7 +1,7 @@
 ## functions for plotting
 
 #' extend model with node representing logic gate
-#'
+#' @export
 AddLogicGates <- function(child, logic, model) {
   #Extends model with a node representing a logic gate for plotting
   parents <- names(which(model[,child]==1))
@@ -23,6 +23,7 @@ AddLogicGates <- function(child, logic, model) {
 #' Plots the winning pathway structure
 #' @importFrom igraph graph.adjacency plot.igraph
 #' @param LogiNEM object created by LogicNEM
+#' @export
 epiNEM.PlotResults <- function(results) {
   result <- results$origModel
   logics <- results$logics

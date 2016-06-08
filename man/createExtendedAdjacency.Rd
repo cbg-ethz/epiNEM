@@ -11,7 +11,7 @@ createExtendedAdjacency(network, mutants, experiments)
 
 \item{mutants:}{vector of single knockouts}
 
-\item{experiments:}{vector of all knockouts haha}
+\item{experiments:}{vector of all knockouts}
 }
 \description{
 extend adjacency matrices taking cycles and logics into account. For every given start state, the final state

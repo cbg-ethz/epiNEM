@@ -134,8 +134,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
       #cat("Extended to", length(extendedModels), "models, ")
       #cat("of which", length(uniqueModels), "are unique")
     
-
-    score     <- sapply(uniqueModels, MLL, D1, D0)
+    score <- sapply(uniqueModels, MLL, D1, D0)
     mll  <- unlist(score["mLL",])
    
     bestModel <- uniqueModels[[which.max(mll)]]$model
@@ -143,10 +142,12 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
       identity(extendedModels[[i]]$model))
     isBest    <- lapply(allModels, IsBestModel, bestModel)
     results   <- extendedModels[isBest == TRUE]
-    results <- lapply(results, modifyList, list(score=mll[which(extendedModels %in% extendedModels[isBest == TRUE])]))
-    posterior <- AttachEGenes(score[,which(isBest==TRUE)]$posterior, experiments)
+    results <- lapply(results, modifyList, list(score=mll[which.max(mll)]))
+    results <- results[[1]]
+    posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
 
-    results <- lapply(results, modifyList, list(EGeneset = posterior))
+    results$EGeneset <- posterior
+    #results <- lapply(results, modifyList, list(EGeneset = posterior))
     
 #     index <- which.max(mll)
 #     posterior <- score[,index]$posterior
@@ -171,6 +172,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 ###--- HELPER FUNCTIONS ---###
 
 #' @noRd
+#' @export
 CreateTopology <- function(single, double) {
   # Returns the adjacency matrix of a randomly generated pathway topology
   extendedModels <- list()
@@ -191,6 +193,7 @@ CreateTopology <- function(single, double) {
 }
 
 #' @noRd
+#' @export
 ExtendTopology <- function(topology, nReporters) {
   # Returns an extended topology in which reporters are linked to pathway genes.
   # The reporter genes are uniformly distributed over the pathway genes.
@@ -206,6 +209,7 @@ ExtendTopology <- function(topology, nReporters) {
 }
 
 #' @noRd
+#' @export
 GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
   # Returns an artificial noisy data matrix
 
@@ -225,6 +229,7 @@ GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
 }
 
 #' @noRd
+#' @export
 IsBestModel <- function(thisModel, bestModel) {
   # Returns whether or not thisModel equals bestModel
   if (any(dim(thisModel) != dim(bestModel))) return(FALSE)

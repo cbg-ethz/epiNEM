@@ -7,6 +7,7 @@
 #' @param experiments: vector of mutants
 #' @param data2: observed data
 #' @param data0: complementary data2
+#' @export
 GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
   cat("\n")
   cat(n)
@@ -47,6 +48,7 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
 #' @description Return all models that differ only one edge from the current model by removing or adding a non-self edge.
 #' @param model: adjacency matrix of current model
 #' @param edges: all non-self edges in the model
+#' @export
 FindNeighbours <- function(model, edges){
   # Return all models that differ only one edge from the current model by
   # removing or adding a non-self edge.
@@ -64,6 +66,7 @@ FindNeighbours <- function(model, edges){
 #' @description Returns a lst of all unique matrices
 #' @param size: number of desired nodes
 #' @importFrom e1071 bincombinations
+#' @export
 EnumerateModels <- function(size, nodes="none") {
   # Enumerates all possible adjacency matrices for a given size. Returns a list of
   # all unique transitively closed adjacency matrices.
