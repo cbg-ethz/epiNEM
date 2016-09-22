@@ -1,3 +1,7 @@
+.smb*
 .Rproj.user
 .Rhistory
 .RData
+martin/
+._*
+.#*

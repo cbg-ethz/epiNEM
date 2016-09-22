@@ -2,7 +2,7 @@
 #'
 #' A publicly availiable example data set for demonstrating the use of the epiNEM package.
 #' For data preprocessing steps please check vignette.
-#' 
+#'
 #' @format A binary matrix with 2274 rows and 5 variables:
 #' \describe{
 #'   \item{row}{knockouts, E-Genes}
@@ -55,9 +55,9 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
       # Use data from file
       data        <- read.table(filename)
       sortedData  <- data[, order(unlist(sortedKOs))]
-      } 
+      }
   } else sortedData = filename
-  
+
     mutants <- colnames(sortedData)
     singleKOs <- sort(unique(unlist(strsplit(mutants, '[.]'))))
     experiments <- singleKOs
@@ -122,7 +122,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 
   else if (method == "exhaustive") {
     basicModels    <- EnumerateModels(length(singleKOs), singleKOs)
-    extendedModels <- lapply(basicModels, includeLogic, experiments, mutants)
+    extendedModels <- lapply(basicModels, includeLogic, experiments, unique(mutants))
     extendedModels <- unlist(unlist(extendedModels, recursive=FALSE), recursive = FALSE)
     uniqueModels   <- unique(lapply(extendedModels, function(e)
       identity((e["model"]))))
@@ -130,15 +130,15 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 
     if (length(doubleKOs) == 0)
       cat("No double perturbations available --> computing NEM")
-    #else 
+    #else
       #cat("Extended to", length(extendedModels), "models, ")
       #cat("of which", length(uniqueModels), "are unique")
-    
+
     score <- sapply(uniqueModels, MLL, D1, D0)
     mll  <- unlist(score["mLL",])
-   
+
     bestModel <- uniqueModels[[which.max(mll)]]$model
-    allModels <- lapply(1:length(extendedModels), function(i) 
+    allModels <- lapply(1:length(extendedModels), function(i)
       identity(extendedModels[[i]]$model))
     isBest    <- lapply(allModels, IsBestModel, bestModel)
     results   <- extendedModels[isBest == TRUE]
@@ -148,16 +148,16 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 
     results$EGeneset <- posterior
     #results <- lapply(results, modifyList, list(EGeneset = posterior))
-    
+
 #     index <- which.max(mll)
 #     posterior <- score[,index]$posterior
-# 
+#
 #     results <- unlist(uniqueModels[index], recursive=FALSE)
-#     
+#
 #     results2 <- unlist(extendedModels[index], recursive=FALSE)
 #     results$score <- mll[index]
 #     results$EGeneset <- AttachEGenes(posterior, experiments)
-#    
+#
     #if (plotsy==TRUE){
 #       PlotResults(results, EGeneset)
 #     }

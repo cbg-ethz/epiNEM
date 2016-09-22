@@ -27,7 +27,8 @@ MLL <- function(Phi, D1, D0) {
   # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
   # complementary data matrix D0
   # Function adapted from NEM package
-  Phi2 <- as.matrix(Phi$model)
+    Phi2 <- as.matrix(Phi$model)
+    Phi2 <- Phi2[colnames(D1), ]
   para <- c(0.13,0.05)
   L    <- para[1]^(D1 %*% (1 - Phi2)) * (1 - para[1])^(D0 %*% (1 - Phi2)) *
     (1 - para[2])^(D1 %*% Phi2) * para[2]^(D0 %*% Phi2)
@@ -244,7 +245,7 @@ getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, exp
   #creates file read by boolNet
   path <- paste("outfile_", modelno, ".txt", sep="")
   network <- loadNetwork(path)
-  extadj2 <- createExtendedAdjacency(network, mutants, experiments)
+  extadj2 <- createExtendedAdjacency(network, unique(mutants), experiments)
   unlink(path)
   return(list(list(origModel=adj, model=extadj2, logics=logicmatrix[modelno,], column=column)))
 }
