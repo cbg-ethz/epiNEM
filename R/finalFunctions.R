@@ -357,7 +357,14 @@ CreateTopology <- function(single, double) {
   mutants   <- sort(c(singleKOs, doubleKOs))
 
   while (length(extendedModels)==0){
-    startModel   <- CreateRandomGraph(singleKOs)
+      startModel   <- CreateRandomGraph(singleKOs)
+      hierarchy <- order(apply(startModel, 1, sum), decreasing = T)
+      startModel <- startModel[hierarchy, hierarchy]
+      startModel[lower.tri(startModel)] <- 0
+      hierarchy <- order(colnames(startModel))
+      startModel <- startModel[hierarchy, hierarchy]
+
+
     extendedModels <- includeLogic(startModel, experiments, mutants)
     #extendedModels <- unlist(extendedModels, recursive=FALSE)
   }

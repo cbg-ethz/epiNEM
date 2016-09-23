@@ -237,4 +237,70 @@ IsBestModel <- function(thisModel, bestModel) {
   return(TRUE)
 }
 
+#' @noRd
+#' @export
+epi2bg <- function(t) {
+
+    if (is.matrix(t)) {
+
+        colnames(t) <- paste("S_vs_S_", gsub("\\.", "_", colnames(t)), sep = "")
+
+        return(t)
+
+    } else {
+
+        tmp <- which.min(apply(t$origModel, 1, sum))
+
+        child <- rownames(t$origModel)[tmp]
+
+        parents <- sort(rownames(t$origModel)[-tmp])
+
+        tmp <- apply(t$origModel, 2, sum)
+
+        stim <- rownames(t$origModel)[which(tmp == min(tmp))]
+
+        graph <- paste("S=", stim, sep = "")
+
+        if (length(stim) != length(parents)) {
+
+            graph <- c(graph, paste(stim, parents[-which(parents %in% stim)], sep = "="))
+
+        }
+
+        if (t$logics %in% "OR") {
+
+            graph <- c(graph, paste(paste(parents, collapse = "+"), child, sep = "="))
+
+        }
+
+        if (t$logics %in% "AND") {
+
+            graph <- c(graph, paste(parents, child, sep = "="))
+
+        }
+
+        if (t$logics %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
+
+            graph <- c(graph, paste("!", parents[1], "+", parents[2], "=", child, sep = ""))
+
+        }
+
+        if (t$logics %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
+
+            graph <- c(graph, paste(parents[1], "+!", parents[2], "=", child, sep = ""))
+
+        }
+
+        if (t$logics %in% "XOR") {
+
+            graph <- c(graph, paste(parents[1], "+", parents[2], "=", child, sep = ""), paste("!", parents[1], "+!", parents[2], "=",, child, sep = ""))
+
+        }
+
+        return(graph)
+
+    }
+
+}
+
 ###--- END OF HELPER FUNCTIONS ---###
