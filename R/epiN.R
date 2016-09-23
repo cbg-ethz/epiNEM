@@ -281,19 +281,19 @@ epi2bg <- function(t) {
 
         if (t$logics %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
 
-            graph <- c(graph, paste("!", parents[1], "+", parents[2], "=", child, sep = ""))
+            graph <- c(graph, paste(c(paste("!", parents[2], sep = ""), parents[1]), "=", child, sep = ""))
 
         }
 
         if (t$logics %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
 
-            graph <- c(graph, paste(parents[1], "+!", parents[2], "=", child, sep = ""))
+            graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
 
         }
 
         if (t$logics %in% "XOR") {
 
-            graph <- c(graph, paste(parents[1], "+", parents[2], "=", child, sep = ""), paste("!", parents[1], "+!", parents[2], "=",, child, sep = ""))
+            graph <- c(graph, paste(parents[1], "+", parents[2], "=", child, sep = ""), paste("!", parents[1], "+!", parents[2], "=", child, sep = ""))
 
         }
 
