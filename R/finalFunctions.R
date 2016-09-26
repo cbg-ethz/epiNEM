@@ -126,7 +126,11 @@ createExtendedAdjacency <- function(network, mutants, experiments){
   colnames(starters) <- experiments
 
   ## get steady state of each startState
-  data <- apply(starters, 1, function(e) getPathToAttractor(network, e, includeAttractorStates="all"))
+  getMyAttractor <- function(e, network, includeAttractorStates) {
+      network$fixed[which(e == 1)] <- 1
+      return(getPathToAttractor(network, e, includeAttractorStates))
+  }
+  data <- apply(starters, 1, getMyAttractor, network, includeAttractorStates="all")
 
   ## get observed data by taking final state from all the random startStates.
   extadj <- data[[1]][nrow(data[[1]]),]
@@ -206,8 +210,12 @@ includeLogic <- function(adj, experiments, mutants){
       cat("targets, factors")
       cat("\n")
       for (c in experiments){
-        count <- 1
-        cat(paste(c, ", ", c, sep=""))
+          count <- 1
+          if (sum(adj[, which(colnames(adj) %in% c)]) == 0) {
+              cat(paste(c, ", ", c, sep=""))
+          } else {
+              cat(paste(c, ", ", sep=""))
+          }
         for (r in experiments){
           if (adj[r,c]==1) {
             if ((count==1) && (which(rownames(adj)==c) %in% column)){
@@ -216,15 +224,15 @@ includeLogic <- function(adj, experiments, mutants){
             }
             else if ((count == 2) && (which(rownames(adj)==c) %in% column)){
               lo <- lo+1
-              if (logicmatrix[modelno, lo]=="OR") cat(paste(" | ", help, " | ", r, sep=""))
-              else if (logicmatrix[modelno, lo]=="AND") cat(paste(" | (", help, " & ", r, ")", sep=""))
-              else if (logicmatrix[modelno, lo]=="XOR") cat(paste(" | ( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")"))
+              if (logicmatrix[modelno, lo]=="OR") cat(paste(help, " | ", r, sep=""))
+              else if (logicmatrix[modelno, lo]=="AND") cat(paste("(", help, " & ", r, ")", sep=""))
+              else if (logicmatrix[modelno, lo]=="XOR") cat(paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")"))
               ## help refers to the first element
-              else if (logicmatrix[modelno, lo]==NOT2) cat(paste(" | (", help, " & ! ", r, ")", sep=""))
-              else if (logicmatrix[modelno, lo]==NOT1) cat(paste(" | (", r, " & ! ", help, ")", sep=""))
+              else if (logicmatrix[modelno, lo]==NOT2) cat(paste("(", help, " & ! ", r, ")", sep=""))
+              else if (logicmatrix[modelno, lo]==NOT1) cat(paste("(", r, " & ! ", help, ")", sep=""))
             }
             else {
-              cat(paste(" | ", r, sep=""))
+              cat(paste(r, sep=""))
             }
           }
         }
@@ -246,7 +254,7 @@ getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, exp
   path <- paste("outfile_", modelno, ".txt", sep="")
   network <- loadNetwork(path)
   extadj2 <- createExtendedAdjacency(network, unique(mutants), experiments)
-  unlink(path)
+    unlink(path)
   return(list(list(origModel=adj, model=extadj2, logics=logicmatrix[modelno,], column=column)))
 }
 
