@@ -205,9 +205,10 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
+        randomnames <- as.numeric(Sys.time()):(as.numeric(Sys.time())+4)
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
-            path <- paste("outfile_", modelno, ".txt", sep="")
+            path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!!
             sink(path)
             cat("targets, factors")
             cat("\n")
@@ -242,7 +243,7 @@ includeLogic <- function(adj, experiments, mutants){
             }
             sink()
         }
-        test <- lapply(1:nrow(logicmatrix), function(x) getExtendedAdjacency(x, logicmatrix, column, adj, mutants, experiments))
+        test <- lapply(1:nrow(logicmatrix), function(x) getExtendedAdjacency(x, logicmatrix, column, adj, mutants, experiments, randomnames))
         return(test)
     }
 }
@@ -251,9 +252,9 @@ includeLogic <- function(adj, experiments, mutants){
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
 #' @export
-getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments){
+getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
                                         #creates file read by boolNet
-    path <- paste("outfile_", modelno, ".txt", sep="")
+    path <- paste("outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
     extadj2 <- createExtendedAdjacency(network, unique(mutants), experiments)
     unlink(path)
