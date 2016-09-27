@@ -359,8 +359,8 @@ epi2bg <- function(t) {
 
         children2 <- unique(gsub(".*=", "", graph))
 
-        if (sum(!(all %in% children)) > 0) {
-            graph <- c(graph, paste("S", all[which(!(all %in% children))], sep = "="))
+        if (sum(!(all %in% children2)) > 0) {
+            graph <- c(graph, paste("S", all[which(!(all %in% children2))], sep = "="))
         }
 
         return(transRed(unique(graph)))
