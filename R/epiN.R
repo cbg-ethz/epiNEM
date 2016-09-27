@@ -240,6 +240,27 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @noRd
 #' @export
 epi2bg <- function(t) {
+    adj2dnf <- function(A) {
+
+        dnf <- NULL
+
+        for (i in 1:ncol(A)) {
+            for (j in 1:nrow(A)) {
+                if (i %in% j) { next() }
+                if (A[i, j] == 1) {
+                    dnf <- c(dnf, paste(colnames(A)[i], rownames(A)[j], sep = "="))
+                }
+                if (A[i, j] == -1) {
+                    dnf <- c(dnf, paste("!", colnames(A)[i], "=", rownames(A)[j], sep = ""))
+                }
+            }
+        }
+
+        dnf <- unique(dnf)
+
+        return(dnf)
+
+    }
 
     if (is.matrix(t)) {
 
@@ -249,55 +270,100 @@ epi2bg <- function(t) {
 
     } else {
 
-        tmp <- which.min(apply(t$origModel, 1, sum))
+        parents <- rownames(t$origModel)[-t$column]
 
-        child <- rownames(t$origModel)[tmp]
-
-        parents <- sort(rownames(t$origModel)[-tmp])
+        children <- rownames(t$origModel)[t$column]
 
         tmp <- apply(t$origModel, 2, sum)
 
         stim <- rownames(t$origModel)[which(tmp == min(tmp))]
 
-        graph <- paste("S=", stim, sep = "")
+        graph <- NULL
 
-        if (length(stim) != length(parents)) {
+        for (i in 1:length(t$column)) {
 
-            graph <- c(graph, paste(stim, parents[-which(parents %in% stim)], sep = "="))
+            parents2 <- rownames(t$origModel)[which(t$origModel[, t$column[i]] == 1)]
+
+            child <- colnames(t$origModel)[t$column[i]]
+
+            if (t$logics[i] %in% "OR") {
+
+                graph <- c(graph, paste(paste(parents2, collapse = "+"), child, sep = "="))
+
+            }
+
+            if (t$logics[i] %in% "AND") {
+
+                graph <- c(graph, paste(parents2, child, sep = "="))
+
+            }
+
+            if ((paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) | (paste(rev(parents2), collapse = "=") %in% adj2dnf(t$origModel))) {
+
+                if (paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) {
+                    graph <- c(graph, paste(parents2, collapse = "="))
+                }
+                if (paste(rev(parents2), collapse = "=") %in% adj2dnf(t$origModel)) {
+                    graph <- c(graph, paste(rev(parents2), collapse = "="))
+                }
+
+                if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
+
+                    ##graph <- c(graph, paste("S", child, sep = "="))
+
+                }
+
+                if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
+
+                    ##graph <- c(graph, paste("S", child, sep = "="))
+
+                }
+
+                if (t$logics[i] %in% "XOR") {
+
+                    if (paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) {
+                        parent <- parents2[1]
+                    } else {
+                        parent <- parents2[2]
+                    }
+
+                    graph <- c(graph, paste(parent, child, sep = "="))
+
+                }
+
+            } else {
+
+                if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
+
+                    graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
+
+                }
+
+                if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
+
+                    graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
+
+                }
+
+                if (t$logics[i] %in% "XOR") {
+
+                    graph <- c(graph, paste(parents2[1], "+", parents2[2], "=", child, sep = ""), paste("!", parents2[1], "+!", parents2[2], "=", child, sep = ""))
+
+                }
+
+            }
 
         }
 
-        if (t$logics %in% "OR") {
+        all <- rownames(t$origModel)
 
-            graph <- c(graph, paste(paste(parents, collapse = "+"), child, sep = "="))
+        children2 <- unique(gsub(".*=", "", graph))
 
+        if (sum(!(all %in% children)) > 0) {
+            graph <- c(graph, paste("S", all[which(!(all %in% children))], sep = "="))
         }
 
-        if (t$logics %in% "AND") {
-
-            graph <- c(graph, paste(parents, child, sep = "="))
-
-        }
-
-        if (t$logics %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
-
-            graph <- c(graph, paste(c(paste("!", parents[2], sep = ""), parents[1]), "=", child, sep = ""))
-
-        }
-
-        if (t$logics %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
-
-            graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
-
-        }
-
-        if (t$logics %in% "XOR") {
-
-            graph <- c(graph, paste(parents[1], "+", parents[2], "=", child, sep = ""), paste("!", parents[1], "+!", parents[2], "=", child, sep = ""))
-
-        }
-
-        return(graph)
+        return(transRed(unique(graph)))
 
     }
 
