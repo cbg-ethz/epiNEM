@@ -152,8 +152,8 @@ includeLogic <- function(adj, experiments, mutants){
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
-    adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
-    adj[lower.tri(adj)] <- 0
+    #adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
+    #adj[lower.tri(adj)] <- 0
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
     doublepos <- c()
     for (i in 1:length(mutantslist)){
@@ -219,6 +219,7 @@ includeLogic <- function(adj, experiments, mutants){
                 } else {
                     cat(paste(c, ", ", sep=""))
                 }
+                count2 <- 0
                 for (r in experiments){
                     if (adj[r,c]==1) {
                         if ((count==1) && (which(rownames(adj)==c) %in% column)){
@@ -235,7 +236,12 @@ includeLogic <- function(adj, experiments, mutants){
                             else if (logicmatrix[modelno, lo]==NOT1) cat(paste("(", r, " & ! ", help, ")", sep=""))
                         }
                         else {
-                            cat(paste(r, sep=""))
+                            count2 <- count2 + 1
+                            if (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
+                                cat(paste(r, " | ", sep=""))
+                            } else {
+                                cat(paste(r, sep=""))
+                            }
                         }
                     }
                 }

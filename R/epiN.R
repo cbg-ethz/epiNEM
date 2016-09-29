@@ -288,7 +288,23 @@ epi2bg <- function(t) {
 
             if (t$logics[i] %in% "OR") {
 
-                graph <- c(graph, paste(paste(parents2, collapse = "+"), child, sep = "="))
+                if (sum(t$origModel == 1) <= 2) {
+
+                    graph <- c(graph, paste(paste(parents2, collapse = "+"), child, sep = "="))
+
+                    graph <- unique(absorptionII(c(graph, adj2dnf(t$origModel))))
+
+                } else {
+
+                    hierarchy <- unlist(getHierarchy(adj2dnf(t$origModel)))
+
+                    for (j in 1:(length(hierarchy)-1)) {
+
+                        graph <- c(graph, paste(hierarchy[j], hierarchy[j+1], sep = "="))
+
+                    }
+
+                }
 
             }
 
@@ -307,27 +323,13 @@ epi2bg <- function(t) {
                     graph <- c(graph, paste(rev(parents2), collapse = "="))
                 }
 
-                if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
-
-                    ##graph <- c(graph, paste("S", child, sep = "="))
-
-                }
-
-                if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
-
-                    ##graph <- c(graph, paste("S", child, sep = "="))
-
-                }
-
                 if (t$logics[i] %in% "XOR") {
 
                     if (paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) {
-                        parent <- parents2[1]
+                        graph <- c(graph, paste(c(paste("!", parents2[1], sep = ""), parents2[2]), "=", child, sep = ""))
                     } else {
-                        parent <- parents2[2]
+                        graph <- c(graph, paste(c(paste("!", parents2[2], sep = ""), parents2[1]), "=", child, sep = ""))
                     }
-
-                    graph <- c(graph, paste(parent, child, sep = "="))
 
                 }
 
