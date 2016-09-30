@@ -316,7 +316,7 @@ epi2bg <- function(t) {
 
                 graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
 
-                edge <-  graph[grep(paste(paste(parents, collapse = ".*+.*"), child, sep = "="), graph)]
+                edge <-  graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
 
                 for (j in parents) {
 
