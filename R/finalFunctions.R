@@ -180,22 +180,15 @@ includeLogic <- function(adj, experiments, mutants){
             }
             notriples <- notriples+1
             relation <- adj[singles, singles]
+            diag(relation) <- 0
             if (sum(relation) == 0){
                 logic <- c("OR", "XOR", NOT1, NOT2, "AND")
-            } else if (relation[2] == 0){
-                ## check if dependent parent has a second parent. If so, include all logics
-                ## if not, only OR and NOT2
-                if (length(which(adj[,singles[2]]==1)) > 1) {
-                    logic <- c("OR", "XOR", NOT1, NOT2, "AND")
-                } else
-                    logic <- c("OR", NOT2)
-            } else if (relation[3] == 0){
-                if (length(which(adj[,singles[1]]==1)) > 1) {
-                    logic <- c("OR", "XOR", NOT1, NOT2, "AND")
-                } else
-                    logic <- c("OR", NOT1)
-            } else {
-                logic <- c("OR")
+            }
+            if (relation[2] == 1) {
+                logic <- c(NOT2, "AND")
+            }
+            if (relation[3] == 1) {
+                logic <- c(NOT1, "AND")
             }
             liste[[notriples]] <- logic
             column <- cbind(column, c)
@@ -205,10 +198,10 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        randomnames <- as.numeric(Sys.time()):(as.numeric(Sys.time())+100)
+        randomnames <- as.numeric(Sys.time()):(as.numeric(Sys.time())+100) # why is a vector of 5 not enough and i end up getting a outfile_NA?
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
-            path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!!
+            path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
             sink(path)
             cat("targets, factors")
             cat("\n")
