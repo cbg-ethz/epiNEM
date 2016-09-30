@@ -270,10 +270,6 @@ epi2bg <- function(t) {
 
     } else {
 
-        parents <- rownames(t$origModel)[-t$column]
-
-        children <- rownames(t$origModel)[t$column]
-
         tmp <- apply(t$origModel, 2, sum)
 
         stim <- rownames(t$origModel)[which(tmp == min(tmp))]
@@ -282,76 +278,53 @@ epi2bg <- function(t) {
 
         for (i in 1:length(t$column)) {
 
-            parents2 <- rownames(t$origModel)[which(t$origModel[, t$column[i]] == 1)]
+            parents <- sort(rownames(t$origModel)[which(t$origModel[, t$column[i]] == 1)])
 
             child <- colnames(t$origModel)[t$column[i]]
 
             if (t$logics[i] %in% "OR") {
 
-                if (sum(t$origModel == 1) <= 2) {
-
-                    graph <- c(graph, paste(paste(parents2, collapse = "+"), child, sep = "="))
-
-                    graph <- unique(absorptionII(c(graph, adj2dnf(t$origModel))))
-
-                } else {
-
-                    hierarchy <- unlist(getHierarchy(adj2dnf(t$origModel)))
-
-                    for (j in 1:(length(hierarchy)-1)) {
-
-                        graph <- c(graph, paste(hierarchy[j], hierarchy[j+1], sep = "="))
-
-                    }
-
-                }
+                graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
 
             }
 
             if (t$logics[i] %in% "AND") {
 
-                graph <- c(graph, paste(parents2, child, sep = "="))
+                graph <- unique(c(graph, transRed(convertGraph(adj2dnf(t$origModel)))))
+
+                graph[grep(paste(paste(parents, collapse = ".*+.*"), child, sep = "="))] <- convertGraph(graph[grep(paste(paste(parents, collapse = ".*+.*"), child, sep = "="))])
 
             }
 
-            if ((paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) | (paste(rev(parents2), collapse = "=") %in% adj2dnf(t$origModel))) {
+            if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
 
-                if (paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) {
-                    graph <- c(graph, paste(parents2, collapse = "="))
-                }
-                if (paste(rev(parents2), collapse = "=") %in% adj2dnf(t$origModel)) {
-                    graph <- c(graph, paste(rev(parents2), collapse = "="))
-                }
+                graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
 
-                if (t$logics[i] %in% "XOR") {
+                graph <-
 
-                    if (paste(parents2, collapse = "=") %in% adj2dnf(t$origModel)) {
-                        graph <- c(graph, paste(c(paste("!", parents2[1], sep = ""), parents2[2]), "=", child, sep = ""))
-                    } else {
-                        graph <- c(graph, paste(c(paste("!", parents2[2], sep = ""), parents2[1]), "=", child, sep = ""))
-                    }
+                graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
 
-                }
+            }
 
-            } else {
+            if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
 
-                if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
+                graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
 
-                    graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
+            }
 
-                }
+            if (t$logics[i] %in% "XOR") {
 
-                if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
+                graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
 
-                    graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
+                edge <-  graph[grep(paste(paste(parents, collapse = ".*+.*"), child, sep = "="), graph)]
+
+                for (j in parents) {
+
+                    edge <- gsub(j, paste("!", j, sep = ""), edge)
 
                 }
 
-                if (t$logics[i] %in% "XOR") {
-
-                    graph <- c(graph, paste(parents2[1], "+", parents2[2], "=", child, sep = ""), paste("!", parents2[1], "+!", parents2[2], "=", child, sep = ""))
-
-                }
+                graph <- unique(c(graph, edge))
 
             }
 
