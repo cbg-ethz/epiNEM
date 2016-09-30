@@ -292,7 +292,10 @@ epi2bg <- function(t) {
 
                 graph <- unique(c(graph, transRed(convertGraph(adj2dnf(t$origModel)))))
 
-                graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)] <- convertGraph(graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)])
+
+                graph <- c(graph, convertGraph(graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))
+
+                graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
 
             }
 
@@ -300,15 +303,19 @@ epi2bg <- function(t) {
 
                 graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
 
-                graph <-
+                graph <- c(graph, gsub(parents[2], paste("!", parents[2], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
 
-                graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
+                graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
 
             }
 
             if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
 
-                graph <- c(graph, paste(c(paste("!", parents[1], sep = ""), parents[2]), "=", child, sep = ""))
+                graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
+
+                graph <- c(graph, gsub(parents[1], paste("!", parents[1], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
+
+                graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
 
             }
 
