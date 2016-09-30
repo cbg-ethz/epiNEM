@@ -205,7 +205,7 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        randomnames <- as.numeric(Sys.time()):(as.numeric(Sys.time())+4)
+        randomnames <- as.numeric(Sys.time()):(as.numeric(Sys.time())+100)
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
             path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!!
