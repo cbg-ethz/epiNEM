@@ -345,7 +345,7 @@ epi2bg <- function(t) {
             graph <- c(graph, paste("S", all[which(!(all %in% children2))], sep = "="))
         }
 
-        return(transRed(unique(graph)))
+        return(unique(graph))
 
     }
 
