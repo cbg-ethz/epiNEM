@@ -292,7 +292,7 @@ epi2bg <- function(t) {
 
                 graph <- unique(c(graph, transRed(convertGraph(adj2dnf(t$origModel)))))
 
-                graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="))] <- convertGraph(graph[grep(paste(paste(parents, collapse = ".*+.*"), child, sep = "="))])
+                graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="))] <- convertGraph(graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="))])
 
             }
 
