@@ -377,8 +377,13 @@ CreateTopology <- function(single, double) {
         extendedModels <- includeLogic(startModel, experiments, mutants)
         ## extendedModels <- unlist(extendedModels, recursive=FALSE)
     }
+    if (length(extendedModels) == 5) {
+        prob <- c(0.485, 0.485, 0.01, 0.01, 0.01)
+    } else {
+        prob <- rep(1/length(extendedModels), length(extendedModels))
+    }
 
-    selectedModel <- sample(1:length(extendedModels), 1)
+    selectedModel <- sample(1:length(extendedModels), 1, prob = prob)
     topology      <- extendedModels[[selectedModel]]
     return(topology)
 }
