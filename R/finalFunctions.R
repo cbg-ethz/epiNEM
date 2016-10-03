@@ -152,9 +152,9 @@ includeLogic <- function(adj, experiments, mutants){
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
-    adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
+    # adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
     # adj[lower.tri(adj)] <- 0
-    # adj <- adj[order(rownames(adj)), order(colnames(adj))]
+    adj <- adj[order(rownames(adj)), order(colnames(adj))]
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
     doublepos <- c()
     for (i in 1:length(mutantslist)){
@@ -377,7 +377,7 @@ CreateTopology <- function(single, double) {
         extendedModels <- includeLogic(startModel, experiments, mutants)
         ## extendedModels <- unlist(extendedModels, recursive=FALSE)
     }
-    extendedModels
+
     selectedModel <- sample(1:length(extendedModels), 1)
     topology      <- extendedModels[[selectedModel]]
     return(topology)
