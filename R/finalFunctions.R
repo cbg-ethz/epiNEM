@@ -378,7 +378,7 @@ CreateTopology <- function(single, double) {
         ## extendedModels <- unlist(extendedModels, recursive=FALSE)
     }
     if (length(extendedModels) == 5) {
-        prob <- c(0.485, 0.485, 0.01, 0.01, 0.01)
+        prob <- c(0.4995, 0.4995, 0.00033, 0.00033, 0.00034)
     } else {
         prob <- rep(1/length(extendedModels), length(extendedModels))
     }
