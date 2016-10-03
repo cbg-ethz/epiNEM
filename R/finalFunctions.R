@@ -152,8 +152,8 @@ includeLogic <- function(adj, experiments, mutants){
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
-    #adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
-    #adj[lower.tri(adj)] <- 0
+    adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 2, sum), decreasing = F)]
+    adj[lower.tri(adj)] <- 0
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
     doublepos <- c()
     for (i in 1:length(mutantslist)){
