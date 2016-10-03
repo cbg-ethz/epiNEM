@@ -152,9 +152,9 @@ includeLogic <- function(adj, experiments, mutants){
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
-    ## adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 2, sum), decreasing = F)]
-    ## adj[lower.tri(adj)] <- 0
-    adj <- adj[order(rownames(adj)), order(colnames(adj))]
+    adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
+    # adj[lower.tri(adj)] <- 0
+    # adj <- adj[order(rownames(adj)), order(colnames(adj))]
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
     doublepos <- c()
     for (i in 1:length(mutantslist)){
@@ -199,7 +199,7 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        randomnames <- as.numeric(Sys.time()):(as.numeric(Sys.time())+nrow(logicmatrix)-1) # why is a vector of 5 not enough and i end up getting a outfile_NA?
+        randomnames <- runif(nrow(logicmatrix)) # why is a vector of 5 not enough and i end up getting a outfile_NA?
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
             path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
@@ -369,7 +369,7 @@ CreateTopology <- function(single, double) {
 
     while (length(extendedModels)==0){
         startModel   <- CreateRandomGraph(singleKOs)
-        startModel <- startModel[order(apply(startModel, 1, sum), decreasing = T), order(apply(startModel, 1, sum), decreasing = F)]
+        startModel <- startModel[order(apply(startModel, 1, sum), decreasing = T), order(apply(startModel, 1, sum), decreasing = T)]
         startModel[lower.tri(startModel)] <- 0
         startModel <- startModel[order(rownames(startModel)), order(colnames(startModel))]
 
