@@ -123,7 +123,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
     else if (method == "exhaustive") {
         basicModels    <- EnumerateModels(length(singleKOs), singleKOs)
         extendedModels <- lapply(basicModels, includeLogic, experiments, unique(mutants))
-        extendedModels <- unlist(unlist(extendedModels, recursive=FALSE), recursive = FALSE)
+        extendedModels <- unlist(unlist(extendedModels, recursive=FALSE), recursive = FALSE) # so you just throw away models without a logic gate??? is this supposed to be like this?
         uniqueModels   <- unique(lapply(extendedModels, function(e)
             identity((e["model"]))))
         uniqueModels <- uniqueModels[1:length(uniqueModels)-1]

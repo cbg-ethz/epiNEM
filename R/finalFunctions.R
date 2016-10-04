@@ -193,13 +193,17 @@ includeLogic <- function(adj, experiments, mutants){
             }
             liste[[notriples]] <- logic
             column <- cbind(column, c)
-        }
+            } else {
+                notriples <- notriples + 1
+                liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+                column <- cbind(column, c)
+            }
     }
     if (length(liste) > 0){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        randomnames <- runif(nrow(logicmatrix)) # why is a vector of 5 not enough and i end up getting a outfile_NA?
+        randomnames <- runif(nrow(logicmatrix)) # why is a vector of 5 not enough and i end up getting a outfile_NA? Because, you dummy, it is a combination of all possible logics for all possible gates.
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
             path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
@@ -219,6 +223,9 @@ includeLogic <- function(adj, experiments, mutants){
                         if ((count==1) && (which(rownames(adj)==c) %in% column)){
                             help <- r
                             count <- count+1
+                            if (sum(adj[, c]) == 1) {
+                                cat(paste(r, sep=""))
+                            }
                         }
                         else if ((count == 2) && (which(rownames(adj)==c) %in% column)){
                             lo <- lo+1
