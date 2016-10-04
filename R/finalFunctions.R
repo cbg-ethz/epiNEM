@@ -193,11 +193,18 @@ includeLogic <- function(adj, experiments, mutants){
             }
             liste[[notriples]] <- logic
             column <- cbind(column, c)
-            } else {
-                notriples <- notriples + 1
-                liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
-                column <- cbind(column, c)
-            }
+        }
+        ## the next two ifs are from yours truly and yours truly should double check that with florian
+        if (length(parents) >= 2 & !(all(parents %in% unlist(mutantslist[doublepos])))) {
+            notriples <- notriples + 1
+            liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+            column <- cbind(column, c)
+        }
+        if (length(parents) == 1) {
+            notriples <- notriples + 1
+            liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+            column <- cbind(column, c)
+        }
     }
     if (length(liste) > 0){
         logicmatrix <- as.matrix(expand.grid(liste))
@@ -218,6 +225,7 @@ includeLogic <- function(adj, experiments, mutants){
                     cat(paste(c, ", ", sep=""))
                 }
                 count2 <- 0
+                count3 <- 0
                 for (r in experiments){
                     if (adj[r,c]==1) {
                         if ((count==1) && (which(rownames(adj)==c) %in% column)){
@@ -229,7 +237,8 @@ includeLogic <- function(adj, experiments, mutants){
                         }
                         else if ((count == 2) && (which(rownames(adj)==c) %in% column)){
                             lo <- lo+1
-                            if (logicmatrix[modelno, lo]=="OR") cat(paste(help, " | ", r, sep=""))
+                            if (logicmatrix[modelno, lo]=="OR" & count3 == 0) { cat(paste(help, " | ", r, sep="")); count3 <- count3 + 1 }
+                            else if (logicmatrix[modelno, lo]=="OR" & count3 > 0) cat(paste(" | ", help, " | ", r, sep=""))
                             else if (logicmatrix[modelno, lo]=="AND") cat(paste("(", help, " & ", r, ")", sep=""))
                             else if (logicmatrix[modelno, lo]=="XOR") cat(paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")"))
                             ## help refers to the first element
@@ -366,32 +375,48 @@ AttachEGenes <- function(posterior, experiments){
 #' @param single: number of single knockouts
 #' @param double: number of double knockouts
 #' @export
-CreateTopology <- function(single, double) {
+CreateTopology <- function(single, double, force = T) {
     extendedModels <- list()
     singleKOs <- LETTERS[1:single]
     experiments <- singleKOs
     doubleKOs <- lapply(1:double, function(d) GenerateDoubleKO(singleKOs))
     doubleKOs <- unlist(unique(doubleKOs))
     mutants   <- sort(c(singleKOs, doubleKOs))
+    donotextend <- FALSE
 
     while (length(extendedModels)==0){
         startModel   <- CreateRandomGraph(singleKOs)
         startModel <- startModel[order(apply(startModel, 1, sum), decreasing = T), order(apply(startModel, 1, sum), decreasing = T)]
         startModel[lower.tri(startModel)] <- 0
         startModel <- startModel[order(rownames(startModel)), order(colnames(startModel))]
-
-
-        extendedModels <- includeLogic(startModel, experiments, mutants)
-        ## extendedModels <- unlist(extendedModels, recursive=FALSE)
+        diag(startModel) <- 0
+        if (force) {
+            if (sum(apply(startModel, 2, sum) >= 2) > 0) {
+                if (sum(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1) > 0) {
+                    mutants <- sort(c(singleKOs, paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".")))
+                    donotextend <- FALSE
+                } else {
+                    donotextend <- TRUE
+                }
+            } else {
+                donotextend <- TRUE
+            }
+        }
+        if (!donotextend) {
+            extendedModels <- includeLogic(startModel, experiments, mutants)
+            ## extendedModels <- unlist(extendedModels, recursive=FALSE)
+        }
     }
     if (length(extendedModels) == 5) {
-        prob <- c(0.4995, 0.4995, 0.00033, 0.00033, 0.00034)
+        prob <- c(0.001, 0.996, 0.001, 0.001, 0.001)
     } else {
         prob <- rep(1/length(extendedModels), length(extendedModels))
     }
 
     selectedModel <- sample(1:length(extendedModels), 1, prob = prob)
     topology      <- extendedModels[[selectedModel]]
+    topology
+    
     return(topology)
 }
 
