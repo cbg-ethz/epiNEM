@@ -126,10 +126,14 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
         extendedModels <- unlist(unlist(extendedModels, recursive=FALSE) , recursive = FALSE) # so you just throw away models without a logic gate??? is this supposed to be like this?
         uniqueModels   <- unique(lapply(extendedModels, function(e)
             identity((e["model"]))))
-        uniqueModels <- uniqueModels[1:length(uniqueModels)-1]
+        uniqueModels <- uniqueModels#[1:length(uniqueModels)-1] # what is this?
 
-        if (length(doubleKOs) == 0)
-            cat("No double perturbations available --> computing NEM")
+        if (length(doubleKOs) == 0) {
+            print("No double perturbations available --> computing NEM")
+            if (method == "exhaustive") { inference <- "search" }
+            if (method == "greedy") { inference <- "nem.greedy" } 
+            return(nem(sortedData, inference = inference))
+        }
                                         #else
                                         #cat("Extended to", length(extendedModels), "models, ")
                                         #cat("of which", length(uniqueModels), "are unique")
@@ -212,18 +216,12 @@ ExtendTopology <- function(topology, nReporters) {
 #' @export
 GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
                                         # Returns an artificial noisy data matrix
-
-    MakeSomeNoise <- function(d) {
-        if (d == 0)
-            d <- sample(0:1, 1, prob=c(1 - FPrate, FPrate))
-        else if (d == 1)
-            d <- sample(0:1, 1, prob=c(FNrate, 1 - FNrate))
-    }
-
     perfectData <- extTopology %*% t(model)
     perfectData <- perfectData[, rep(seq_len(ncol(perfectData)), replicates)]
-    noisyData   <- t(apply(perfectData, 1, function(data) sapply(data, function(d)
-        MakeSomeNoise(d))))
+    fps <- sample(which(perfectData == 0), floor(sum(perfectData == 0)*FPrate))
+    fns <- sample(which(perfectData == 1), floor(sum(perfectData == 1)*FNrate))
+    noisyData   <- perfectData
+    noisyData[c(fps, fns)] <- 1 - noisyData[c(fps, fns)]
 
     return(noisyData)
 }

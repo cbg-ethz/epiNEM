@@ -183,13 +183,13 @@ includeLogic <- function(adj, experiments, mutants){
             relation <- adj[singles, singles]
             diag(relation) <- 0
             if (sum(relation) == 0){
-                logic <- c("OR", "XOR", NOT1, NOT2, "AND")
+                logic <- c("OR", "XOR", "AND", NOT1, NOT2)
             }
             if (relation[2] == 1) {
-                logic <- c(NOT2, "AND")
+                logic <- c(NOT2)
             }
             if (relation[3] == 1) {
-                logic <- c(NOT1, "AND")
+                logic <- c(NOT1)
             }
             liste[[notriples]] <- logic
             column <- cbind(column, c)
@@ -408,9 +408,9 @@ CreateTopology <- function(single, double, force = T) {
         }
     }
     if (length(extendedModels) == 5) {
-        prob <- c(0.001, 0.996, 0.001, 0.001, 0.001)
+        prob <- c(0.018, 0.49, 0.49, 0.001, 0.001) # or = [1] is normal nem so has a higher prob for networks > 3, and the nots = [4:5] have sure probs if parents are related
     } else {
-        prob <- rep(1/length(extendedModels), length(extendedModels))
+        prob <- rep(1/length(extendedModels), length(extendedModels)) # this does not make sense rbecause length should be equal to 1, right?
     }
 
     selectedModel <- sample(1:length(extendedModels), 1, prob = prob)
