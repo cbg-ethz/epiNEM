@@ -233,6 +233,7 @@ includeLogic <- function(adj, experiments, mutants){
                             count <- count+1
                             if (sum(adj[, c]) == 1) {
                                 cat(paste(r, sep=""))
+                                lo <- lo + 1
                             }
                         }
                         else if ((count == 2) && (which(rownames(adj)==c) %in% column)){
@@ -251,8 +252,8 @@ includeLogic <- function(adj, experiments, mutants){
                                 cat(paste(r, " | ", sep=""))
                             } else {
                                 cat(paste(r, sep=""))
+                                lo <- lo + 1
                             }
-                            lo <- lo + 1
                         }
                     }
                 }
