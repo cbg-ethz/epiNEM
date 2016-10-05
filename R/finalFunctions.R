@@ -252,6 +252,7 @@ includeLogic <- function(adj, experiments, mutants){
                             } else {
                                 cat(paste(r, sep=""))
                             }
+                            lo <- lo + 1
                         }
                     }
                 }
