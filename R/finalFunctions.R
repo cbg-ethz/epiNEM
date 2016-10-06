@@ -148,7 +148,9 @@ createExtendedAdjacency <- function(network, mutants, experiments){
 #' @param mutants: vector of single knockouts
 #' @export
 includeLogic <- function(adj, experiments, mutants){
-    adj=matrix(unlist(adj),length(experiments), byrow=FALSE)
+    if (is.list(adj)) {
+        adj=matrix(unlist(adj),length(experiments), byrow=FALSE)
+    }
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
@@ -167,9 +169,6 @@ includeLogic <- function(adj, experiments, mutants){
     logic <- c()
     liste <- list()
     column <- c()
-    parents <- experiments[which(experiments %in% unlist(mutantslist[doublepos], recursive=FALSE))]
-    NOT2 <- paste(parents[2], "masks the effect of", parents[1])
-    NOT1 <- paste(parents[1], "masks the effect of", parents[2])
     for (c in 1:length(experiments)){
         singles <- c()
         parents <- names(which(adj[,c]==1))
@@ -182,6 +181,8 @@ includeLogic <- function(adj, experiments, mutants){
             notriples <- notriples+1
             relation <- adj[singles, singles]
             diag(relation) <- 0
+            NOT2 <- paste(parents[2], "masks the effect of", parents[1])
+            NOT1 <- paste(parents[1], "masks the effect of", parents[2])
             if (sum(relation) == 0){
                 logic <- c("OR", "XOR", "AND", NOT1, NOT2)
             }
@@ -194,8 +195,13 @@ includeLogic <- function(adj, experiments, mutants){
             liste[[notriples]] <- logic
             column <- cbind(column, c)
         }
-        ## the next two ifs are from yours truly and yours truly should double check that with florian
-        if (length(parents) >= 2 & !(all(parents %in% unlist(mutantslist[doublepos])))) {
+        ## the next three ifs are from yours truly and yours truly should double check that with florian
+        if (length(parents) == 2 & !(all(parents %in% unlist(mutantslist[doublepos])))) {
+            notriples <- notriples + 1
+            liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+            column <- cbind(column, c)
+        }
+        if (length(parents) > 2) { # this could be a future update to produce more complicated gates ===> B-NEM not really epistasis anymore
             notriples <- notriples + 1
             liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
             column <- cbind(column, c)
@@ -237,7 +243,11 @@ includeLogic <- function(adj, experiments, mutants){
                             }
                         }
                         else if ((count == 2) && (which(rownames(adj)==c) %in% column)){
-                            lo <- lo+1
+                            NOT2 <- paste(r, "masks the effect of", help)
+                            NOT1 <- paste(help, "masks the effect of", r)
+                            if (count3 < 1) {
+                                lo <- lo+1
+                            }
                             if (logicmatrix[modelno, lo]=="OR" & count3 == 0) { cat(paste(help, " | ", r, sep="")); count3 <- count3 + 1 }
                             else if (logicmatrix[modelno, lo]=="OR" & count3 > 0) cat(paste(" | ", help, " | ", r, sep=""))
                             else if (logicmatrix[modelno, lo]=="AND") cat(paste("(", help, " & ", r, ")", sep=""))
@@ -381,7 +391,7 @@ CreateTopology <- function(single, double, force = T) {
     extendedModels <- list()
     singleKOs <- LETTERS[1:single]
     experiments <- singleKOs
-    doubleKOs <- lapply(1:double, function(d) GenerateDoubleKO(singleKOs))
+    doubleKOs <- lapply(1:double, GenerateDoubleKO, singleKOs)
     doubleKOs <- unlist(unique(doubleKOs))
     mutants   <- sort(c(singleKOs, doubleKOs))
     donotextend <- FALSE
@@ -395,7 +405,9 @@ CreateTopology <- function(single, double, force = T) {
         if (force) {
             if (sum(apply(startModel, 2, sum) >= 2) > 0) {
                 if (sum(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1) > 0) {
-                    mutants <- sort(c(singleKOs, paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".")))
+                    if (!(paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".") %in% mutants)) {
+                        mutants <- sort(c(singleKOs, paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".")))
+                    }
                     donotextend <- FALSE
                 } else {
                     donotextend <- TRUE
@@ -412,12 +424,11 @@ CreateTopology <- function(single, double, force = T) {
     if (length(extendedModels) == 5) {
         prob <- c(0.018, 0.49, 0.49, 0.001, 0.001) # or = [1] is normal nem so has a higher prob for networks > 3, and the nots = [4:5] have sure probs if parents are related
     } else {
-        prob <- rep(1/length(extendedModels), length(extendedModels)) # this does not make sense rbecause length should be equal to 1, right?
+        prob <- rep(1/length(extendedModels), length(extendedModels)) # this does not make sense because length should be equal to 1, right?
     }
 
     selectedModel <- sample(1:length(extendedModels), 1, prob = prob)
     topology      <- extendedModels[[selectedModel]]
-    topology
     
     return(topology)
 }
@@ -426,10 +437,9 @@ CreateTopology <- function(single, double, force = T) {
 #' @param singleKOs: vector of single mutants
 #' @importFrom gtools combinations
 #' @export
-GenerateDoubleKO <- function(singleKOs) {
+GenerateDoubleKO <- function(d, singleKOs) {
     allDoubles    <- combinations(length(singleKOs), 2, singleKOs)
-    randomDoubles <- sample(1:choose(length(singleKOs), 2), 1)
-    doubleKO      <- allDoubles[randomDoubles, ]
+    doubleKO      <- allDoubles[d, ]
     doubleKO      <- do.call(paste, as.list(c(doubleKO, sep=".")))
     return(doubleKO)
 }
