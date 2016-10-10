@@ -280,6 +280,8 @@ epi2bg <- function(t) {
 
             child <- colnames(t$origModel)[t$column[i]]
 
+            if (length(parents) == 2) {
+
             if (t$logics[i] %in% "OR") {
 
                 graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
@@ -313,6 +315,8 @@ epi2bg <- function(t) {
 
                 graph <- c(graph, gsub(parents[1], paste("!", parents[1], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
 
+                graph <- gsub("\\+=", "=", graph)
+                
                 graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
 
             }
@@ -330,6 +334,14 @@ epi2bg <- function(t) {
                 }
 
                 graph <- unique(c(graph, edge))
+
+            }
+
+            }
+
+            if (length(parents) > 2 | length(parents) == 1) {
+
+                graph <- c(graph, paste(sort(parents), child, sep = "="))
 
             }
 
