@@ -28,3 +28,16 @@ Then check out the vignette for working examples.
 ```r
 vignette(package="epiNEM")
 ```
+
+Toy example:
+
+```r
+data <- matrix(sample(c(0,1), 100*4, replace = T), 100, 4)
+
+colnames(data) <- c("A", "A.B", "B", "C")
+
+rownames(data) <- paste("E", 1:100, sep = "_")
+
+res <- epiNEM(data, method = "exhaustive")
+```
+
