@@ -23,7 +23,7 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' @param D0: complementary D1
 #' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
 #' @export
-MLL <- function(Phi, D1, D0) {
+MLL <- function(Phi, D1, D0, ltype = "marginal") {
                                         # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
                                         # complementary data matrix D0
                                         # Function adapted from NEM package
@@ -37,6 +37,10 @@ MLL <- function(Phi, D1, D0) {
     mLL       <- sum(LLperGene)
     theta     <- apply(posterior, 1, function(e) e == max(e))
     mappos    <- apply(theta, 1, which)
+    ## map instead of mll
+    if (ltype %in% "maximum") {
+        mLL <- sum(apply(L, 1, max))
+    }
     return(list(posterior=posterior, LLperGene=LLperGene, mLL=mLL, mappos=mappos,
                 para=para))
 }
