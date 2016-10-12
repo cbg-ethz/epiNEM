@@ -289,7 +289,7 @@ includeLogic <- function(adj, experiments, mutants){
 #' @export
 getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
                                         #creates file read by boolNet
-    path <- paste("outfile_", randomnames[modelno], ".txt", sep="")
+    path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
     extadj2 <- createExtendedAdjacency(network, unique(mutants), experiments)
     unlink(path)
