@@ -223,7 +223,10 @@ includeLogic <- function(adj, experiments, mutants){
         randomnames <- runif(nrow(logicmatrix)) # why is a vector of 5 not enough and i end up getting a outfile_NA? Because, you dummy, it is a combination of all possible logics for all possible gates.
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
-            path <- paste("outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
+            if (!dir.exists("temp")) {
+                dir.create("temp")
+            }
+            path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
             sink(path)
             cat("targets, factors")
             cat("\n")
