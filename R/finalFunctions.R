@@ -220,22 +220,23 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        randomnames <- runif(nrow(logicmatrix)) # why is a vector of 5 not enough and i end up getting a outfile_NA? Because, you dummy, it is a combination of all possible logics for all possible gates.
+        randomnames <- sort(runif(nrow(logicmatrix))) # why is a vector of 5 not enough and i end up getting a outfile_NA? Because, you dummy, it is a combination of all possible logics for all possible gates.
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
             if (!dir.exists("temp")) {
                 dir.create("temp")
             }
             path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
-            sink(path)
-            cat("targets, factors")
-            cat("\n")
-            for (c in experiments){
+            network <- character()
+            countline <- 1
+            network[countline] <- "targets, factors"
+            for (c in experiments) {
+                tmp <- NULL
                 count <- 1
                 if (sum(adj[, which(colnames(adj) %in% c)]) == 0) {
-                    cat(paste(c, ", ", c, sep=""))
+                    tmp <- paste(tmp, paste(c, ", ", c, sep=""), sep = "")
                 } else {
-                    cat(paste(c, ", ", sep=""))
+                  tmp <- paste(tmp, paste(c, ", ", sep=""), sep = "")
                 }
                 count2 <- 0
                 count3 <- 0
@@ -245,7 +246,7 @@ includeLogic <- function(adj, experiments, mutants){
                             help <- r
                             count <- count+1
                             if (sum(adj[, c]) == 1) {
-                                cat(paste(r, sep=""))
+                              tmp <- paste(tmp, paste(r, sep=""), sep = "")
                                 lo <- lo + 1
                             }
                         }
@@ -255,30 +256,31 @@ includeLogic <- function(adj, experiments, mutants){
                             if (count3 < 1) {
                                 lo <- lo+1
                             }
-                            if (logicmatrix[modelno, lo]=="OR" & count3 == 0) { cat(paste(help, " | ", r, sep="")); count3 <- count3 + 1 }
-                            else if (logicmatrix[modelno, lo]=="OR" & count3 > 0) cat(paste(" | ", help, " | ", r, sep=""))
-                            else if (logicmatrix[modelno, lo]=="AND") cat(paste("(", help, " & ", r, ")", sep=""))
-                            else if (logicmatrix[modelno, lo]=="XOR") cat(paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")"))
+                            if (logicmatrix[modelno, lo]=="OR" & count3 == 0) { tmp <- paste(tmp, paste(help, " | ", r, sep=""), sep = ""); count3 <- count3 + 1 }
+                            else if (logicmatrix[modelno, lo]=="OR" & count3 > 0) tmp <- paste(tmp, paste(" | ", help, " | ", r, sep=""), sep = "")
+                            else if (logicmatrix[modelno, lo]=="AND") tmp <- paste(tmp, paste("(", help, " & ", r, ")", sep=""), sep = "")
+                            else if (logicmatrix[modelno, lo]=="XOR") tmp <- paste(tmp, paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")"), sep = "")
                             ## help refers to the first element
-                            else if (logicmatrix[modelno, lo]==NOT2) cat(paste("(", help, " & ! ", r, ")", sep=""))
-                            else if (logicmatrix[modelno, lo]==NOT1) cat(paste("(", r, " & ! ", help, ")", sep=""))
+                            else if (logicmatrix[modelno, lo]==NOT2) tmp <- paste(tmp, paste("(", help, " & ! ", r, ")", sep=""), sep = "")
+                            else if (logicmatrix[modelno, lo]==NOT1) tmp <- paste(tmp, paste("(", r, " & ! ", help, ")", sep=""), sep = "")
                         }
                         else {
                             count2 <- count2 + 1
                             if (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
-                                cat(paste(r, " | ", sep=""))
+                               tmp <- paste(tmp, paste(r, " | ", sep=""), sep = "")
                             } else {
-                                cat(paste(r, sep=""))
-                                lo <- lo + 1
+                               tmp <- paste(tmp, paste(r, sep=""), sep = "")
+                               lo <- lo + 1
                             }
                         }
                     }
                 }
-                cat("\n")
+                countline <- countline + 1
+                network[countline] <- tmp
             }
-            sink()
+            write(network, file = path)
         }
-        test <- lapply(1:nrow(logicmatrix), function(x) getExtendedAdjacency(x, logicmatrix, column, adj, mutants, experiments, randomnames))
+        test <- lapply(1:nrow(logicmatrix), function(x) getExtendedAdjacency(x, logicmatrix, column, adj, mutants, experiments, sort(randomnames)))
         return(test)
     }
 }
@@ -289,6 +291,7 @@ includeLogic <- function(adj, experiments, mutants){
 #' @export
 getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
                                         #creates file read by boolNet
+    randomnames <- sort(randomnames)
     path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
     extadj2 <- createExtendedAdjacency(network, unique(mutants), experiments)
