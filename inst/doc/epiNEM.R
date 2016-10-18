@@ -14,7 +14,7 @@ library(devtools)
 library(epiNEM)
 
 ## ----load packages----------------------------------------------------------------------
-library(bnem) # MartinFXP/B-NEM/package
+library(bnem) #  install_github("MartinFXP/B-NEM/package")
 
 library(nem)
 
@@ -319,7 +319,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 
 ## }
 
-## ----simplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'-------------------
+## ----simplot, fig.width=8, fig.height=8, out.width='0.95\\linewidth'--------------------
 data(sim)
 
 acc <- (sens + spec)/2
@@ -361,6 +361,18 @@ colnames(accframe) <- c(paste(rep("E", length(noiselvls)), noiselvls, sep = "_")
 boxplot(accframe, col = "green", main = "accuracy of the inferred expected data", ylim = c(0,1))
 
 abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
+
+## ----legendplot, fig.width=3, fig.height=3, out.width='0.24\\linewidth'-----------------
+options(warn=-1)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "OR", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "AND", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "XOR", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
+options(warn=0)
 
 ## ----Holstege---------------------------------------------------------------------------
 data(wageningen)
@@ -483,7 +495,7 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
     
 ## }
 
-## ----wagplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'-------------------
+## ----wagplot, fig.width=10, fig.height=5, out.width='0.95\\linewidth'-------------------
 data(wageningen_res)
 
 llmat0 <- wageningen$ll
@@ -493,6 +505,8 @@ logicmat0 <- wageningen$logic
 paperdoubles <- c(4, 9, 17)
 
 for (i in 1:length(doubles)) {
+    
+    if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
     
     if (i %in% 8) { next() }
 
@@ -649,7 +663,7 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 
 ## }
 
-## ----samplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'-------------------
+## ----samplot, fig.width=10, fig.height=5, out.width='0.95\\linewidth'-------------------
 data(sameith_res)
 
 llmat0 <- sameith$ll
@@ -659,6 +673,8 @@ logicmat0 <- sameith$logic
 paperdoubles <- c(4, 9, 17)
 
 for (i in 1:length(doubles)) {
+    
+    if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
     
     if (i %in% 8) { next() }
 
@@ -710,4 +726,3 @@ for (i in 1:length(doubles)) {
 ## ----sessioninfo------------------------------------------------------------------------
 sessionInfo()
 
-                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

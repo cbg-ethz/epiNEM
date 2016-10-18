@@ -415,7 +415,7 @@ heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3, dimnames = list(c("A", "B", 
 heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "XOR", col = "Greys", sub = "", colorkey = NULL)
 heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "unconnected", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
 options(warn=0)
 @ 
 
