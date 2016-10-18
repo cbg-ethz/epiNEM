@@ -29,7 +29,7 @@ options(formatR.arrow=TRUE,width=90)
 	Inferring mixed epistatis from indirect measurements of knockout screens.}
 
 
-\author{Madeline Diekmann \& Martin Pirkl}
+\author{Madeline, Diekmann \& Martin Pirkl}
 
 \maketitle
 This package is an extension of the classic Nested Effects Models provided in package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of a pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
@@ -51,7 +51,7 @@ library(epiNEM)
 We compare epiNEM to several network inference methods.
 
 <<load packages>>=
-library(bnem) #  install_github("MartinFXP/B-NEM/package")
+library(bnem) # MartinFXP/B-NEM/package
 
 library(nem)
 
@@ -358,7 +358,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ## }
 @ 
 
-<<simplot, fig.width=8, fig.height=8, out.width='0.95\\linewidth'>>=
+<<simplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'>>=
 data(sim)
 
 acc <- (sens + spec)/2
@@ -403,21 +403,7 @@ abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 @
 
 \section*{Yeast knockout screens}
-In this section we analyse previously published yeast knockout screens. The screens consist of gene expression data derived from double and single knockout mutants. We use epiNEM on each double mutant combined with each single mutant.\\
-
-The results of the knockout screens have been annotated according to the following legend:
-<<legendplot, fig.width=3, fig.height=3, out.width='0.24\\linewidth'>>=
-options(warn=-1)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "OR", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "AND", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "XOR", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "unconnected", col = "Greys", sub = "", colorkey = NULL)
-options(warn=0)
-@ 
+In this section we analyse previously publish yeast knockout screens. The screens consist of gene expression data derived from double and single knockout mutants. We use epiNEM on each double mutant combined with each single mutant.
 
 \subsection*{Wageningen et al., 2010} 
 
@@ -545,7 +531,7 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 
 Plot results.
 
-<<wagplot, fig.width=10, fig.height=5, out.width='0.95\\linewidth'>>=
+<<wagplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'>>=
 data(wageningen_res)
 
 llmat0 <- wageningen$ll
@@ -555,8 +541,6 @@ logicmat0 <- wageningen$logic
 paperdoubles <- c(4, 9, 17)
 
 for (i in 1:length(doubles)) {
-    
-    if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
     
     if (i %in% 8) { next() }
 
@@ -718,7 +702,7 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 ## }
 @ 
 
-<<samplot, fig.width=10, fig.height=5, out.width='0.95\\linewidth'>>=
+<<samplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'>>=
 data(sameith_res)
 
 llmat0 <- sameith$ll
@@ -728,8 +712,6 @@ logicmat0 <- sameith$logic
 paperdoubles <- c(4, 9, 17)
 
 for (i in 1:length(doubles)) {
-    
-    if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
     
     if (i %in% 8) { next() }
 
@@ -787,3 +769,28 @@ sessionInfo()
 \\
 
 \end{document}
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                c[1:length(llvec)] <- -1000 }
+
+    margin <- abs(max(llvec[1:30]) - min(llvec[1:30]))*0.2
+
+    llvec[which(llvec == min(llvec))] <- min(llvec) + 100 - margin
+
+    par(mfrow=c(1,2))
+    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1)
+    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45)
+    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
+    axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
+
+}
+@ 
+
+<<sessioninfo>>=
+sessionInfo()
+@
+
+\textbf{References:}\\
+\\
+
+\end{document}
+                                                                                                                              

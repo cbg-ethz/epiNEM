@@ -319,7 +319,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 
 ## }
 
-## ----load and plot simulation results---------------------------------------------------
+## ----simplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'-------------------
 data(sim)
 
 acc <- (sens + spec)/2
@@ -483,3 +483,231 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
     
 ## }
 
+## ----wagplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'-------------------
+data(wageningen_res)
+
+llmat0 <- wageningen$ll
+
+logicmat0 <- wageningen$logic
+
+paperdoubles <- c(4, 9, 17)
+
+for (i in 1:length(doubles)) {
+    
+    if (i %in% 8) { next() }
+
+    logicvec <- logicmat0[, i]
+
+    llvec <- llmat0[, i]
+
+    logicvec <- logicvec[order(llvec, decreasing = T)]
+
+    llvec <- llvec[order(llvec, decreasing = T)]
+
+    parents <- unlist(strsplit(doubles[i], "\\."))
+
+    pchvec <- numeric(length(llvec))
+
+    pchvec[which(logicvec %in% "AND")] <- 1
+    pchvec[which(logicvec %in% "OR")] <- 2
+    pchvec[which(logicvec %in% "XOR")] <- 3
+    pchvec[grep(paste("^", parents[1], sep = ""), logicvec)] <- 4
+    pchvec[grep(paste("^", parents[2], sep = ""), logicvec)] <- 5
+    pchvec[which(logicvec %in% "NOEPI")] <- 6
+    pchvec[which(logicvec %in% "UNCON")] <- 7
+
+    logicvec <- logicvec[-which(logicvec %in% "0")]
+    pchvec <- pchvec[-which(pchvec == 0)]
+    llvec <- llvec[-which(llvec == 0)]
+
+    colvec <- pchvec
+
+    llvec[which(is.infinite(llvec) == T)] <- Inf
+    
+    llvec[which(is.infinite(llvec) == T)] <- min(llvec) - 100
+
+    if (all(is.infinite(llvec) == T)) { llvec[1:length(llvec)] <- -1000 }
+
+    margin <- abs(max(llvec[1:30]) - min(llvec[1:30]))*0.2
+
+    llvec[which(llvec == min(llvec))] <- min(llvec) + 100 - margin
+    
+    par(mfrow=c(1,2))
+    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1)
+    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45)
+    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
+    axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
+
+}
+
+## ----Sameith et al., 2015---------------------------------------------------------------
+data <- read.delim("http://www.holstegelab.nl/publications/GSTF_geneticinteractions/downloads/del_mutants_limma.txt")
+
+data <- apply(data, c(1,2), as.character)
+
+dataM <- data[-1, which(data[1, ] %in% "M")]
+
+dataM <- apply(dataM, c(1,2), as.numeric)
+
+dataP <- data[-1, which(data[1, ] %in% "p.value")]
+
+dataP <- apply(dataP, c(1,2), as.numeric)
+
+dataBin <- dataM
+
+sig <- 0.05
+
+cutoff <- 0.7
+
+dataBin[which(dataP < sig & dataP > 0 & abs(dataM) >= cutoff)] <- 1
+
+dataBin[which(dataP >= sig | dataP == 0 | abs(dataM) < cutoff)] <- 0
+
+dataBin <- dataBin[-which(apply(dataBin, 1, max) == 0), ]
+
+colnames(dataBin) <- gsub("\\.\\.\\.", "\\.", colnames(dataBin))
+
+## big screen:
+
+doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
+
+doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
+
+singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
+
+singles <- unique(sort(singles))
+
+llmat <- logicmat <- matrix(0, length(singles), length(doubles))
+
+rownames(llmat) <- rownames(logicmat) <- singles
+
+colnames(llmat) <- colnames(logicmat) <- doubles
+
+globalgenes <- which(apply(dataBin, 1, max) == 1)
+
+## for (i in doubles[set]) {
+##     print(i)
+##     doubles.singles <- unlist(strsplit(i, "\\."))
+##     egenes <- which(apply(dataBin[, which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
+##     for (j in singles) {
+##         print(j)
+##         if (j %in% doubles.singles) { next() }
+
+##         dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"), colnames(dataBin))]
+
+##         if (path %in% "fixed_set") {
+##             dataTmp <- dataTmp[egenes, ]
+##         }
+##         if (path %in% "global") {
+##             dataTmp <- dataTmp[globalgenes, ]
+##         }
+##         if (path %in% "") {
+##             dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
+##         }
+        
+##         i1 <- which(singles %in% j)
+##         i2 <- which(doubles %in% i)
+
+##         if (!(is.null(dim(dataTmp)))) {
+            
+##             if (any(dataTmp[, j] != 0)) {
+                
+##                 epires <- epiNEM(dataTmp, method = "exhaustive")
+                
+##                 tmp <- epires$logics
+##                 if ("OR" %in% tmp) {
+##                     if (sum(epires$origModel[, j]) != 2) {
+##                         tmp <- "NOEPI"
+##                     } else {
+##                         if (all(tmp %in% "OR")) {
+##                             tmp <- "OR"
+##                         } else {
+##                             tmp <- tmp[which(!(tmp %in% "OR"))]
+##                         }
+##                     }
+##                 }
+                
+##                 logicmat[i1, i2] <- tmp
+##                 llmat[i1, i2] <- epires$score
+                
+##             } else {
+
+##                 logicmat[i1, i2] <- "UNCON"
+##                 llmat[i1, i2] <- -Inf
+                
+##             }
+            
+##         } else {
+            
+##             logicmat[i1, i2] <- "UNCON"
+##             llmat[i1, i2] <- -Inf
+            
+##         }
+        
+##     }
+
+## }
+
+## ----samplot, fig.width=12, fig.height=12, out.width='0.4\\linewidth'-------------------
+data(sameith_res)
+
+llmat0 <- sameith$ll
+
+logicmat0 <- sameith$logic
+
+paperdoubles <- c(4, 9, 17)
+
+for (i in 1:length(doubles)) {
+    
+    if (i %in% 8) { next() }
+
+    logicvec <- logicmat0[, i]
+
+    llvec <- llmat0[, i]
+
+    logicvec <- logicvec[order(llvec, decreasing = T)]
+
+    llvec <- llvec[order(llvec, decreasing = T)]
+
+    parents <- unlist(strsplit(doubles[i], "\\."))
+
+    pchvec <- numeric(length(llvec))
+
+    pchvec[which(logicvec %in% "AND")] <- 1
+    pchvec[which(logicvec %in% "OR")] <- 2
+    pchvec[which(logicvec %in% "XOR")] <- 3
+    pchvec[grep(paste("^", parents[1], sep = ""), logicvec)] <- 4
+    pchvec[grep(paste("^", parents[2], sep = ""), logicvec)] <- 5
+    pchvec[which(logicvec %in% "NOEPI")] <- 6
+    pchvec[which(logicvec %in% "UNCON")] <- 7
+
+    logicvec <- logicvec[-which(logicvec %in% "0")]
+    pchvec <- pchvec[-which(pchvec == 0)]
+    llvec <- llvec[-which(llvec == 0)]
+
+    colvec <- pchvec
+
+    llvec[which(is.infinite(llvec) == T)] <- Inf
+    
+    llvec[which(is.infinite(llvec) == T)] <- min(llvec) - 100
+
+    if (all(is.infinite(llvec) == T)) { llvec[1:length(llvec)] <- -1000 }
+
+    margin <- abs(max(llvec[1:30]) - min(llvec[1:30]))*0.2
+
+    llvec[which(llvec == min(llvec))] <- min(llvec) + 100 - margin
+
+    par(mfrow=c(1,2))
+    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1)
+    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45)
+    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
+    axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
+
+}
+
+## ----sessioninfo------------------------------------------------------------------------
+sessionInfo()
+
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    

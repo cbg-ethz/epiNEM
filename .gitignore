@@ -6,3 +6,6 @@
 martin/
 ._*
 .#*
+*.timestamp
+
+*.timestamp
