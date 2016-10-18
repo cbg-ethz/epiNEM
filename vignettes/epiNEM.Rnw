@@ -29,7 +29,7 @@ options(formatR.arrow=TRUE,width=90)
 	Inferring mixed epistatis from indirect measurements of knockout screens.}
 
 
-\author{Martin Pirkl}
+\author{Madeline, Diekmann \& Martin Pirkl}
 
 \maketitle
 This package is an extension of the classic Nested Effects Models provided in package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of a pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
