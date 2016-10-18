@@ -358,7 +358,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ## }
 @ 
 
-<<load and plot simulation results>>=
+<<simplot, fig.width=4, fig.height=4, out.width='0.4\\linewidth'>>=
 data(sim)
 
 acc <- (sens + spec)/2
@@ -531,12 +531,12 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 
 Plot results.
 
-<<Wageningen results>>=
+<<wagplot, fig.width=4, fig.height=34, out.width='0.4\\linewidth'>>=
 data(wageningen_res)
 
-llmat0 <- llmat
+llmat0 <- wageningen$ll
 
-logicmat0 <- logicmat
+logicmat0 <- wageningen$logic
 
 paperdoubles <- c(4, 9, 17)
 
@@ -581,11 +581,11 @@ for (i in 1:length(doubles)) {
     llvec[which(llvec == min(llvec))] <- min(llvec) + 100 - margin
     
     par(mfrow=c(1,2))
-    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and ")),
-    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1),
-    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45),
-    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n"),
-    axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec)))
+    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1)
+    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45)
+    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
+    axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
 
 }
 @ 
@@ -702,12 +702,12 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 ## }
 @ 
 
-<<plot sameith results>>=
-data(sameith <- res)
+<<wagplot, fig.width=4, fig.height=34, out.width='0.4\\linewidth'>>=
+data(sameith_res)
 
-llmat0 <- llmat
+llmat0 <- sameith$ll
 
-logicmat0 <- logicmat
+logicmat0 <- sameith$logic
 
 paperdoubles <- c(4, 9, 17)
 
@@ -751,11 +751,11 @@ for (i in 1:length(doubles)) {
 
     llvec[which(llvec == min(llvec))] <- min(llvec) + 100 - margin
 
-    par(mfrow=c(1,2)),
-    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and ")),
-    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1),
-    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45),
-    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n"),
+    par(mfrow=c(1,2))
+    plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    legend(30, max(llvec)+margin, legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "unconnected"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1)
+    text((1:30)+0.5, llvec[1:30]+(margin*0.1), labels = c(names(llvec)[1:15], rep("", 15)), cex = 0.7, pos = 3, srt = 45)
+    plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), max(llvec[-(1:30)])), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
     axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
 
 }
