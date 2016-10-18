@@ -38,11 +38,11 @@ However, classic Nested Effects Models do not account for double knockouts. In t
 \section*{Loading epiNEM}
 
 <<installandload>>=
-install.packages("devtools", verbose = F, quiet = T)
+## install.packages("devtools", verbose = F, quiet = T)
 
 library(devtools)
 
-install_github("cbg-ethz/epiNEM", quiet = T)
+## install_github("cbg-ethz/epiNEM", quiet = T)
 
 library(epiNEM)
 @
