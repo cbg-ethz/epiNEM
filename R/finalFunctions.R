@@ -23,13 +23,12 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' @param D0: complementary D1
 #' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
 #' @export
-MLL <- function(Phi, D1, D0, ltype = "marginal") {
+MLL <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
                                         # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
                                         # complementary data matrix D0
                                         # Function adapted from NEM package
     Phi2 <- as.matrix(Phi$model)
     Phi2 <- Phi2[colnames(D1), ]
-    para <- c(0.13,0.05)
     L    <- para[1]^(D1 %*% (1 - Phi2)) * (1 - para[1])^(D0 %*% (1 - Phi2)) *
                                                             (1 - para[2])^(D1 %*% Phi2) * para[2]^(D0 %*% Phi2)
     posterior <- L / (rowSums(L))

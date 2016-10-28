@@ -27,7 +27,7 @@
 #' @export
 epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0,
                    random=list(single=4, double=1, reporters=100, FPrate=0.1,
-                               FNrate=0.1, replicates=1), plotsy=TRUE, ltype = "mrginal") {
+                               FNrate=0.1, replicates=1), plotsy=TRUE, ltype = "mrginal", para = c(0.13, 0.05)) {
 
                                         #--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
@@ -108,7 +108,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
         index <- which.max(iterations["maxLlh",])
         reconstruct <- includeLogic(iterations[,index]$model, experiments, mutants)
         reconstruct <- unlist(reconstruct, recursive=FALSE)
-        score <- sapply(reconstruct, MLL, D1, D0, ltype)
+        score <- sapply(reconstruct, MLL, D1, D0, ltype, para)
         mll <- unlist(score["mLL",])
         index <- which.max(mll)
         posterior <- score[,index]$posterior
@@ -138,7 +138,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
                                         #cat("Extended to", length(extendedModels), "models, ")
                                         #cat("of which", length(uniqueModels), "are unique")
 
-        score <- sapply(uniqueModels, MLL, D1, D0, ltype)
+        score <- sapply(uniqueModels, MLL, D1, D0, ltype, para)
         mll  <- unlist(score["mLL",])
 
         bestModel <- uniqueModels[[which.max(mll)]]$model
