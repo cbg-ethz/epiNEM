@@ -17,4 +17,8 @@ createExtendedAdjacency(network, mutants, experiments)
 extend adjacency matrices taking cycles and logics into account. For every given start state, the final state
 is computed yu using BoolNet.
 }
+\examples{
+model <- CreateTopology(3, 1)
+extModel <- createExtendedAdjacency(model, rownames(model$model), colnames(model$model))
+}
 

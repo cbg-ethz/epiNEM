@@ -1,7 +1,7 @@
 Package: epiNEM
 Type: Package
 Title: epiNEM
-Version: 1.0
+Version: 0.99.0
 Author: Madeline Diekmann & Martin Pirkl
 Maintainer: Martin Pirkl <martin.pirkl@bsse.ethz.ch>
 Description: epiNEM is an extension of the NEM package which is able to take into account double knockouts.
@@ -10,7 +10,8 @@ Depends:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
+biocViews: Software, signaling, pathways, networks, graphs, hyper
 RoxygenNote: 5.0.1
-Imports: BoolNet, e1071, knitr
+Imports: BoolNet, e1071, knitr, igraph
 VignetteBuilder: knitr
 Suggests: knitr

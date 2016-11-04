@@ -4,7 +4,7 @@
 \alias{CreateTopology}
 \title{create topology for a randomly generated pathway topology}
 \usage{
-CreateTopology(single, double)
+CreateTopology(single, double, force = T)
 }
 \arguments{
 \item{single:}{number of single knockouts}
@@ -13,5 +13,8 @@ CreateTopology(single, double)
 }
 \description{
 create topology for a randomly generated pathway topology
+}
+\examples{
+model <- CreateTopology(3, 1)
 }
 

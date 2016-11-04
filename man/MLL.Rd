@@ -4,7 +4,7 @@
 \alias{MLL}
 \title{Evaluation of graphs}
 \usage{
-MLL(Phi, D1, D0)
+MLL(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05))
 }
 \arguments{
 \item{Phi:}{model to be evaluated}
@@ -15,5 +15,11 @@ MLL(Phi, D1, D0)
 }
 \description{
 Computes marginal log-likelihood for model Phi given observed data matrix D1
+}
+\examples{
+Phi <- matrix(sample(c(0,1), 9, replace = T), 3, 3)
+data <- matrix(sample(c(0,1), 3*10, replace = T), 10, 3)
+rownames(Phi) <- colnames(Phi) <- colnames(data) <- c("Ikk1", "Ikk2", "RelA")
+score <- MLL(Phi, D1 <- data, D0 <- 1 - data)
 }
 

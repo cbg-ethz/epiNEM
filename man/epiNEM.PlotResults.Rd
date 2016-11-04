@@ -12,4 +12,8 @@ epiNEM.PlotResults(results)
 \description{
 Plots the winning pathway structure
 }
+\examples{
+res <- epiNEM()
+epiNEM.PlotResults(res)
+}
 

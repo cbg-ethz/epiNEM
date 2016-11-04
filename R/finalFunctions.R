@@ -5,6 +5,8 @@
 #' @param pathwayGenes: vector of genes in the pathway
 #' @param edgeProb: probability of random edge
 #' @export
+#' @examples
+#' graph <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
 CreateRandomGraph <- function(pathwayGenes, edgeProb=0.5) {
     size     <- length(pathwayGenes)
     model    <- diag(size)
@@ -23,6 +25,11 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' @param D0: complementary D1
 #' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
 #' @export
+#' @examples
+#' Phi <- matrix(sample(c(0,1), 9, replace = T), 3, 3)
+#' data <- matrix(sample(c(0,1), 3*10, replace = T), 10, 3)
+#' rownames(Phi) <- colnames(Phi) <- colnames(data) <- c("Ikk1", "Ikk2", "RelA")
+#' score <- MLL(Phi, D1 <- data, D0 <- 1 - data)
 MLL <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
                                         # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
                                         # complementary data matrix D0
@@ -72,11 +79,7 @@ colours <- function(logic, parents2){
     return(list(col=col, pch=pch, log=log))
 }
 
-#' get starting vector
-#' @description get mutant vectors for simulating boolean network
-#' @param mutants: vector of single knockouts
-#' @param experiments: vector of all knockouts
-#' @export
+#' @noRd
 getStarters <- function(mutants, experiments){
     ## get positions of doublemutants
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
@@ -123,6 +126,9 @@ getStarters <- function(mutants, experiments){
 #' @param experiments: vector of all knockouts
 #' @importFrom BoolNet getPathToAttractor
 #' @export
+#' @examples
+#' model <- CreateTopology(3, 1)
+#' extModel <- createExtendedAdjacency(model, rownames(model$model), colnames(model$model))
 createExtendedAdjacency <- function(network, mutants, experiments){
     starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
     rownames(starters) <- mutants
@@ -145,11 +151,7 @@ createExtendedAdjacency <- function(network, mutants, experiments){
     return(extadj)
 }
 
-#' include logics into network. Returns an extended adjacency matrix.
-#' @param adj: adjacency matrix of graph
-#' @param experiments: vector of all knockouts
-#' @param mutants: vector of single knockouts
-#' @export
+#' @noRd
 includeLogic <- function(adj, experiments, mutants){
     if (is.list(adj)) {
         adj=matrix(unlist(adj),length(experiments), byrow=FALSE)
@@ -288,6 +290,7 @@ includeLogic <- function(adj, experiments, mutants){
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
 #' @export
+#' @noRd
 getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
                                         #creates file read by boolNet
     randomnames <- sort(randomnames)
@@ -396,6 +399,8 @@ AttachEGenes <- function(posterior, experiments){
 #' @param single: number of single knockouts
 #' @param double: number of double knockouts
 #' @export
+#' @examples
+#' model <- CreateTopology(3, 1)
 CreateTopology <- function(single, double, force = T) {
     extendedModels <- list()
     singleKOs <- LETTERS[1:single]
@@ -446,6 +451,7 @@ CreateTopology <- function(single, double, force = T) {
 #' @param singleKOs: vector of single mutants
 #' @importFrom gtools combinations
 #' @export
+#' @noRd
 GenerateDoubleKO <- function(d, singleKOs) {
     allDoubles    <- combinations(length(singleKOs), 2, singleKOs)
     doubleKO      <- allDoubles[d, ]

@@ -25,6 +25,11 @@
 #' @author Madeline Diekmann
 #' @seealso nem
 #' @export
+#' @import
+#' igraph
+#' e1071
+#' @examples
+#' res <- epiNEM()
 epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0,
                    random=list(single=4, double=1, reporters=100, FPrate=0.1,
                                FNrate=0.1, replicates=1), plotsy=TRUE, ltype = "marginal", para = c(0.13, 0.05)) {

@@ -9,4 +9,8 @@ AddLogicGates(child, logic, model)
 \description{
 extend model with node representing logic gate
 }
+\examples{
+model <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
+model2 <- AddLogicGates("RelB", "OR", model)
+}
 

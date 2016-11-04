@@ -14,4 +14,7 @@ CreateRandomGraph(pathwayGenes, edgeProb = 0.5)
 \description{
 Returns a model graph with randomly sampled edges. Every possible edge has a probability to exist in the graph.
 }
+\examples{
+graph <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
+}
 

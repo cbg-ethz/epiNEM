@@ -16,7 +16,8 @@ Epistatic NEMs - main function
 \usage{
 epiNEM(filename = "random", method = "greedy", nIterations = 10,
   nModels = 0, random = list(single = 4, double = 1, reporters = 100, FPrate
-  = 0.1, FNrate = 0.1, replicates = 1), plotsy = TRUE)
+  = 0.1, FNrate = 0.1, replicates = 1), plotsy = TRUE, ltype = "marginal",
+  para = c(0.13, 0.05))
 }
 \arguments{
 \item{filename}{A binary, tab-delimited matrix. Columns: single and double knockdowns. Rows: genes showing effect or not?
@@ -34,6 +35,9 @@ FP-rate, FN-rate, no. of replicates}
 \description{
 A publicly availiable example data set for demonstrating the use of the epiNEM package.
 For data preprocessing steps please check vignette.
+}
+\examples{
+res <- epiNEM()
 }
 \author{
 Madeline Diekmann

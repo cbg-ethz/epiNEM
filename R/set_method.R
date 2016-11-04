@@ -1,13 +1,6 @@
 ## optional functions
 
-#' perform greedy hillclimbing algorithm
-#' @description Performs iteration n of a greedy hillclimbing algorithm. Returns the score and the model representing
-#' the optimal solution of the iteration.
-#' @param n: number of iterations
-#' @param experiments: vector of mutants
-#' @param data2: observed data
-#' @param data0: complementary data2
-#' @export
+#' @noRd
 GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
   cat("\n")
   cat(n)
@@ -44,11 +37,7 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
   return(list(maxLlh=maxLlh, model=prevModel))
 }
 
-#' find neighbors
-#' @description Return all models that differ only one edge from the current model by removing or adding a non-self edge.
-#' @param model: adjacency matrix of current model
-#' @param edges: all non-self edges in the model
-#' @export
+#' @noRd
 FindNeighbours <- function(model, edges){
   # Return all models that differ only one edge from the current model by
   # removing or adding a non-self edge.
@@ -62,11 +51,7 @@ FindNeighbours <- function(model, edges){
   return(models)
 }
 
-#' Enumerate all possible adjacency matrices
-#' @description Returns a lst of all unique matrices
-#' @param size: number of desired nodes
-#' @importFrom e1071 bincombinations
-#' @export
+#' @noRd
 EnumerateModels <- function(size, nodes="none") {
   # Enumerates all possible adjacency matrices for a given size. Returns a list of
   # all unique transitively closed adjacency matrices.

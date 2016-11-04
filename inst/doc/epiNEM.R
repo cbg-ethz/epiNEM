@@ -375,7 +375,7 @@ heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3, dimnames = list(c("A", "B",
 options(warn=0)
 
 ## ----Holstege---------------------------------------------------------------------------
-data(wageningen)
+data <- read.delim("http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt")
 
 dataM <- data[-(1:2), (1+(1:(324/2))*2)]
 
