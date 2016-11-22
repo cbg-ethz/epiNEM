@@ -564,7 +564,7 @@ logicmat0 <- wageningen$logic
 
 for (i in 1:length(doubles)) {
     
-    if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
+    #if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
     
     if (i %in% 8) { next() }
 
@@ -645,7 +645,7 @@ for (i in 1:length(doubles)) {
 @
 
 <<wagdist, fig.width=10, fig.height=5, out.width='0.95\\linewidth'>>=
-distmat <- wageningen$logicmat
+distmat <- wageningen$logic
 
 distmat[which(distmat %in% "AND")] <- 1
 distmat[which(distmat %in% "OR")] <- 2
@@ -704,9 +704,9 @@ dataP <- apply(dataP, c(1,2), as.numeric)
 
 dataBin <- dataM
 
-sig <- 0.05
+sig <- 0.01
 
-cutoff <- 0.7
+cutoff <- log2(1.5)
 
 dataBin[which(dataP < sig & dataP > 0 & abs(dataM) >= cutoff)] <- 1
 
@@ -809,7 +809,7 @@ paperdoubles <- c(4, 9, 17)
 
 for (i in 1:length(doubles)) {
   
-  if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
+  ## if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
   
   logicvec <- logicmat0[, i]
 

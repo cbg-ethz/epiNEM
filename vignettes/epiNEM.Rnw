@@ -704,9 +704,9 @@ dataP <- apply(dataP, c(1,2), as.numeric)
 
 dataBin <- dataM
 
-sig <- 0.05
+sig <- 0.01
 
-cutoff <- 0.7
+cutoff <- log2(1.5)
 
 dataBin[which(dataP < sig & dataP > 0 & abs(dataM) >= cutoff)] <- 1
 
