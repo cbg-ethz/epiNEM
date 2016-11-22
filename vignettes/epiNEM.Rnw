@@ -564,7 +564,7 @@ logicmat0 <- wageningen$logic
 
 for (i in 1:length(doubles)) {
     
-    if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
+    #if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
     
     if (i %in% 8) { next() }
 
@@ -639,13 +639,13 @@ for (i in 1:length(doubles)) {
     plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
     legend = legend(length(llvec[-(1:30)]), p2max,
                     legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
-    axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec)))
+    axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
 
 }
 @
 
 <<wagdist, fig.width=10, fig.height=5, out.width='0.95\\linewidth'>>=
-distmat <- logicmat
+distmat <- wageningen$logic
 
 distmat[which(distmat %in% "AND")] <- 1
 distmat[which(distmat %in% "OR")] <- 2
@@ -673,6 +673,8 @@ for (i in 1:ncol(distmat)) {
 rownames(distmat) <- 1:nrow(distmat)
 
 distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
+
+distmat <- distmat[, -which(apply(distmat, 2, max) == 0 | apply(distmat, 2, min) == 7)]
 
 library(bnem)
 
@@ -807,7 +809,7 @@ paperdoubles <- c(4, 9, 17)
 
 for (i in 1:length(doubles)) {
   
-  if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
+  ## if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
   
   logicvec <- logicmat0[, i]
 
@@ -879,13 +881,13 @@ for (i in 1:length(doubles)) {
     plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
     legend = legend(length(llvec[-(1:30)]), p2max,
                     legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
-    axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec)))
+    axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
 
 }
 @
 
 <<samdist, fig.width=10, fig.height=5, out.width='0.95\\linewidth'>>=
-distmat <- logicmat
+distmat <- sameith$logic
 
 distmat[which(distmat %in% "AND")] <- 1
 distmat[which(distmat %in% "OR")] <- 2
