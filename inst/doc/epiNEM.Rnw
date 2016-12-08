@@ -51,7 +51,7 @@ library(epiNEM)
 We compare epiNEM to several network inference methods.
 
 <<load packages>>=
-library(bnem) #  install_github("MartinFXP/B-NEM/package")
+library(bnem, quietly = T, verbose = F) #  install_github("MartinFXP/B-NEM/package")
 
 library(nem)
 
@@ -462,6 +462,8 @@ dataBin[which(dataP >= sig | dataP == 0 | abs(dataM) < cutoff)] <- 0
 
 dataBin <- dataBin[-which(apply(dataBin, 1, max) == 0), ]
 
+dataBinWag <- dataBin
+
 genelist <- toupper(c('hsl1', 'cla4', 'gin4', 'swe1', 'hsl1.cla4'))
 
 colnames(dataBin) <- gsub(".del.vs..wt", "", colnames(dataBin))
@@ -633,14 +635,30 @@ for (i in 1:length(doubles)) {
         p2max <- max(llvec[-(1:30)])
         
     }
-    par = par(mfrow=c(1,2))
-    plot = plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin*0.2), xlim = c(1, 32), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
-    text = text((1:30)+0.5, llvec[1:30]+(margin*offset), labels = c(names(llvec)[1:donames], rep("", 30 - donames)), cex = 0.6, srt = 45, pos = 3, offset = 0)
-    plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
-    legend = legend(length(llvec[-(1:30)]), p2max,
-                    legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
-    axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
-
+    
+    ## par = par(mfrow=c(1,2))
+    ## plot = plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin*0.2), xlim = c(1, 32), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    ## text = text((1:30)+0.5, llvec[1:30]+(margin*offset), labels = c(names(llvec)[1:donames], rep("", 30 - donames)), cex = 0.6, srt = 45, pos = 3, offset = 0)
+    ## plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
+    ## legend = legend(length(llvec[-(1:30)]), p2max,
+    ##                 legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
+    ## axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
+    
+    mark <- ""
+    thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
+    legendx <- length(llvec[1:thetop])
+    p2max <- max(llvec[1:thetop])
+    if (p2max == min(llvec[1:thetop])) {
+        p2max <- p2max+margin*0.2
+    }
+    if (thetop == 0) { next() }
+    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2), xlim = c(1, thetop+(thetop/100)), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset), labels = names(llvec)[1:thetop], cex = 0.6, srt = 45, pos = 3, offset = 0)
+    mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
+                                        #text2 = text(-10/thetop, p2max+(margin*0.2), labels = mark, cex = 5, pos = 3, offset = 0),
+    legend = legend(legendx, p2max,
+                    legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis"), col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)
+    
 }
 @
 
@@ -670,19 +688,17 @@ for (i in 1:ncol(distmat)) {
     distmat[, i] <- rev(sort(distmat[, i]))
 }
 
-rownames(distmat) <- 1:nrow(distmat)
-
 distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
 
 distmat <- distmat[, -which(apply(distmat, 2, max) == 0 | apply(distmat, 2, min) == 7)]
-
-library(bnem)
 
 y <- distmat
 
 distmat <- distmat[, order(apply(distmat, 2, function(x) { return(sum(x == 1)) }))]
 
 y[which(y == 5)] <- 4
+
+rownames(distmat) <- NULL
 
 heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0, cexCol = 0.4, aspect = "fill", colorkey = list(space = "right", labels = rev(c("", "no information\n\n\n", "no epistasis\n\n\n", "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")), width = 1, at = seq(1.5,7.5, length.out = 8)), xlab = "double knock-outs", ylab = "modulators\n(different order for each pair)", xrot = 45, bordercol = "transparent")#, sub = "AND (1), OR (2), XOR (3), masking (4,5), no epistasis (6), no information (7)", clusterx = y, dendrogram = "both")
 @ 
@@ -805,11 +821,7 @@ llmat0 <- sameith$ll
 
 logicmat0 <- sameith$logic
 
-paperdoubles <- c(4, 9, 17)
-
 for (i in 1:length(doubles)) {
-  
-  ## if (!(doubles[i] %in% c("ECM22.UPC2", "GLN3.GZF3"))) { next() }
   
   logicvec <- logicmat0[, i]
 
@@ -875,14 +887,32 @@ for (i in 1:length(doubles)) {
         
     }
     
-    par = par(mfrow=c(1,2))
-    plot = plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin*0.2), xlim = c(1, 32), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
-    text = text((1:30)+0.5, llvec[1:30]+(margin*0.075), labels = c(names(llvec)[1:donames], rep("", 30 - donames)), cex = 0.6, srt = 45, pos = 3, offset = 0)
-    plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
-    legend = legend(length(llvec[-(1:30)]), p2max,
-                    legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
-    axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
+    ## par = par(mfrow=c(1,2))
+    ## plot = plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin*0.2), xlim = c(1, 32), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    ## text = text((1:30)+0.5, llvec[1:30]+(margin*0.075), labels = c(names(llvec)[1:donames], rep("", 30 - donames)), cex = 0.6, srt = 45, pos = 3, offset = 0)
+    ## plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
+    ## legend = legend(length(llvec[-(1:30)]), p2max,
+    ##                 legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
+    ## axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
 
+    mark <- ""
+    pointx <- 10000
+    ## if (doubles[i] %in% "GAT1.GZF3") { pointx <- 6 }
+    thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
+    legendx <- length(llvec[1:thetop])
+    p2max <- max(llvec[1:thetop])
+    if (p2max == min(llvec[1:thetop])) {
+        p2max <- p2max+margin*0.2
+    }
+    if (thetop == 0) { next() }
+    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2), xlim = c(1, thetop+(thetop/100)), main = paste(tolower(unlist(strsplit(doubles[i], "\\."))), collapse = " and "))
+    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset), labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3, offset = 0)
+    ## arrows(pointx, llvec[6]+(margin*offset*6), pointx, llvec[6]+(margin*offset*2), length = 0.1, col = "darkred"), 
+    mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
+                                        #text2 = text(-10/thetop, p2max+(margin*0.2), labels = mark, cex = 5, pos = 3, offset = 0),
+    legend = legend(legendx, p2max,
+                    legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis"), col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)  
+    
 }
 @
 
@@ -912,8 +942,6 @@ for (i in 1:ncol(distmat)) {
     distmat[, i] <- rev(sort(distmat[, i]))
 }
 
-rownames(distmat) <- 1:nrow(distmat)
-
 distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
 
 library(bnem)
@@ -924,7 +952,132 @@ distmat <- distmat[, order(apply(distmat, 2, function(x) { return(sum(x == 1)) }
 
 y[which(y == 5)] <- 4
 
+rownames(distmat) <- NULL
+
 heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0, cexCol = 0.4, aspect = "fill", colorkey = list(space = "right", labels = rev(c("", "no information\n\n\n", "no epistasis\n\n\n", "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")), width = 1, at = seq(1.5,7.5, length.out = 8)), xlab = "double knock-outs", ylab = "modulators\n(different order for each pair)", xrot = 45, bordercol = "transparent")#, sub = "AND (1), OR (2), XOR (3), masking (4,5), no epistasis (6), no information (7)", clusterx = y, dendrogram = "both")
+@ 
+
+Now we plot the densities of the string-db interaction scores of our identified modulators and a random draw.
+
+<<bothstring, fig.width=10, fig.height=5, out.width='0.95\\linewidth'>>=
+par(mfrow=c(1,2))
+
+library(STRINGdb)
+
+get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
+
+string_db <- STRINGdb$new( version="10", species=4932, score_threshold=0, input_directory="~/")
+
+llmat <- wageningen$ll
+
+logicmat <- wageningen$logic
+
+string.scores <- list()
+
+string.names <- character()
+
+for (i in 1:ncol(llmat)) {
+
+    if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
+        top30 <- llmat[, i]
+        top30[which(top30 == 0)] <- -Inf
+        top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i] %in% c(0,-Inf))))]]
+
+        doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+
+        for (j in names(top30)) {
+            tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+            string.scores <- c(string.scores, tmp$combined_score)
+            string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+            tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+            string.scores <- c(string.scores, tmp$combined_score)
+            string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+        }
+        
+    } else {
+        next()
+    }
+
+}
+
+tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag), "\\.")))))
+
+stsc <- unlist(string.scores)
+
+denspval <- wilcox.test(stsc, unlist(tmp$combined_score), alternative = "greater")$p.value
+
+for (i in 100:1) {
+
+    if (denspval < 10^(-i)) {
+
+        denspval <- paste("< ", 10^(-i), sep = "")
+
+    } 
+
+}
+
+plot(density(stsc), col = "#00000000", ylim = c(0, max(c(max(density(stsc)$y), max(density(unlist(tmp$combined_score))$y)))), main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "", cex.main = 1.5)
+polygon(density(stsc), col = "#ff000066")
+
+lines(density(unlist(tmp$combined_score)), col = "#00000000")
+polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
+
+llmat <- sameith$ll
+
+logicmat <- sameith$logic
+
+string.scores <- list()
+
+string.names <- character()
+
+for (i in 1:ncol(llmat)) {
+
+    if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
+        top30 <- llmat[, i]
+        top30[which(top30 == 0)] <- -Inf
+        top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i] %in% c(0,-Inf))))]]
+
+        doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+
+        for (j in names(top30)) {
+            tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+            string.scores <- c(string.scores, tmp$combined_score)
+            string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+            tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+            string.scores <- c(string.scores, tmp$combined_score)
+            string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+        }
+        
+    } else {
+        next()
+    }
+
+}
+
+tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin), "\\.")))))
+
+stsc <- unlist(string.scores)
+
+denspval <- wilcox.test(stsc, unlist(tmp$combined_score), alternative = "greater")$p.value
+
+for (i in 100:1) {
+
+    if (denspval < 10^(-i)) {
+
+        denspval <- paste("< ", 10^(-i), sep = "")
+
+    } 
+
+}
+
+plot(density(stsc), col = "#00000000", ylim = c(0, max(c(max(density(stsc)$y), max(density(unlist(tmp$combined_score))$y)))), main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "", cex.main = 1.5)
+polygon(density(stsc), col = "#ff000066")
+
+lines(density(unlist(tmp$combined_score)), col = "#00000000")
+polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
+
 @ 
           
 <<sessioninfo>>=
