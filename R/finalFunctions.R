@@ -178,7 +178,7 @@ includeLogic <- function(adj, experiments, mutants){
         singles <- c()
         parents <- names(which(adj[,c]==1))
         if ((length(parents) == 2) &&
-            ##check whether double mutant is abvailable in the data
+            ##check whether double mutant is available in the data
             (parents[1] %in% unlist(mutantslist[doublepos])) && parents[2] %in% unlist(mutantslist[doublepos])){
             for (i in 1:length(parents)) {
                 singles <- cbind(singles, parents[i])
@@ -200,20 +200,19 @@ includeLogic <- function(adj, experiments, mutants){
             liste[[notriples]] <- logic
             column <- cbind(column, c)
         }
-        ## the next three ifs are from yours truly and yours truly should double check that with florian
         if (length(parents) == 2 & !(all(parents %in% unlist(mutantslist[doublepos])))) {
             notriples <- notriples + 1
-            liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+            liste[[notriples]] <- "OR"
             column <- cbind(column, c)
         }
-        if (length(parents) > 2) { # this could be a future update to produce more complicated gates ===> B-NEM not really epistasis anymore
+        if (length(parents) > 2) { 
             notriples <- notriples + 1
-            liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+            liste[[notriples]] <- "OR"
             column <- cbind(column, c)
         }
         if (length(parents) == 1) {
             notriples <- notriples + 1
-            liste[[notriples]] <- "OR" # because this is normal NEM; seems like a hack that will crash the universe
+            liste[[notriples]] <- "OR"
             column <- cbind(column, c)
         }
     }
@@ -221,13 +220,13 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        randomnames <- sort(runif(nrow(logicmatrix))) # why is a vector of 5 not enough and i end up getting a outfile_NA? Because, you dummy, it is a combination of all possible logics for all possible gates.
+        randomnames <- sort(runif(nrow(logicmatrix)))
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
             if (!dir.exists("temp")) {
                 dir.create("temp")
             }
-            path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="") # change that !!! how? i don't know, think of something! yea, later. boy, i hope the rest is correct...
+            path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="") # change that
             network <- character()
             countline <- 1
             network[countline] <- "targets, factors"
@@ -462,7 +461,6 @@ GenerateDoubleKO <- function(d, singleKOs) {
 #' @noRd
 #' @export
 epiNEM.Simulations <- function(random, nSim){
-                                        #perform simulation experiments for LogicNEM, Correlation and Mutual Information
     count <- rep(0, length(random$FNrate))
     log <- rep(0, length(random$FNrate))
     errorLOG <- list(0)
