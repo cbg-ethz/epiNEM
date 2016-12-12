@@ -23,7 +23,7 @@ install_github("cbg-ethz/epiNEM")
 library(epiNEM)
 ```
 
-Then check out the vignette for working examples.
+Check out the vignette for working examples.
 
 ```r
 vignette(package="epiNEM")
