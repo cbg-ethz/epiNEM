@@ -7,7 +7,7 @@ options(formatR.arrow=TRUE,width=90)
 ## ----installandload---------------------------------------------------------------------
 ## install.packages("devtools", verbose = F, quiet = T)
 
-library(devtools)
+## library(devtools)
 
 ## install_github("cbg-ethz/epiNEM", quiet = T)
 
@@ -135,8 +135,10 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##             ers <- cbind(Ctrl_vs_S = 1, ers)
 ##             ers <- ers[, order(colnames(ers))]
 
-##             CNOlist <- dummyCNOlist(stimuli = "S", inhibitors = LETTERS[1:random$single],
-##                                maxStim = 1, maxInhibit = 2, signals = LETTERS[1:random$single])
+##             CNOlist <- dummyCNOlist(stimuli = "S",
+##                                inhibitors = LETTERS[1:random$single],
+##                                maxStim = 1, maxInhibit = 2,
+##                                signals = LETTERS[1:random$single])
 
 ##             parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.",
 ##                                colnames(sortedData))], "\\.")))
@@ -213,9 +215,11 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##                 res2 <- rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
 ##                               matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
 ##                 colnames(res2)[(ncol(res)+1):ncol(res2)] <-
-##                                      colnames(gtn2)[which(!(colnames(gtn2) %in% colnames(res)))]
+##                                      colnames(gtn2)[which(!(colnames(gtn2)
+##                                      %in% colnames(res)))]
 ##                 rownames(res2)[(nrow(res)+1):nrow(res2)] <-
-##                                      rownames(gtn2)[which(!(rownames(gtn2) %in% rownames(res)))]
+##                                      rownames(gtn2)[which(!(rownames(gtn2)
+##                                      %in% rownames(res)))]
 ##                 res2 <- res2[order(rownames(res2)), order(colnames(res2))]
 ##                 res <- res2
 ##             }
@@ -253,7 +257,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##                                          length(unique(colnames(reddata))))
 ##             for (k in 1:length(unique(colnames(reddata)))) {
 ##                 reddata2[, k] <- as.vector(reddata[, which(colnames(reddata) %in%
-##                                                                unique(colnames(reddata))[k])])
+##                                                      unique(colnames(reddata))[k])])
 ##             }
 ##             colnames(reddata2) <- unique(colnames(reddata))
 
@@ -349,9 +353,10 @@ m <- rbind(c(1,1), c(2,2), c(3,4))
 
 layout(m)
 
-timeframe <- as.data.frame(cbind(data.frame(epiNEM = time[1,,]),
-                                 data.frame(BNEM = time[2,,]), data.frame(NEM = time[3,,]),
-                                 data.frame(Cor = time[4,,]), data.frame(MI = time[5,,])))
+timeframe <- as.data.frame(
+    cbind(data.frame(epiNEM = time[1,,]),
+          data.frame(BNEM = time[2,,]), data.frame(NEM = time[3,,]),
+          data.frame(Cor = time[4,,]), data.frame(MI = time[5,,])))
 
 colnames(timeframe) <- rep(noiselvls, 5)
 
@@ -362,9 +367,10 @@ abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
      tick = F, pos = -25)
 
-accframe2 <- as.data.frame(cbind(data.frame(epiNEM = acc2[1,,]),
-                                 data.frame(BNEM = acc2[2,,]), data.frame(NEM = acc2[3,,]),
-                                 data.frame(Cor = acc2[4,,]), data.frame(MI = acc2[5,,])))
+accframe2 <- as.data.frame(
+    cbind(data.frame(epiNEM = acc2[1,,]),
+          data.frame(BNEM = acc2[2,,]), data.frame(NEM = acc2[3,,]),
+          data.frame(Cor = acc2[4,,]), data.frame(MI = acc2[5,,])))
 
 colnames(accframe2) <- rep(noiselvls, 5)
 
@@ -434,7 +440,6 @@ heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
 options(warn=0)
 
 ## ----Holstege---------------------------------------------------------------------------
-
 file <-
     "http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt"
 
@@ -501,7 +506,8 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 ##         if (j %in% doubles.singles) { next() }
 
 ##         dataTmp <- dataBin[, grep(paste(
-##              paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"), colnames(dataBin))]
+##              paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"),
+##                                                               colnames(dataBin))]
 
 ##         if (path %in% "fixed_set") {
 ##             dataTmp <- dataTmp[egenes, ]
@@ -715,8 +721,8 @@ heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution",
           xrot = 45, bordercol = "transparent")
 
 ## ----Sameith et al., 2015---------------------------------------------------------------
-file <-
-    "http://www.holstegelab.nl/publications/GSTF_geneticinteractions/downloads/del_mutants_limma.txt"
+file <- paste("http://www.holstegelab.nl/publications/GSTF_geneticinteractions/",
+              "downloads/del_mutants_limma.txt", sep = "")
 
 data <- read.delim(file)
 
@@ -915,12 +921,15 @@ for (i in 1:length(doubles)) {
                 ylab = "likelihood", xlab = "ranked single knockouts",
                 ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2),
                 xlim = c(1, thetop+(thetop/100)),
-                main = paste(tolower(unlist(strsplit(doubles[i], "\\."))), collapse = " and "))
+                main = paste(tolower(unlist(strsplit(doubles[i], "\\."))),
+                             collapse = " and "))
     text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
-                labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3, offset = 0)
+                labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3,
+                offset = 0)
     mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
     legend = legend(legendx, p2max,
-                    legend = labeltext, col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)  
+                    legend = labeltext, col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
+                    cex = 0.7)  
     
 }
 
@@ -995,31 +1004,33 @@ string.scores <- list()
 
 string.names <- character()
 
-for (i in 1:ncol(llmat)) {
+## for (i in 1:ncol(llmat)) {
 
-    if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
-        top30 <- llmat[, i]
-        top30[which(top30 == 0)] <- -Inf
-        top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30,decreasing = T)[1:min(30, sum(!(llmat[, i]
-            %in% c(0,-Inf))))]]
+##     if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
+##         top30 <- llmat[, i]
+##         top30[which(top30 == 0)] <- -Inf
+##         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+##         top30 <- top30[order(top30,decreasing = T)[1:min(30, sum(!(llmat[, i]
+##             %in% c(0,-Inf))))]]
 
-        doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+##         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
-        for (j in names(top30)) {
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-            string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-            string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
-        }
+##         for (j in names(top30)) {
+##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+##             string.scores <- c(string.scores, tmp$combined_score)
+##             string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+##             string.scores <- c(string.scores, tmp$combined_score)
+##             string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+##         }
         
-    } else {
-        next()
-    }
+##     } else {
+##         next()
+##     }
 
-}
+## }
+
+data(wageningen_string)
 
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag)
                                                                      , "\\.")))))
@@ -1055,31 +1066,33 @@ string.scores <- list()
 
 string.names <- character()
 
-for (i in 1:ncol(llmat)) {
+## for (i in 1:ncol(llmat)) {
 
-    if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
-        top30 <- llmat[, i]
-        top30[which(top30 == 0)] <- -Inf
-        top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i]
-            %in% c(0,-Inf))))]]
+##     if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
+##         top30 <- llmat[, i]
+##         top30[which(top30 == 0)] <- -Inf
+##         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+##         top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i]
+##             %in% c(0,-Inf))))]]
 
-        doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+##         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
-        for (j in names(top30)) {
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-            string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-            string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
-        }
+##         for (j in names(top30)) {
+##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+##             string.scores <- c(string.scores, tmp$combined_score)
+##             string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+##             string.scores <- c(string.scores, tmp$combined_score)
+##             string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+##         }
         
-    } else {
-        next()
-    }
+##     } else {
+##         next()
+##     }
 
-}
+## }
+
+data(sameith_string)
 
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin)
                                                                     , "\\.")))))
