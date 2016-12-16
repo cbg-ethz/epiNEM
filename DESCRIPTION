@@ -10,8 +10,8 @@ Depends:
 License: GPL-3
 Encoding: UTF-8
 LazyData: true
-biocViews: Software, signaling, pathways, networks, graphs, hyper
+biocViews: Software, Pathways, Signaling, Networks, Graphs
 RoxygenNote: 5.0.1
-Imports: BoolNet, e1071, knitr, igraph
+Imports: BoolNet, e1071, gtools, knitr, igraph
 VignetteBuilder: knitr
 Suggests: knitr

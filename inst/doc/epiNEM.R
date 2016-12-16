@@ -27,7 +27,8 @@ runs <- 100
 
 noiselvls <- c(0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
 
-random <- list(FPrate = 0.1, FNrate = noiselvls, single = 4, double = 1, reporters = 100, replicates = 3)
+random <- list(FPrate = 0.1, FNrate = noiselvls,
+               single = 4, double = 1, reporters = 100, replicates = 3)
 
 spec <- sens  <- logics <- array(0, dim = c(2, runs, length(noiselvls)))
 
@@ -69,7 +70,8 @@ edgenr <- matrix(0, runs, length(noiselvls))
 
 ##         extTopology <- ExtendTopology(topology$model, random$reporters)
 
-##         sortedData <- GenerateData(topology$model, extTopology, random$FPrate, random$FNrate[j], random$replicates)
+##         sortedData <- GenerateData(topology$model, extTopology, 
+##                                    random$FPrate, random$FNrate[j], random$replicates)
 
 ##         logicgate[i, j] <- paste(topology$logics, collapse = "_")
 
@@ -79,7 +81,8 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##             print("epiNEM")
 
 ##             start <- Sys.time()
-##             TriplModel <- epiNEM(filename = sortedData, method = epinemsearch, nIterations = nIterations)
+##             TriplModel <- epiNEM(filename = sortedData,
+##                       method = epinemsearch, nIterations = nIterations)
 ##             time[1, i, j] <- difftime(Sys.time(), start, units = "secs")
 ##             print(time[1, i, j])
 
@@ -105,7 +108,8 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##                     }
 ##                 }
 ##             }
-##             logics[1, i, j] <- tp/(length(topology$logics) + length(TriplModel$logics) - tp)
+##             logics[1, i, j] <- tp/(length(topology$logics) +
+##                                       length(TriplModel$logics) - tp)
 ##             print(sens[1, i, j])
 ##             print(spec[1, i, j])
 ##             print(sens2[1, i, j])
@@ -126,13 +130,16 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##             fc[bnemnoise, 1] <- 0
             
 ##             ers <- t(topology$model)*(-1)
-##             colnames(ers) <- paste("S_vs_S_", gsub("\\.", "_", colnames(ers)), sep = "")
+##             colnames(ers) <- paste("S_vs_S_",
+##                                  gsub("\\.", "_", colnames(ers)), sep = "")
 ##             ers <- cbind(Ctrl_vs_S = 1, ers)
 ##             ers <- ers[, order(colnames(ers))]
 
-##             CNOlist <- dummyCNOlist(stimuli = "S", inhibitors = LETTERS[1:random$single], maxStim = 1, maxInhibit = 2, signals = LETTERS[1:random$single])
+##             CNOlist <- dummyCNOlist(stimuli = "S", inhibitors = LETTERS[1:random$single],
+##                                maxStim = 1, maxInhibit = 2, signals = LETTERS[1:random$single])
 
-##             parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.", colnames(sortedData))], "\\.")))
+##             parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.",
+##                                colnames(sortedData))], "\\.")))
 
 ##             nodes <- unique(colnames(sortedData)[-grep("\\.", colnames(sortedData))])
 
@@ -140,7 +147,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 
 ##             sifMatrix <- NULL
 ##             for (k in LETTERS[1:random$single]) {
-##                sifMatrix <- rbind(sifMatrix, c("S", "1", k))#, c("S", "-1", k)) # bnem can set a prior because epiNEM does that too
+##                sifMatrix <- rbind(sifMatrix, c("S", "1", k))#, c("S", "-1", k))
 ##                 for (l in LETTERS[1:random$single]) {
 ##                     if (k %in% l) { next() }
 ##                     if (k %in% parents) {
@@ -176,7 +183,8 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##             time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
 ##             print(time[2, i, j])
 
-##             ers2 <- computeFc(CNOlist, t(simulateStatesRecursive(CNOlist, model, bga$bString)))
+##             ers2 <- computeFc(CNOlist, t(simulateStatesRecursive(CNOlist,
+##                                                                  model, bga$bString)))
 ##             ers2 <- ers2[, unique(colnames(fc))]
 ##             ers2 <- ers2[, order(colnames(ers2))]
 
@@ -193,7 +201,8 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##             gtn2 <- gtn2[order(rownames(gtn2)), order(colnames(gtn2))]
 ##             res <- abs(dnf2adj(bga$graph))
 ##             if (length(grep("S", rownames(res))) > 0) {
-##                 res <- as.matrix(res[-grep("S", rownames(res)), -grep("S", colnames(res))])
+##                 res <- as.matrix(res[-grep("S", rownames(res)),
+##                                                     -grep("S", colnames(res))])
 ##             }
 ##             if (dim(res)[1] == 1) {
 ##                 colnames(res) <- rownames(res) <- gsub(".*=", "", bga$graph)
@@ -201,9 +210,12 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##                 res <- res[order(rownames(res)), order(colnames(res))]
 ##             }
 ##             if (nrow(res) < nrow(gtn2)) {
-##                 res2 <- rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))), matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
-##                 colnames(res2)[(ncol(res)+1):ncol(res2)] <- colnames(gtn2)[which(!(colnames(gtn2) %in% colnames(res)))]
-##                 rownames(res2)[(nrow(res)+1):nrow(res2)] <- rownames(gtn2)[which(!(rownames(gtn2) %in% rownames(res)))]
+##                 res2 <- rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
+##                               matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
+##                 colnames(res2)[(ncol(res)+1):ncol(res2)] <-
+##                                      colnames(gtn2)[which(!(colnames(gtn2) %in% colnames(res)))]
+##                 rownames(res2)[(nrow(res)+1):nrow(res2)] <-
+##                                      rownames(gtn2)[which(!(rownames(gtn2) %in% rownames(res)))]
 ##                 res2 <- res2[order(rownames(res2)), order(colnames(res2))]
 ##                 res <- res2
 ##             }
@@ -215,7 +227,7 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ##             sens2[2, i, j] <- tp/(tp+fn)
 ##             spec2[2, i, j] <- tn/(tn+fp)
 ##             tp <- sum(bga$graph %in% gtn)
-##             logics[2, i, j] <- tp/(length(gtn) + length(bga$graph) - tp) # (tp/(tp+fn) + tn/(tn+fp))/2
+##             logics[2, i, j] <- tp/(length(gtn) + length(bga$graph) - tp)
 ##             print(sens[2, i, j])
 ##             print(spec[2, i, j])
 ##             print(sens2[2, i, j])
@@ -231,14 +243,17 @@ edgenr <- matrix(0, runs, length(noiselvls))
 
 ##             reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
 ##             gtnadj <- topology$origModel
-##             gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = T), order(apply(gtnadj, 2, sum), decreasing = F)]
+##             gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = T),
+##                                         order(apply(gtnadj, 2, sum), decreasing = F)]
 ##             gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
 ##             gtnadj <- gtnadj[order(rownames(gtnadj)), order(colnames(gtnadj))]
 ##             eadj <- topology$origModel
 ##             eadj <- eadj[order(rownames(eadj)), order(colnames(eadj))]
-##             reddata2 <- matrix(0, nrow(reddata)*random$replicates, length(unique(colnames(reddata))))
+##             reddata2 <- matrix(0, nrow(reddata)*random$replicates,
+##                                          length(unique(colnames(reddata))))
 ##             for (k in 1:length(unique(colnames(reddata)))) {
-##                 reddata2[, k] <- as.vector(reddata[, which(colnames(reddata) %in% unique(colnames(reddata))[k])])
+##                 reddata2[, k] <- as.vector(reddata[, which(colnames(reddata) %in%
+##                                                                unique(colnames(reddata))[k])])
 ##             }
 ##             colnames(reddata2) <- unique(colnames(reddata))
 
@@ -322,7 +337,9 @@ edgenr <- matrix(0, runs, length(noiselvls))
 ## ----simplot, fig.width=8, fig.height=8, out.width='0.95\\linewidth'--------------------
 data(sim)
 
-colvec <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)), rep("darkgreen", length(noiselvls)), rep("brown", length(noiselvls)), rep("darkgrey", length(noiselvls)))
+colvec <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)),
+            rep("darkgreen", length(noiselvls)), rep("brown", length(noiselvls)),
+            rep("darkgrey", length(noiselvls)))
 
 acc <- (sens + spec)/2
 
@@ -332,64 +349,96 @@ m <- rbind(c(1,1), c(2,2), c(3,4))
 
 layout(m)
 
-timeframe <- as.data.frame(cbind(data.frame(epiNEM = time[1,,]), data.frame(BNEM = time[2,,]), data.frame(NEM = time[3,,]), data.frame(Cor = time[4,,]), data.frame(MI = time[5,,])))
+timeframe <- as.data.frame(cbind(data.frame(epiNEM = time[1,,]),
+                                 data.frame(BNEM = time[2,,]), data.frame(NEM = time[3,,]),
+                                 data.frame(Cor = time[4,,]), data.frame(MI = time[5,,])))
 
-colnames(timeframe) <- rep(noiselvls, 5) # c(paste(rep("epi", length(noiselvls)), noiselvls, sep = "_"), paste(rep("B", length(noiselvls)), noiselvls, sep = "_"), paste(rep("N", length(noiselvls)), noiselvls, sep = "_"), paste(rep("P", length(noiselvls)), noiselvls, sep = "_"), paste(rep("A", length(noiselvls)), noiselvls, sep = "_"))
+colnames(timeframe) <- rep(noiselvls, 5)
 
 boxplot(timeframe, col = colvec, main = "running time", ylab = "seconds")
 
 abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"), tick = F, pos = -25)
+axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+     tick = F, pos = -25)
 
-accframe2 <- as.data.frame(cbind(data.frame(epiNEM = acc2[1,,]), data.frame(BNEM = acc2[2,,]), data.frame(NEM = acc2[3,,]), data.frame(Cor = acc2[4,,]), data.frame(MI = acc2[5,,])))
+accframe2 <- as.data.frame(cbind(data.frame(epiNEM = acc2[1,,]),
+                                 data.frame(BNEM = acc2[2,,]), data.frame(NEM = acc2[3,,]),
+                                 data.frame(Cor = acc2[4,,]), data.frame(MI = acc2[5,,])))
 
-colnames(accframe2) <- rep(noiselvls, 5) # c(paste(rep("E", length(noiselvls)), noiselvls, sep = "_"), paste(rep("B", length(noiselvls)), noiselvls, sep = "_"), paste(rep("N", length(noiselvls)), noiselvls, sep = "_"), paste(rep("P", length(noiselvls)), noiselvls, sep = "_"),  paste(rep("A", length(noiselvls)), noiselvls, sep = "_"))
+colnames(accframe2) <- rep(noiselvls, 5)
 
 boxplot(accframe2, col = colvec, main = "accuracy of the inferred edges", ylim = c(0,1))
 
 abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"), tick = F, pos = -0.2)
+axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+     tick = F, pos = -0.2)
 
 ## logical nems:
 
 colvec2 <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)))
 
-logicsframe <- as.data.frame(cbind(data.frame(epiNEM = logics[1,,]), data.frame(BNEM = logics[2,,])))
+logicsframe <- as.data.frame(cbind(data.frame(epiNEM = logics[1,,]),
+                                   data.frame(BNEM = logics[2,,])))
 
-colnames(logicsframe) <- rep(noiselvls, 2) # c(paste(rep("E", length(noiselvls)), noiselvls, sep = "_"), paste(rep("B", length(noiselvls)), noiselvls, sep = "_"))
+colnames(logicsframe) <- rep(noiselvls, 2)
 
-boxplot(logicsframe, col = colvec2, main = "accuracy of the inferred logic gate", ylim = c(0,1))
-
-abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
-
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"), tick = F, pos = -0.2)
-
-accframe <- as.data.frame(cbind(data.frame(epiNEM = acc[1,,]), data.frame(BNEM = acc[2,,])))
-
-colnames(accframe) <- rep(noiselvls, 2) # c(paste(rep("E", length(noiselvls)), noiselvls, sep = "_"), paste(rep("B", length(noiselvls)), noiselvls, sep = "_"))
-
-boxplot(accframe, col = colvec2, main = "accuracy of the inferred expected data", ylim = c(0,1)) # what does madeline call that?
+boxplot(logicsframe, col = colvec2, main = "accuracy of the inferred logic gate",
+        ylim = c(0,1))
 
 abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"), tick = F, pos = -0.2)
+axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+     tick = F, pos = -0.2)
+
+accframe <- as.data.frame(cbind(data.frame(epiNEM = acc[1,,]),
+                                data.frame(BNEM = acc[2,,])))
+
+colnames(accframe) <- rep(noiselvls, 2)
+
+boxplot(accframe, col = colvec2, main = "accuracy of the inferred expected data",
+        ylim = c(0,1))
+
+abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
+
+axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+     tick = F, pos = -0.2)
 
 ## ----legendplot, fig.width=3, fig.height=3, out.width='0.24\\linewidth'-----------------
 options(warn=-1)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "OR", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "AND", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "XOR", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3, dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F, main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "OR", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "AND", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "XOR", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+          main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
 options(warn=0)
 
 ## ----Holstege---------------------------------------------------------------------------
-data <- read.delim("http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt")
+
+file <-
+    "http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt"
+
+data <- read.delim(file)
 
 dataM <- data[-(1:2), (1+(1:(324/2))*2)]
 
@@ -445,12 +494,14 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 ##     if (which(doubles %in% i) == 8) { next() }
 ##     print(i)
 ##     doubles.singles <- unlist(strsplit(i, "\\."))
-##     egenes <- which(apply(dataBin[, which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
+##     egenes <- which(apply(dataBin[, which(colnames(dataBin) %in%
+##             c(i, doubles.singles))], 1, max) == 1)
 ##     for (j in singles) {
 ##         print(j)
 ##         if (j %in% doubles.singles) { next() }
 
-##         dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"), colnames(dataBin))]
+##         dataTmp <- dataBin[, grep(paste(
+##              paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"), colnames(dataBin))]
 
 ##         if (path %in% "fixed_set") {
 ##             dataTmp <- dataTmp[egenes, ]
@@ -516,8 +567,6 @@ logicmat0 <- wageningen$logic
 
 for (i in 1:length(doubles)) {
     
-    #if (!(doubles[i] %in% c("ark1.prk1", "prk1.ark1", "ptp2.ptp3", "ptp3.ptp2", "bck1.ptp3", "ptp3.bck1", "slt2.ptp3", "ptp3.slt2", "dun1.pph3", "pph3.dun1", "elm1.mih1", "mih1.elm1", "rim11.snf1", "snf1.rim11"))) { next() }
-    
     if (i %in% 8) { next() }
 
     logicvec <- logicmat0[, i]
@@ -568,7 +617,8 @@ for (i in 1:length(doubles)) {
 
         donames <- 30 - sum(is.na(llvec[1:30]) == T)
 
-        if (any(is.na(llvec[1:30]) == T)) { margin2 <- margin*2 } else { margin2 <- margin }
+        if (any(is.na(llvec[1:30]) == T)) { margin2 <- margin*2
+        } else { margin2 <- margin }
         
         llvec[which(is.na(llvec) == T)] <- min(llvec, na.rm = T) - margin
         
@@ -586,14 +636,6 @@ for (i in 1:length(doubles)) {
         
     }
     
-    ## par = par(mfrow=c(1,2))
-    ## plot = plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin*0.2), xlim = c(1, 32), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
-    ## text = text((1:30)+0.5, llvec[1:30]+(margin*offset), labels = c(names(llvec)[1:donames], rep("", 30 - donames)), cex = 0.6, srt = 45, pos = 3, offset = 0)
-    ## plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
-    ## legend = legend(length(llvec[-(1:30)]), p2max,
-    ##                 legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
-    ## axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
-    
     mark <- ""
     thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
     legendx <- length(llvec[1:thetop])
@@ -601,13 +643,21 @@ for (i in 1:length(doubles)) {
     if (p2max == min(llvec[1:thetop])) {
         p2max <- p2max+margin*0.2
     }
+    legendtext <- c("AND", "OR", "XOR", paste(parents[1]," masks ", parents[2], sep = ""),
+                    paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis")
     if (thetop == 0) { next() }
-    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2), xlim = c(1, thetop+(thetop/100)), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
-    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset), labels = names(llvec)[1:thetop], cex = 0.6, srt = 45, pos = 3, offset = 0)
+    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop],
+                ylab = "likelihood", xlab = "ranked single knockouts",
+                ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2),
+                xlim = c(1, thetop+(thetop/100)),
+                main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
+                labels = names(llvec)[1:thetop], cex = 0.6, srt = 45, pos = 3,
+                offset = 0)
     mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
-                                        #text2 = text(-10/thetop, p2max+(margin*0.2), labels = mark, cex = 5, pos = 3, offset = 0),
     legend = legend(legendx, p2max,
-                    legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis"), col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)
+                    legend = legendtext,
+                    col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)
     
 }
 
@@ -624,10 +674,12 @@ for (i in 1:ncol(distmat)) {
 
     genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
     
-    distmat[which(distmat[, i] %in% paste(genes[1], " masks the effect of ", genes[2], sep = "")), i] <- 4
+    distmat[which(distmat[, i] %in%
+                  paste(genes[1], " masks the effect of ", genes[2], sep = "")), i] <- 4
 
     
-    distmat[which(distmat[, i] %in% paste(genes[2], " masks the effect of ", genes[1], sep = "")), i] <- 5
+    distmat[which(distmat[, i] %in%
+                  paste(genes[2], " masks the effect of ", genes[1], sep = "")), i] <- 5
 
 }
 
@@ -649,10 +701,24 @@ y[which(y == 5)] <- 4
 
 rownames(distmat) <- NULL
 
-heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0, cexCol = 0.4, aspect = "fill", colorkey = list(space = "right", labels = rev(c("", "no information\n\n\n", "no epistasis\n\n\n", "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")), width = 1, at = seq(1.5,7.5, length.out = 8)), xlab = "double knock-outs", ylab = "modulators\n(different order for each pair)", xrot = 45, bordercol = "transparent")#, sub = "AND (1), OR (2), XOR (3), masking (4,5), no epistasis (6), no information (7)", clusterx = y, dendrogram = "both")
+labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n","masking (NOT B)\n\n\n",
+              "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
+
+heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution",
+          sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8),
+          cexRow = 0, cexCol = 0.4, aspect = "fill",
+          colorkey = list(space = "right",
+                          labels = rev(labeltext), width = 1,
+                          at = seq(1.5,7.5, length.out = 8)),
+          xlab = "double knock-outs",
+          ylab = "modulators\n(different order for each pair)",
+          xrot = 45, bordercol = "transparent")
 
 ## ----Sameith et al., 2015---------------------------------------------------------------
-data <- read.delim("http://www.holstegelab.nl/publications/GSTF_geneticinteractions/downloads/del_mutants_limma.txt")
+file <-
+    "http://www.holstegelab.nl/publications/GSTF_geneticinteractions/downloads/del_mutants_limma.txt"
+
+data <- read.delim(file)
 
 data <- apply(data, c(1,2), as.character)
 
@@ -699,12 +765,14 @@ globalgenes <- which(apply(dataBin, 1, max) == 1)
 ## for (i in doubles[set]) {
 ##     print(i)
 ##     doubles.singles <- unlist(strsplit(i, "\\."))
-##     egenes <- which(apply(dataBin[, which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
+##     egenes <- which(apply(dataBin[,
+##                 which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
 ##     for (j in singles) {
 ##         print(j)
 ##         if (j %in% doubles.singles) { next() }
 
-##         dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"), colnames(dataBin))]
+##         dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep
+##                     = ""), collapse = "|"), colnames(dataBin))]
 
 ##         if (path %in% "fixed_set") {
 ##             dataTmp <- dataTmp[egenes, ]
@@ -806,15 +874,14 @@ for (i in 1:length(doubles)) {
         
         llvec[which(is.infinite(llvec) == T)] <- NA
         
-        ## llvec[which(is.infinite(llvec) == T)] <- min(llvec) - 100
-        
         margin <- abs(max(llvec[1:30], na.rm = T) - min(llvec[1:30], na.rm = T))
 
         if (margin == 0) { margin <- 10 }
 
         donames <- 30 - sum(is.na(llvec[1:30]) == T)
 
-        if (any(is.na(llvec[1:30]) == T)) { margin2 <- margin*2 } else { margin2 <- margin }
+        if (any(is.na(llvec[1:30]) == T)) { margin2 <- margin*2
+        } else { margin2 <- margin }
         
         llvec[which(is.na(llvec) == T)] <- min(llvec, na.rm = T) - margin
         
@@ -832,17 +899,11 @@ for (i in 1:length(doubles)) {
         
     }
     
-    ## par = par(mfrow=c(1,2))
-    ## plot = plot(llvec[1:30], pch = pchvec[1:30], col = colvec[1:30], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:30]), max(llvec[1:30])+margin*0.2), xlim = c(1, 32), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
-    ## text = text((1:30)+0.5, llvec[1:30]+(margin*0.075), labels = c(names(llvec)[1:donames], rep("", 30 - donames)), cex = 0.6, srt = 45, pos = 3, offset = 0)
-    ## plot2 = plot(llvec[-(1:30)], pch = pchvec[-(1:30)], col = colvec[-(1:30)], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[-(1:30)]), p2max), main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "), xaxt = "n")
-    ## legend = legend(length(llvec[-(1:30)]), p2max,
-    ##                 legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis", "no information"), col = 1:7, pch = 1:7, xjust = 1, yjust = 1, cex = 0.8)
-    ## axis = axis(1, at = 1:length(llvec[-(1:30)]), labels = 31:length(llvec))
+    labeltext <- c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""),
+                   paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis")
 
     mark <- ""
     pointx <- 10000
-    ## if (doubles[i] %in% "GAT1.GZF3") { pointx <- 6 }
     thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
     legendx <- length(llvec[1:thetop])
     p2max <- max(llvec[1:thetop])
@@ -850,13 +911,16 @@ for (i in 1:length(doubles)) {
         p2max <- p2max+margin*0.2
     }
     if (thetop == 0) { next() }
-    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop], ylab = "likelihood", xlab = "ranked single knockouts", ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2), xlim = c(1, thetop+(thetop/100)), main = paste(tolower(unlist(strsplit(doubles[i], "\\."))), collapse = " and "))
-    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset), labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3, offset = 0)
-    ## arrows(pointx, llvec[6]+(margin*offset*6), pointx, llvec[6]+(margin*offset*2), length = 0.1, col = "darkred"), 
+    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop],
+                ylab = "likelihood", xlab = "ranked single knockouts",
+                ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2),
+                xlim = c(1, thetop+(thetop/100)),
+                main = paste(tolower(unlist(strsplit(doubles[i], "\\."))), collapse = " and "))
+    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
+                labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3, offset = 0)
     mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
-                                        #text2 = text(-10/thetop, p2max+(margin*0.2), labels = mark, cex = 5, pos = 3, offset = 0),
     legend = legend(legendx, p2max,
-                    legend = c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""), paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis"), col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)  
+                    legend = labeltext, col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)  
     
 }
 
@@ -873,10 +937,12 @@ for (i in 1:ncol(distmat)) {
 
     genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
     
-    distmat[which(distmat[, i] %in% paste(genes[1], " masks the effect of ", genes[2], sep = "")), i] <- 4
+    distmat[which(distmat[, i] %in% paste(genes[1], " masks the effect of ",
+                                          genes[2], sep = "")), i] <- 4
 
     
-    distmat[which(distmat[, i] %in% paste(genes[2], " masks the effect of ", genes[1], sep = "")), i] <- 5
+    distmat[which(distmat[, i] %in% paste(genes[2], " masks the effect of ",
+                                          genes[1], sep = "")), i] <- 5
 
 }
 
@@ -898,7 +964,18 @@ y[which(y == 5)] <- 4
 
 rownames(distmat) <- NULL
 
-heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0, cexCol = 0.4, aspect = "fill", colorkey = list(space = "right", labels = rev(c("", "no information\n\n\n", "no epistasis\n\n\n", "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")), width = 1, at = seq(1.5,7.5, length.out = 8)), xlab = "double knock-outs", ylab = "modulators\n(different order for each pair)", xrot = 45, bordercol = "transparent")#, sub = "AND (1), OR (2), XOR (3), masking (4,5), no epistasis (6), no information (7)", clusterx = y, dendrogram = "both")
+labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
+               "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n",
+               "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
+
+heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "",
+          col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0,
+          cexCol = 0.4, aspect = "fill",
+          colorkey = list(space = "right", labels = rev(labeltext), width = 1,
+                          at = seq(1.5,7.5, length.out = 8)),
+          xlab = "double knock-outs",
+          ylab = "modulators\n(different order for each pair)",
+          xrot = 45, bordercol = "transparent")
 
 ## ----bothstring, fig.width=10, fig.height=5, out.width='0.95\\linewidth'----------------
 par(mfrow=c(1,2))
@@ -907,7 +984,8 @@ library(STRINGdb)
 
 get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
 
-string_db <- STRINGdb$new( version="10", species=4932, score_threshold=0, input_directory="~/")
+string_db <- STRINGdb$new( version="10", species=4932, score_threshold=0,
+                          input_directory="~/")
 
 llmat <- wageningen$ll
 
@@ -923,7 +1001,8 @@ for (i in 1:ncol(llmat)) {
         top30 <- llmat[, i]
         top30[which(top30 == 0)] <- -Inf
         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i] %in% c(0,-Inf))))]]
+        top30 <- top30[order(top30,decreasing = T)[1:min(30, sum(!(llmat[, i]
+            %in% c(0,-Inf))))]]
 
         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
@@ -942,7 +1021,8 @@ for (i in 1:ncol(llmat)) {
 
 }
 
-tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag), "\\.")))))
+tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag)
+                                                                     , "\\.")))))
 
 stsc <- unlist(string.scores)
 
@@ -958,7 +1038,10 @@ for (i in 100:1) {
 
 }
 
-plot(density(stsc), col = "#00000000", ylim = c(0, max(c(max(density(stsc)$y), max(density(unlist(tmp$combined_score))$y)))), main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "", cex.main = 1.5)
+plot(density(stsc), col = "#00000000",
+     ylim = c(0, max(c(max(density(stsc)$y),max(density(unlist(tmp$combined_score))$y)))),
+     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+     cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
 
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
@@ -978,7 +1061,8 @@ for (i in 1:ncol(llmat)) {
         top30 <- llmat[, i]
         top30[which(top30 == 0)] <- -Inf
         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i] %in% c(0,-Inf))))]]
+        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i]
+            %in% c(0,-Inf))))]]
 
         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
@@ -997,7 +1081,8 @@ for (i in 1:ncol(llmat)) {
 
 }
 
-tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin), "\\.")))))
+tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin)
+                                                                    , "\\.")))))
 
 stsc <- unlist(string.scores)
 
@@ -1013,7 +1098,10 @@ for (i in 100:1) {
 
 }
 
-plot(density(stsc), col = "#00000000", ylim = c(0, max(c(max(density(stsc)$y), max(density(unlist(tmp$combined_score))$y)))), main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "", cex.main = 1.5)
+plot(density(stsc), col = "#00000000",
+     ylim = c(0, max(c(max(density(stsc)$y), max(density(unlist(tmp$combined_score))$y)))),
+     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+     cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
 
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
