@@ -26,15 +26,19 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
 #' @export
 #' @examples
-#' Phi <- matrix(sample(c(0,1), 9, replace = T), 3, 3)
-#' data <- matrix(sample(c(0,1), 3*10, replace = T), 10, 3)
+#' Phi <- matrix(sample(c(0,1), 9, replace = TRUE), 3, 3)
+#' data <- matrix(sample(c(0,1), 3*10, replace = TRUE), 10, 3)
 #' rownames(Phi) <- colnames(Phi) <- colnames(data) <- c("Ikk1", "Ikk2", "RelA")
 #' score <- MLL(Phi, D1 <- data, D0 <- 1 - data)
 MLL <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
                                         # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
                                         # complementary data matrix D0
                                         # Function adapted from NEM package
-    Phi2 <- as.matrix(Phi$model)
+    if (is.matrix(Phi)) {
+        Phi2 <- Phi
+    } else {
+        Phi2 <- as.matrix(Phi$model)
+    }
     Phi2 <- Phi2[colnames(D1), ]
     L    <- para[1]^(D1 %*% (1 - Phi2)) * (1 - para[1])^(D0 %*% (1 - Phi2)) *
                                                             (1 - para[2])^(D1 %*% Phi2) * para[2]^(D0 %*% Phi2)
@@ -127,8 +131,8 @@ getStarters <- function(mutants, experiments){
 #' @importFrom BoolNet getPathToAttractor
 #' @export
 #' @examples
-#' model <- CreateTopology(3, 1)
-#' extModel <- createExtendedAdjacency(model, rownames(model$model), colnames(model$model))
+#' data(cellcycle)
+#' extModel <- createExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
 createExtendedAdjacency <- function(network, mutants, experiments){
     starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
     rownames(starters) <- mutants

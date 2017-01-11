@@ -18,7 +18,7 @@ extend adjacency matrices taking cycles and logics into account. For every given
 is computed yu using BoolNet.
 }
 \examples{
-model <- CreateTopology(3, 1)
-extModel <- createExtendedAdjacency(model, rownames(model$model), colnames(model$model))
+data(cellcycle)
+extModel <- createExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
 }
 

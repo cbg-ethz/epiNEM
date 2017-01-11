@@ -4,7 +4,7 @@
 #' @export
 #' @examples
 #' model <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
-#' model2 <- AddLogicGates("RelB", "OR", model)
+#' model2 <- AddLogicGates("RelA", "OR", model)
 AddLogicGates <- function(child, logic, model) {
   #Extends model with a node representing a logic gate for plotting
   parents <- names(which(model[,child]==1))
