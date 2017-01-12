@@ -1062,9 +1062,9 @@ llmat <- sameith$ll
 
 logicmat <- sameith$logic
 
-string.scores <- list()
+string.scores2 <- list()
 
-string.names <- character()
+string.names2 <- character()
 
 ## for (i in 1:ncol(llmat)) {
 
@@ -1079,11 +1079,11 @@ string.names <- character()
 
 ##         for (j in names(top30)) {
 ##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-##             string.scores <- c(string.scores, tmp$combined_score)
-##             string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+##             string.scores2 <- c(string.scores2, tmp$combined_score)
+##             string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)), collapse = "_"))
 ##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-##             string.scores <- c(string.scores, tmp$combined_score)
-##             string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+##             string.scores2 <- c(string.scores2, tmp$combined_score)
+##             string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)), collapse = "_"))
 ##         }
         
 ##     } else {
@@ -1097,7 +1097,7 @@ data(sameith_string)
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin)
                                                                     , "\\.")))))
 
-stsc <- unlist(string.scores)
+stsc <- unlist(string.scores2)
 
 denspval <- wilcox.test(stsc, unlist(tmp$combined_score), alternative = "greater")$p.value
 

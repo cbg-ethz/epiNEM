@@ -180,29 +180,16 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 
 ###--- HELPER FUNCTIONS ---###
 
-#' @noRd
+#' Extending topology of normal "nem"
+#' @param topology: model of a topology from CreateTopology
+#' @param nReporters: number of effects reporters
+#' @author Madeline Diekmann
+#' @seealso CreateTopology
 #' @export
-CreateTopology <- function(single, double) {
-                                        # Returns the adjacency matrix of a randomly generated pathway topology
-    extendedModels <- list()
-    singleKOs <- LETTERS[1:single]
-    experiments <- singleKOs
-    doubleKOs <- lapply(1:double, function(d) GenerateDoubleKO(singleKOs))
-    doubleKOs <- unlist(unique(doubleKOs))
-    mutants   <- sort(c(singleKOs, doubleKOs))
-
-    while (length(extendedModels)==0){
-        startModel   <- CreateRandomGraph(singleKOs)
-        extendedModels <- includeLogic(startModel, experiments, mutants)
-                                        #extendedModels <- unlist(extendedModels, recursive=FALSE)
-    }
-    selectedModel <- sample(1:length(extendedModels), 1)
-    topology      <- extendedModels[[selectedModel]]
-    return(topology)
-}
-
-#' @noRd
-#' @export
+#' @examples
+#' topology <- CreateTopology(3, 2, force = TRUE)
+#' topology <- unlist(unique(topology), recursive = FALSE)
+#' extTopology <- ExtendTopology(topology$model, 100)
 ExtendTopology <- function(topology, nReporters) {
                                         # Returns an extended topology in which reporters are linked to pathway genes.
                                         # The reporter genes are uniformly distributed over the pathway genes.
@@ -217,8 +204,20 @@ ExtendTopology <- function(topology, nReporters) {
     return(extTopology)
 }
 
-#' @noRd
+#' Generate data from extended model
+#' @param model model of a topology from CreateTopology
+#' @param extTopology extended topology
+#' @param FPrate false positive rate
+#' @param FNrate false negative rate
+#' @param replicates number of replicates
+#' @author Madeline Diekmann
+#' @seealso CreateTopology
 #' @export
+#' @examples
+#' topology <- CreateTopology(3, 2, force = forcelogic)
+#' topology <- unlist(unique(topology), recursive = FALSE)
+#' extTopology <- ExtendTopology(topology$model, 100)
+#' sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
 GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
                                         # Returns an artificial noisy data matrix
     perfectData <- extTopology %*% t(model)
@@ -232,7 +231,6 @@ GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
 }
 
 #' @noRd
-#' @export
 IsBestModel <- function(thisModel, bestModel) {
                                         # Returns whether or not thisModel equals bestModel
     if (any(dim(thisModel) != dim(bestModel))) return(FALSE)
@@ -240,8 +238,16 @@ IsBestModel <- function(thisModel, bestModel) {
     return(TRUE)
 }
 
-#' @noRd
+#' Convert epiNEM model into general Boolean graph
+#' @param t full epiNEM model
+#' @author Madeline Diekmann
+#' @seealso CreateTopology
 #' @export
+#' @examples
+#' topology <- CreateTopology(3, 2, force = forcelogic)
+#' topology <- unlist(unique(topology), recursive = FALSE)
+#' extTopology <- ExtendTopology(topology$model, 100)
+#' b <- epi2bg(extTopology)
 epi2bg <- function(t) {
     adj2dnf <- function(A) {
 

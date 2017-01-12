@@ -292,7 +292,6 @@ includeLogic <- function(adj, experiments, mutants){
 ## to do: sehr unschoen!!!
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
-#' @export
 #' @noRd
 getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
                                         #creates file read by boolNet
@@ -305,7 +304,6 @@ getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, exp
 }
 
 #' @noRd
-#' @export
 AttachEGenes <- function(posterior, experiments){
     maxpost <- lapply(1:nrow(posterior), function(x) length(which(posterior[x,]==max(posterior[x,]))))
     attachedEs <- matrix()
@@ -453,7 +451,6 @@ CreateTopology <- function(single, double, force = T) {
 #' generate a random double mutant for artificial data
 #' @param singleKOs: vector of single mutants
 #' @importFrom gtools combinations
-#' @export
 #' @noRd
 GenerateDoubleKO <- function(d, singleKOs) {
     allDoubles    <- combinations(length(singleKOs), 2, singleKOs)
@@ -463,93 +460,6 @@ GenerateDoubleKO <- function(d, singleKOs) {
 }
 
 #' @noRd
-#' @export
-epiNEM.Simulations <- function(random, nSim){
-    count <- rep(0, length(random$FNrate))
-    log <- rep(0, length(random$FNrate))
-    errorLOG <- list(0)
-    errorCOR1 <- list(0)
-    errorCOR2 <- list(0)
-    errorCOR3 <- list(0)
-    errorMUT1 <- list(0)
-    errorMUT2 <- list(0)
-    errorNEM <- list(0)
-    good <- c()
-    avgErrorLOG <- list()
-    avgErrorMUT1 <- list()
-    avgErrorMUT2 <- list()
-    avgErrorCOR1 <- list()
-    avgErrorCOR2 <- list()
-    avgErrorCOR3 <- list()
-    avgErrorNEM <- list()
-    for (j in 1:length(random$FNrate)){
-        for(i in 1:nSim){
-            topology <- CreateTopology(random$single, random$double)
-            topology <- unlist(unique(topology), recursive=FALSE)
-            extTopology <- ExtendTopology(topology$model, random$reporters)
-            sortedData  <- GenerateData(topology$model, extTopology, random$FPrate,
-                                        random$FNrate[j], random$replicates)
-            ##LogicNEM
-                                        #       scoreTrip1 <- sapply(tripl12, MLL, sortedData, 1-sortedData)
-                                        #       mll=unlist(scoreTrip1["mLL",])
-                                        #       index <- which.max(mll)
-                                        #       TriplModel <- tripl12[index]
-            TriplModel <- LogicNEM(sortedData, method = "exhaustive")
-                                        #       if (all.equal(TriplModel[[1]], topology)==TRUE){
-                                        #         count[j]=count[j]+1
-                                        #         good[count]=TriplModel[[1]]$logics
-                                        #         errorLOG[[1]][i]=0
-                                        #         log[j]=log[j]+1
-                                        #      } else {
-            if (TriplModel$logics==topology$logics){
-                log[j]=log[j]+1
-            }
-            errorLOG[[1]][i]=sum(1-(as.numeric(topology$origModel==TriplModel$origModel)))
-                                        #}
-            ##Correlation
-            cori <- cor(sortedData[,1:3])
-            diag(cori) <- 0
-            cori1 <- cori
-            cori2 <- cori
-            cori3 <- cori
-            cori1[cori1>abs(0.2)] <- 1
-            cori2[cori2>abs(0.5)] <- 1
-            cori3[cori3>abs(0.8)] <- 1
-            errorCOR1[[1]][i] <- sum(1-(as.numeric(topology$origModel==cori1)))/2
-            errorCOR2[[1]][i] <- sum(1-(as.numeric(topology$origModel==cori2)))/2
-            errorCOR3[[1]][i] <- sum(1-(as.numeric(topology$origModel==cori3)))/2
-            ## Mutual Information
-            mut <- minet(sortedData[,1:3], method="mrnet", estimator="spearman", disc="none", nbins=sqrt(NROW(dataset)))
-            mut1 <- mut
-            mut2 <- mut
-            mut1[mut1>0.5] <- 1
-            mut2[mut2>0.8] <- 1
-            errorMUT1[[1]][i] <- sum(1-(as.numeric(topology$origModel==mut1)))/2
-            errorMUT2[[1]][i]=sum(1-(as.numeric(topology$origModel==mut2)))/2
-
-                                        #classic NEM
-            nemi <- nem(sortedData, inference = "search")
-            nemi <- igraph.from.graphNEL(nemi$graph)
-            nemi <- as.matrix(get.adjacency(nemi))
-            nemi <- nemi[which(rownames(nemi) %in% c("A", "B", "C")),which(colnames(nemi) %in% c("A", "B", "C"))]
-            errorNEM[[1]][i] <- sum(1-(as.numeric(topology$origModel==nemi)))
-
-        }
-        avgErrorLOG <- c(avgErrorLOG, errorLOG)
-        avgErrorCOR1 <- c(avgErrorCOR1, errorCOR1)
-        avgErrorCOR2 <- c(avgErrorCOR2, errorCOR2)
-        avgErrorCOR3 <- c(avgErrorCOR3, errorCOR3)
-        avgErrorMUT1 <- c(avgErrorMUT1, errorMUT1)
-        avgErrorMUT2 <- c(avgErrorMUT2, errorMUT2)
-        avgErrorNEM <- c(avgErrorNEM, errorNEM)
-    }
-    return(list(count = count, errorCOR02 = avgErrorCOR1, errorCOR05 = avgErrorCOR2, errorCOR08 = avgErrorCOR3,
-                errorMUT05 = avgErrorMUT1, errorMUT08 = avgErrorMUT2, errorNEM = avgErrorNEM, errorLOG=avgErrorLOG, logs=log))
-                                        #, LogicNEM=avgErrorLOG, MutualInfo=avgErrorMUT, Correlation=avgErrorCOR, alpha=alpha))#, log=log))#, modTip=modTip, modTop=modTop))
-}
-
-#' @noRd
-#' @export
 getGeneName <- function(symbol){
     name <- as.character(unlist(xx[which(xx==symbol)], recursive=FALSE))
     if (length(name)==0){
