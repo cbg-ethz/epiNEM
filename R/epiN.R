@@ -12,6 +12,47 @@
 #' @source \url{http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt}
                                         # "epiNEMdata"
 
+#' Example data: simulation results
+#' 
+#' Contains simulation results
+#' 
+#' @docType data
+#' @examples 
+#' data(sim)
+#' @name sim
+NA
+
+#' Example data: epiNEM results for the Sameith et al., 2015 knock-out screen
+#' 
+#' @docType data
+#' @examples 
+#' data(sameith_res)
+#' @name sameith_res
+NA
+
+#' Example data: epiNEM results for the Wageningen et al., 2010 knock-out screen
+#' 
+#' @docType data
+#' @examples 
+#' data(wageningen_res)
+#' @name wageningen_res
+NA
+
+#' Example data: string db interactions of interactions identified by epiNEM for the Sameith et al., 2010 knock-out screen
+#' 
+#' @docType data
+#' @examples 
+#' data(sameith_string)
+#' @name sameith_string
+NA
+
+#' Example data: string db interactions of interactions identified by epiNEM for the Wageningen et al., 2010 knock-out screen
+#' 
+#' @docType data
+#' @examples 
+#' data(wageningen_string)
+#' @name wageningen_string
+NA
 
 ###--- MAIN SCRIPT ---###
 #' Epistatic NEMs - main function

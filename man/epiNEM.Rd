@@ -2,17 +2,7 @@
 % Please edit documentation in R/epiN.R
 \name{epiNEM}
 \alias{epiNEM}
-\title{A binary effect matrix for a given set of knockouts.}
-\format{A binary matrix with 2274 rows and 5 variables:
-\describe{
-  \item{row}{knockouts, E-Genes}
-  \item{column}{S-Genes}
-  ...
-}}
-\source{
-\url{http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt}
-Epistatic NEMs - main function
-}
+\title{Epistatic NEMs - main function}
 \usage{
 epiNEM(filename = "random", method = "greedy", nIterations = 10,
   nModels = 0, random = list(single = 4, double = 1, reporters = 100, FPrate
@@ -39,8 +29,7 @@ FP-rate, FN-rate, no. of replicates}
 \item{para}{false positive and false negative rates}
 }
 \description{
-A publicly availiable example data set for demonstrating the use of the epiNEM package.
-For data preprocessing steps please check vignette.
+Epistatic NEMs - main function
 }
 \examples{
 res <- epiNEM()
