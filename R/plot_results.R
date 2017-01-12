@@ -2,6 +2,9 @@
 
 #' extend model with node representing logic gate
 #' @export
+#' @param child define the child
+#' @param logic define the logical gate
+#' @param model normal model
 #' @examples
 #' model <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
 #' model2 <- AddLogicGates("RelA", "OR", model)
@@ -25,7 +28,7 @@ AddLogicGates <- function(child, logic, model) {
 
 #' Plots the winning pathway structure
 #' @importFrom igraph graph.adjacency plot.igraph
-#' @param LogiNEM object created by LogicNEM
+#' @param results object created by epiNEM
 #' @export
 #' @examples
 #' res <- epiNEM()

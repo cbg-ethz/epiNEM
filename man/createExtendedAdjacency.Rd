@@ -7,11 +7,11 @@
 createExtendedAdjacency(network, mutants, experiments)
 }
 \arguments{
-\item{network:}{network created by BoolNet from file}
+\item{network}{network created by BoolNet from file}
 
-\item{mutants:}{vector of single knockouts}
+\item{mutants}{vector of single knockouts}
 
-\item{experiments:}{vector of all knockouts}
+\item{experiments}{vector of all knockouts}
 }
 \description{
 extend adjacency matrices taking cycles and logics into account. For every given start state, the final state

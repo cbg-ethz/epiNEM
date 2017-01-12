@@ -31,6 +31,12 @@ Default: random; artificial data is generated according to 'random' specificatio
 
 \item{random}{list specifying how the data should be generated: no. of single mutants, no. of double mutants, no. of reporterGenes,
 FP-rate, FN-rate, no. of replicates}
+
+\item{plotsy}{atm not used}
+
+\item{ltype}{likelihood either "marginal" or "maximum"}
+
+\item{para}{false positive and false negative rates}
 }
 \description{
 A publicly availiable example data set for demonstrating the use of the epiNEM package.

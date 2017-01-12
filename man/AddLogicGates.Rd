@@ -6,6 +6,13 @@
 \usage{
 AddLogicGates(child, logic, model)
 }
+\arguments{
+\item{child}{define the child}
+
+\item{logic}{define the logical gate}
+
+\item{model}{normal model}
+}
 \description{
 extend model with node representing logic gate
 }

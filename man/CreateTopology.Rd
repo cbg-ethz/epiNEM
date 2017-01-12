@@ -7,9 +7,11 @@
 CreateTopology(single, double, force = T)
 }
 \arguments{
-\item{single:}{number of single knockouts}
+\item{single}{number of single knockouts}
 
-\item{double:}{number of double knockouts}
+\item{double}{number of double knockouts}
+
+\item{force}{if true the random model will have a sophisticated logical gate}
 }
 \description{
 create topology for a randomly generated pathway topology

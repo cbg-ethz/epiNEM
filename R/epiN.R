@@ -22,6 +22,9 @@
 #' @param nModels number of Models. Default: 0
 #' @param random list specifying how the data should be generated: no. of single mutants, no. of double mutants, no. of reporterGenes,
 #' FP-rate, FN-rate, no. of replicates
+#' @param plotsy atm not used
+#' @param ltype likelihood either "marginal" or "maximum"
+#' @param para false positive and false negative rates
 #' @author Madeline Diekmann
 #' @seealso nem
 #' @export
@@ -181,13 +184,13 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 ###--- HELPER FUNCTIONS ---###
 
 #' Extending topology of normal "nem"
-#' @param topology: model of a topology from CreateTopology
-#' @param nReporters: number of effects reporters
+#' @param topology model of a topology from CreateTopology
+#' @param nReporters number of effects reporters
 #' @author Madeline Diekmann
 #' @seealso CreateTopology
 #' @export
 #' @examples
-#' topology <- CreateTopology(3, 2, force = TRUE)
+#' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
 ExtendTopology <- function(topology, nReporters) {
@@ -214,7 +217,7 @@ ExtendTopology <- function(topology, nReporters) {
 #' @seealso CreateTopology
 #' @export
 #' @examples
-#' topology <- CreateTopology(3, 2, force = forcelogic)
+#' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
 #' sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
@@ -244,7 +247,7 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @seealso CreateTopology
 #' @export
 #' @examples
-#' topology <- CreateTopology(3, 2, force = forcelogic)
+#' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
 #' b <- epi2bg(extTopology)

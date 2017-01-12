@@ -7,9 +7,9 @@
 CreateRandomGraph(pathwayGenes, edgeProb = 0.5)
 }
 \arguments{
-\item{pathwayGenes:}{vector of genes in the pathway}
+\item{pathwayGenes}{vector of genes in the pathway}
 
-\item{edgeProb:}{probability of random edge}
+\item{edgeProb}{probability of random edge}
 }
 \description{
 Returns a model graph with randomly sampled edges. Every possible edge has a probability to exist in the graph.

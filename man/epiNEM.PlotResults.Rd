@@ -7,7 +7,7 @@
 epiNEM.PlotResults(results)
 }
 \arguments{
-\item{LogiNEM}{object created by LogicNEM}
+\item{results}{object created by epiNEM}
 }
 \description{
 Plots the winning pathway structure

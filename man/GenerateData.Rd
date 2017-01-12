@@ -21,7 +21,7 @@ GenerateData(model, extTopology, FPrate, FNrate, replicates)
 Generate data from extended model
 }
 \examples{
-topology <- CreateTopology(3, 2, force = forcelogic)
+topology <- CreateTopology(3, 1, force = TRUE)
 topology <- unlist(unique(topology), recursive = FALSE)
 extTopology <- ExtendTopology(topology$model, 100)
 sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)

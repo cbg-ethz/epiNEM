@@ -7,15 +7,15 @@
 ExtendTopology(topology, nReporters)
 }
 \arguments{
-\item{topology:}{model of a topology from CreateTopology}
+\item{topology}{model of a topology from CreateTopology}
 
-\item{nReporters:}{number of effects reporters}
+\item{nReporters}{number of effects reporters}
 }
 \description{
 Extending topology of normal "nem"
 }
 \examples{
-topology <- CreateTopology(3, 2, force = forcelogic)
+topology <- CreateTopology(3, 1, force = TRUE)
 topology <- unlist(unique(topology), recursive = FALSE)
 extTopology <- ExtendTopology(topology$model, 100)
 }

@@ -2,8 +2,8 @@
 
 #' Create a random graph
 #' @description Returns a model graph with randomly sampled edges. Every possible edge has a probability to exist in the graph.
-#' @param pathwayGenes: vector of genes in the pathway
-#' @param edgeProb: probability of random edge
+#' @param pathwayGenes vector of genes in the pathway
+#' @param edgeProb probability of random edge
 #' @export
 #' @examples
 #' graph <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
@@ -20,9 +20,11 @@ get_col <- function(i, m) ((i-1) %/% nrow(m)) + 1
 get_row <- function(i, m) (i-1) %% nrow(m) + 1
 
 #' Evaluation of graphs
-#' @param Phi: model to be evaluated
-#' @param D1: observed data matrix
-#' @param D0: complementary D1
+#' @param Phi model to be evaluated
+#' @param D1 observed data matrix
+#' @param D0 complementary D1
+#' @param ltype likelihood type either "marginal" or "maximum"
+#' @param para false positive and false negative rates
 #' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
 #' @export
 #' @examples
@@ -125,9 +127,9 @@ getStarters <- function(mutants, experiments){
 #' Create an extended adjacency matrix
 #' @description extend adjacency matrices taking cycles and logics into account. For every given start state, the final state
 #' is computed yu using BoolNet.
-#' @param network: network created by BoolNet from file
-#' @param mutants: vector of single knockouts
-#' @param experiments: vector of all knockouts
+#' @param network network created by BoolNet from file
+#' @param mutants vector of single knockouts
+#' @param experiments vector of all knockouts
 #' @importFrom BoolNet getPathToAttractor
 #' @export
 #' @examples
@@ -397,8 +399,9 @@ AttachEGenes <- function(posterior, experiments){
                                         # }
 
 #' create topology for a randomly generated pathway topology
-#' @param single: number of single knockouts
-#' @param double: number of double knockouts
+#' @param single number of single knockouts
+#' @param double number of double knockouts
+#' @param force if true the random model will have a sophisticated logical gate
 #' @export
 #' @examples
 #' model <- CreateTopology(3, 1)

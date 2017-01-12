@@ -13,7 +13,7 @@ epi2bg(t)
 Convert epiNEM model into general Boolean graph
 }
 \examples{
-topology <- CreateTopology(3, 2, force = forcelogic)
+topology <- CreateTopology(3, 1, force = TRUE)
 topology <- unlist(unique(topology), recursive = FALSE)
 extTopology <- ExtendTopology(topology$model, 100)
 b <- epi2bg(extTopology)

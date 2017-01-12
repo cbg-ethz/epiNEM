@@ -1,20 +1,15 @@
-## ----setup, include=FALSE, cache=FALSE--------------------------------------------------
-library(knitr)
-# set global chunk options
-opts_chunk$set(fig.path='figure/', fig.align='center', fig.show='hold')
-options(formatR.arrow=TRUE,width=90)
+## ---- eval=FALSE---------------------------------------------------------
+#  install.packages("devtools", verbose = F, quiet = T)
+#  
+#  library(devtools)
+#  
+#  install_github("cbg-ethz/epiNEM", quiet = T)
 
-## ----installandload---------------------------------------------------------------------
-## install.packages("devtools", verbose = F, quiet = T)
-
-## library(devtools)
-
-## install_github("cbg-ethz/epiNEM", quiet = T)
-
+## ------------------------------------------------------------------------
 library(epiNEM)
 
-## ----load packages----------------------------------------------------------------------
-library(bnem, quietly = T, verbose = F) #  install_github("MartinFXP/B-NEM/package")
+## ------------------------------------------------------------------------
+library(bnem, quietly = T, verbose = F) # install_github("MartinFXP/B-NEM/package")
 
 library(nem)
 
@@ -22,7 +17,6 @@ library(minet)
 
 library(pcalg)
 
-## ----run simulations--------------------------------------------------------------------
 runs <- 100
 
 noiselvls <- c(0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
@@ -56,289 +50,290 @@ logicgate <- matrix("", runs, length(noiselvls))
 
 edgenr <- matrix(0, runs, length(noiselvls))
 
-## for (i in 1:runs) {
+## ---- eval=FALSE---------------------------------------------------------
+#  for (i in 1:runs) {
+#  
+#      print(paste("run ", i, sep = ""))
+#  
+#      for (j in 1:length(noiselvls)) {
+#  
+#          print(paste("noiselvl ", j, sep = ""))
+#  
+#          topology <- CreateTopology(random$single, random$double, force = forcelogic)
+#  
+#          topology <- unlist(unique(topology), recursive = FALSE)
+#  
+#          extTopology <- ExtendTopology(topology$model, random$reporters)
+#  
+#          sortedData <- GenerateData(topology$model, extTopology,
+#                                     random$FPrate, random$FNrate[j], random$replicates)
+#  
+#          logicgate[i, j] <- paste(topology$logics, collapse = "_")
+#  
+#          edgenr[i, j] <- sum(topology$origModel == 1)
+#  
+#          if ("e" %in% do) {
+#              print("epiNEM")
+#  
+#              start <- Sys.time()
+#              TriplModel <- epiNEM(filename = sortedData,
+#                        method = epinemsearch, nIterations = nIterations)
+#              time[1, i, j] <- difftime(Sys.time(), start, units = "secs")
+#              print(time[1, i, j])
+#  
+#              tp <- sum(topology$model == 1 & TriplModel$model == 1)
+#              tn <- sum(topology$model == 0 & TriplModel$model == 0)
+#              fp <- sum(topology$model == 0 & TriplModel$model == 1)
+#              fn <- sum(topology$model == 1 & TriplModel$model == 0)
+#              sens[1, i, j] <- tp/(tp+fn)
+#              spec[1, i, j] <- tn/(tn+fp)
+#              tp <- sum(topology$origModel == 1 & TriplModel$origModel == 1)
+#              tn <- sum(topology$origModel == 0 & TriplModel$origModel == 0)
+#              fp <- sum(topology$origModel == 0 & TriplModel$origModel == 1)
+#              fn <- sum(topology$origModel == 1 & TriplModel$origModel == 0)
+#              sens2[1, i, j] <- tp/(tp+fn)
+#              spec2[1, i, j] <- tn/(tn+fp)
+#              tp <- 0
+#              for (k in 1:length(topology$column)) {
+#                  for (l in 1:length(TriplModel$column)) {
+#                      if (topology$column[k] == TriplModel$column[l]) {
+#                          if (topology$logics[k] %in% TriplModel$logics[l]) {
+#                              tp <- tp + 1
+#                          }
+#                      }
+#                  }
+#              }
+#              logics[1, i, j] <- tp/(length(topology$logics) +
+#                                        length(TriplModel$logics) - tp)
+#              print(sens[1, i, j])
+#              print(spec[1, i, j])
+#              print(sens2[1, i, j])
+#              print(spec2[1, i, j])
+#              print(logics[1, i, j])
+#  
+#          }
+#  
+#          if ("b" %in% do) {
+#              print("B-NEM")
+#  
+#              gtn <- epi2bg(topology)
+#  
+#              fc <- cbind(Ctrl_vs_S = -1, epi2bg(sortedData))*(-1)
+#  
+#              bnemnoise <- sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
+#  
+#              fc[bnemnoise, 1] <- 0
+#  
+#              ers <- t(topology$model)*(-1)
+#              colnames(ers) <- paste("S_vs_S_",
+#                                   gsub("\\.", "_", colnames(ers)), sep = "")
+#              ers <- cbind(Ctrl_vs_S = 1, ers)
+#              ers <- ers[, order(colnames(ers))]
+#  
+#              CNOlist <- dummyCNOlist(stimuli = "S",
+#                                 inhibitors = LETTERS[1:random$single],
+#                                 maxStim = 1, maxInhibit = 2,
+#                                 signals = LETTERS[1:random$single])
+#  
+#              parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.",
+#                                 colnames(sortedData))], "\\.")))
+#  
+#              nodes <- unique(colnames(sortedData)[-grep("\\.", colnames(sortedData))])
+#  
+#              child <- nodes[-which(nodes %in% parents)]
+#  
+#              sifMatrix <- NULL
+#              for (k in LETTERS[1:random$single]) {
+#                 sifMatrix <- rbind(sifMatrix, c("S", "1", k))#, c("S", "-1", k))
+#                  for (l in LETTERS[1:random$single]) {
+#                      if (k %in% l) { next() }
+#                      if (k %in% parents) {
+#                          sifMatrix <- rbind(sifMatrix, c(k, "1", l), c(k, "-1", l))
+#                      } else {
+#                          sifMatrix <- rbind(sifMatrix, c(k, "1", l))
+#                      }
+#  
+#              randfile <- paste("pkn_", as.numeric(Sys.time()), sep = "")
+#              write.table(sifMatrix, file = randfile, sep = "\t",
+#                          row.names = FALSE, col.names = FALSE, quote = FALSE)
+#              PKN <- readSIF(randfile)
+#              unlink(randfile)
+#  
+#              model <- preprocessing(CNOlist, PKN)
+#  
+#              initBstring <- absorption(rep(1, length(model$reacID)), model)
+#  
+#              if (maxTime) { maxTime2 <- time[1, i, j] } else { maxTime2 <- Inf }
+#  
+#              start <- Sys.time()
+#              bga <- bnem(search = bnemsearch,
+#                          fc=fc,
+#                          CNOlist=CNOlist,
+#                          model=model,
+#                          initBstring=initBstring,
+#                          draw = F,
+#                          verbose = F,
+#                          popSize = popSize,
+#                          maxTime = maxTime2,
+#                          parallel = parallel
+#                          )
+#              time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
+#              print(time[2, i, j])
+#  
+#              ers2 <- computeFc(CNOlist, t(simulateStatesRecursive(CNOlist,
+#                                                                   model, bga$bString)))
+#              ers2 <- ers2[, unique(colnames(fc))]
+#              ers2 <- ers2[, order(colnames(ers2))]
+#  
+#              tp <- sum(ers == -1 & ers2 == -1)
+#              tn <- sum(ers == 0 & ers2 == 0)
+#              fn <- sum(ers == -1 & ers2 == 0)
+#              fp <- sum(ers == 0 & ers2 == -1)
+#              sens[2, i, j] <- tp/(tp+fn)
+#              spec[2, i, j] <- tn/(tn+fp)
+#              gtn2 <- abs(dnf2adj(gtn))
+#              if (length(grep("S", rownames(gtn2))) > 0) {
+#                  gtn2 <- gtn2[-grep("S", rownames(gtn2)), -grep("S", colnames(gtn2))]
+#              }
+#              gtn2 <- gtn2[order(rownames(gtn2)), order(colnames(gtn2))]
+#              res <- abs(dnf2adj(bga$graph))
+#              if (length(grep("S", rownames(res))) > 0) {
+#                  res <- as.matrix(res[-grep("S", rownames(res)),
+#                                                      -grep("S", colnames(res))])
+#              }
+#              if (dim(res)[1] == 1) {
+#                  colnames(res) <- rownames(res) <- gsub(".*=", "", bga$graph)
+#              } else {
+#                  res <- res[order(rownames(res)), order(colnames(res))]
+#              }
+#              if (nrow(res) < nrow(gtn2)) {
+#                  res2 <- rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
+#                                matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
+#                  colnames(res2)[(ncol(res)+1):ncol(res2)] <-
+#                                       colnames(gtn2)[which(!(colnames(gtn2)
+#                                       %in% colnames(res)))]
+#                  rownames(res2)[(nrow(res)+1):nrow(res2)] <-
+#                                       rownames(gtn2)[which(!(rownames(gtn2)
+#                                       %in% rownames(res)))]
+#                  res2 <- res2[order(rownames(res2)), order(colnames(res2))]
+#                  res <- res2
+#              }
+#              diag(gtn2) <- diag(res) <- 0
+#              tp <- sum(gtn2 == 1 & res == 1)
+#              tn <- sum(gtn2 == 0 & res == 0)
+#              fn <- sum(gtn2 == 1 & res == 0)
+#              fp <- sum(gtn2 == 0 & res == 1)
+#              sens2[2, i, j] <- tp/(tp+fn)
+#              spec2[2, i, j] <- tn/(tn+fp)
+#              tp <- sum(bga$graph %in% gtn)
+#              logics[2, i, j] <- tp/(length(gtn) + length(bga$graph) - tp)
+#              print(sens[2, i, j])
+#              print(spec[2, i, j])
+#              print(sens2[2, i, j])
+#              print(spec2[2, i, j])
+#              print(logics[2, i, j])
+#  
+#              print(bga$graph)
+#              print(gtn)
+#  
+#          }
+#  
+#          if (any(c("n", "p", "a") %in% do)) {
+#  
+#              reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
+#              gtnadj <- topology$origModel
+#              gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = T),
+#                                          order(apply(gtnadj, 2, sum), decreasing = F)]
+#              gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
+#              gtnadj <- gtnadj[order(rownames(gtnadj)), order(colnames(gtnadj))]
+#              eadj <- topology$origModel
+#              eadj <- eadj[order(rownames(eadj)), order(colnames(eadj))]
+#              reddata2 <- matrix(0, nrow(reddata)*random$replicates,
+#                                           length(unique(colnames(reddata))))
+#              for (k in 1:length(unique(colnames(reddata)))) {
+#                  reddata2[, k] <- as.vector(reddata[, which(colnames(reddata) %in%
+#                                                       unique(colnames(reddata))[k])])
+#              }
+#              colnames(reddata2) <- unique(colnames(reddata))
+#  
+#          }
+#  
+#          if ("n" %in% do) {
+#              print("NEM")
+#  
+#              start <- Sys.time()
+#              if (epinemsearch %in% "greedy") {
+#                  nemres <- nem(reddata, inference = "nem.greedy")
+#              } else {
+#                  nemres <- nem(reddata, inference = "search")
+#              }
+#              nadj <- transitive.reduction(graph2adj(nemres$graph))
+#              time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
+#              print(time[3, i, j])
+#  
+#              tp <- sum(eadj  == 1 & nadj == 1)
+#              tn <- sum(eadj == 0 & nadj == 0)
+#              fp <- sum(eadj == 0 & nadj == 1)
+#              fn <- sum(eadj == 1 & nadj == 0)
+#              sens2[3, i, j] <- tp/(tp+fn)
+#              spec2[3, i, j] <- tn/(tn+fp)
+#              print(sens2[3, i, j])
+#              print(spec2[3, i, j])
+#  
+#          }
+#  
+#          if ("p" %in% do) {
+#              print("PCalg")
+#  
+#              start <- Sys.time()
+#              pc.fit <- pc(suffStat = list(C = cor(reddata2), n = nrow(reddata2)),
+#                    indepTest = gaussCItest, ## indep.test: partial correlations
+#                    alpha=0.05, labels = colnames(reddata2), verbose = F)
+#              pcadj <- graph2adj(pc.fit@graph)
+#              time[4, i, j] <- difftime(Sys.time(), start, units = "secs")
+#              print(time[4, i, j])
+#  
+#              tp <- sum(gtnadj == 1 & pcadj == 1)
+#              tn <- sum(gtnadj  == 0 & pcadj == 0)
+#              fp <- sum(gtnadj == 0 & pcadj == 1)
+#              fn <- sum(gtnadj == 1 & pcadj == 0)
+#              sens2[4, i, j] <- tp/(tp+fn)
+#              spec2[4, i, j] <- tn/(tn+fp)
+#              print(sens2[4, i, j])
+#              print(spec2[4, i, j])
+#  
+#          }
+#  
+#          if ("a" %in% do) {
+#              print("Aracne")
+#  
+#              start <- Sys.time()
+#              ares <- build.mim(reddata2)
+#              ares <- aracne(ares)
+#              ares <- disc(ares, 0)
+#              ares <- ares[order(rownames(ares)), order(colnames(ares))]
+#              nas <- which(is.na(ares) == T)
+#              ares[nas] <- 0
+#              diag(ares) <- 0
+#              time[5, i, j] <- difftime(Sys.time(), start, units = "secs")
+#              print(time[5, i, j])
+#  
+#              tp <- sum(gtnadj == 1 & ares == 1)
+#              tn <- sum(gtnadj == 0 & ares == 0)
+#              fp <- sum(gtnadj == 0 & ares == 1)
+#              fn <- sum(gtnadj == 1 & ares == 0)
+#              sens2[5, i, j] <- tp/(tp+fn)
+#              spec2[5, i, j] <- tn/(tn+fp)
+#              print(sens2[5, i, j])
+#              print(spec2[5, i, j])
+#  
+#          }
+#  
+#      }
+#  
+#  }
 
-##     print(paste("run ", i, sep = ""))
-
-##     for (j in 1:length(noiselvls)) {
-
-##         print(paste("noiselvl ", j, sep = ""))
-        
-##         topology <- CreateTopology(random$single, random$double, force = forcelogic)
-
-##         topology <- unlist(unique(topology), recursive = FALSE)
-
-##         extTopology <- ExtendTopology(topology$model, random$reporters)
-
-##         sortedData <- GenerateData(topology$model, extTopology, 
-##                                    random$FPrate, random$FNrate[j], random$replicates)
-
-##         logicgate[i, j] <- paste(topology$logics, collapse = "_")
-
-##         edgenr[i, j] <- sum(topology$origModel == 1)
-
-##         if ("e" %in% do) {
-##             print("epiNEM")
-
-##             start <- Sys.time()
-##             TriplModel <- epiNEM(filename = sortedData,
-##                       method = epinemsearch, nIterations = nIterations)
-##             time[1, i, j] <- difftime(Sys.time(), start, units = "secs")
-##             print(time[1, i, j])
-
-##             tp <- sum(topology$model == 1 & TriplModel$model == 1)
-##             tn <- sum(topology$model == 0 & TriplModel$model == 0)
-##             fp <- sum(topology$model == 0 & TriplModel$model == 1)
-##             fn <- sum(topology$model == 1 & TriplModel$model == 0)
-##             sens[1, i, j] <- tp/(tp+fn)
-##             spec[1, i, j] <- tn/(tn+fp)
-##             tp <- sum(topology$origModel == 1 & TriplModel$origModel == 1)
-##             tn <- sum(topology$origModel == 0 & TriplModel$origModel == 0)
-##             fp <- sum(topology$origModel == 0 & TriplModel$origModel == 1)
-##             fn <- sum(topology$origModel == 1 & TriplModel$origModel == 0)
-##             sens2[1, i, j] <- tp/(tp+fn)
-##             spec2[1, i, j] <- tn/(tn+fp)
-##             tp <- 0
-##             for (k in 1:length(topology$column)) {
-##                 for (l in 1:length(TriplModel$column)) {
-##                     if (topology$column[k] == TriplModel$column[l]) {
-##                         if (topology$logics[k] %in% TriplModel$logics[l]) {
-##                             tp <- tp + 1
-##                         }
-##                     }
-##                 }
-##             }
-##             logics[1, i, j] <- tp/(length(topology$logics) +
-##                                       length(TriplModel$logics) - tp)
-##             print(sens[1, i, j])
-##             print(spec[1, i, j])
-##             print(sens2[1, i, j])
-##             print(spec2[1, i, j])
-##             print(logics[1, i, j])    
-
-##         }
-
-##         if ("b" %in% do) {
-##             print("B-NEM")
-
-##             gtn <- epi2bg(topology)
-
-##             fc <- cbind(Ctrl_vs_S = -1, epi2bg(sortedData))*(-1)
-
-##             bnemnoise <- sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
-            
-##             fc[bnemnoise, 1] <- 0
-            
-##             ers <- t(topology$model)*(-1)
-##             colnames(ers) <- paste("S_vs_S_",
-##                                  gsub("\\.", "_", colnames(ers)), sep = "")
-##             ers <- cbind(Ctrl_vs_S = 1, ers)
-##             ers <- ers[, order(colnames(ers))]
-
-##             CNOlist <- dummyCNOlist(stimuli = "S",
-##                                inhibitors = LETTERS[1:random$single],
-##                                maxStim = 1, maxInhibit = 2,
-##                                signals = LETTERS[1:random$single])
-
-##             parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.",
-##                                colnames(sortedData))], "\\.")))
-
-##             nodes <- unique(colnames(sortedData)[-grep("\\.", colnames(sortedData))])
-
-##             child <- nodes[-which(nodes %in% parents)]
-
-##             sifMatrix <- NULL
-##             for (k in LETTERS[1:random$single]) {
-##                sifMatrix <- rbind(sifMatrix, c("S", "1", k))#, c("S", "-1", k))
-##                 for (l in LETTERS[1:random$single]) {
-##                     if (k %in% l) { next() }
-##                     if (k %in% parents) {
-##                         sifMatrix <- rbind(sifMatrix, c(k, "1", l), c(k, "-1", l))
-##                     } else {
-##                         sifMatrix <- rbind(sifMatrix, c(k, "1", l))
-##                     }
-                
-##             randfile <- paste("pkn_", as.numeric(Sys.time()), sep = "")
-##             write.table(sifMatrix, file = randfile, sep = "\t",
-##                         row.names = FALSE, col.names = FALSE, quote = FALSE)
-##             PKN <- readSIF(randfile)
-##             unlink(randfile)
-
-##             model <- preprocessing(CNOlist, PKN)
-
-##             initBstring <- absorption(rep(1, length(model$reacID)), model)
-
-##             if (maxTime) { maxTime2 <- time[1, i, j] } else { maxTime2 <- Inf }
-
-##             start <- Sys.time()
-##             bga <- bnem(search = bnemsearch,
-##                         fc=fc,
-##                         CNOlist=CNOlist,
-##                         model=model,
-##                         initBstring=initBstring,
-##                         draw = F,
-##                         verbose = F,
-##                         popSize = popSize,
-##                         maxTime = maxTime2,
-##                         parallel = parallel
-##                         )
-##             time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
-##             print(time[2, i, j])
-
-##             ers2 <- computeFc(CNOlist, t(simulateStatesRecursive(CNOlist,
-##                                                                  model, bga$bString)))
-##             ers2 <- ers2[, unique(colnames(fc))]
-##             ers2 <- ers2[, order(colnames(ers2))]
-
-##             tp <- sum(ers == -1 & ers2 == -1)
-##             tn <- sum(ers == 0 & ers2 == 0)
-##             fn <- sum(ers == -1 & ers2 == 0)
-##             fp <- sum(ers == 0 & ers2 == -1)
-##             sens[2, i, j] <- tp/(tp+fn)
-##             spec[2, i, j] <- tn/(tn+fp)
-##             gtn2 <- abs(dnf2adj(gtn))
-##             if (length(grep("S", rownames(gtn2))) > 0) {
-##                 gtn2 <- gtn2[-grep("S", rownames(gtn2)), -grep("S", colnames(gtn2))]
-##             }
-##             gtn2 <- gtn2[order(rownames(gtn2)), order(colnames(gtn2))]
-##             res <- abs(dnf2adj(bga$graph))
-##             if (length(grep("S", rownames(res))) > 0) {
-##                 res <- as.matrix(res[-grep("S", rownames(res)),
-##                                                     -grep("S", colnames(res))])
-##             }
-##             if (dim(res)[1] == 1) {
-##                 colnames(res) <- rownames(res) <- gsub(".*=", "", bga$graph)
-##             } else {
-##                 res <- res[order(rownames(res)), order(colnames(res))]
-##             }
-##             if (nrow(res) < nrow(gtn2)) {
-##                 res2 <- rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
-##                               matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
-##                 colnames(res2)[(ncol(res)+1):ncol(res2)] <-
-##                                      colnames(gtn2)[which(!(colnames(gtn2)
-##                                      %in% colnames(res)))]
-##                 rownames(res2)[(nrow(res)+1):nrow(res2)] <-
-##                                      rownames(gtn2)[which(!(rownames(gtn2)
-##                                      %in% rownames(res)))]
-##                 res2 <- res2[order(rownames(res2)), order(colnames(res2))]
-##                 res <- res2
-##             }
-##             diag(gtn2) <- diag(res) <- 0
-##             tp <- sum(gtn2 == 1 & res == 1)
-##             tn <- sum(gtn2 == 0 & res == 0)
-##             fn <- sum(gtn2 == 1 & res == 0)
-##             fp <- sum(gtn2 == 0 & res == 1)
-##             sens2[2, i, j] <- tp/(tp+fn)
-##             spec2[2, i, j] <- tn/(tn+fp)
-##             tp <- sum(bga$graph %in% gtn)
-##             logics[2, i, j] <- tp/(length(gtn) + length(bga$graph) - tp)
-##             print(sens[2, i, j])
-##             print(spec[2, i, j])
-##             print(sens2[2, i, j])
-##             print(spec2[2, i, j])
-##             print(logics[2, i, j])
-
-##             print(bga$graph)
-##             print(gtn)
-
-##         }
-
-##         if (any(c("n", "p", "a") %in% do)) {
-
-##             reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
-##             gtnadj <- topology$origModel
-##             gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = T),
-##                                         order(apply(gtnadj, 2, sum), decreasing = F)]
-##             gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
-##             gtnadj <- gtnadj[order(rownames(gtnadj)), order(colnames(gtnadj))]
-##             eadj <- topology$origModel
-##             eadj <- eadj[order(rownames(eadj)), order(colnames(eadj))]
-##             reddata2 <- matrix(0, nrow(reddata)*random$replicates,
-##                                          length(unique(colnames(reddata))))
-##             for (k in 1:length(unique(colnames(reddata)))) {
-##                 reddata2[, k] <- as.vector(reddata[, which(colnames(reddata) %in%
-##                                                      unique(colnames(reddata))[k])])
-##             }
-##             colnames(reddata2) <- unique(colnames(reddata))
-
-##         }
-
-##         if ("n" %in% do) {
-##             print("NEM")
-
-##             start <- Sys.time()
-##             if (epinemsearch %in% "greedy") {
-##                 nemres <- nem(reddata, inference = "nem.greedy")
-##             } else {
-##                 nemres <- nem(reddata, inference = "search")
-##             }
-##             nadj <- transitive.reduction(graph2adj(nemres$graph))
-##             time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
-##             print(time[3, i, j])
-
-##             tp <- sum(eadj  == 1 & nadj == 1)
-##             tn <- sum(eadj == 0 & nadj == 0)
-##             fp <- sum(eadj == 0 & nadj == 1)
-##             fn <- sum(eadj == 1 & nadj == 0)
-##             sens2[3, i, j] <- tp/(tp+fn)
-##             spec2[3, i, j] <- tn/(tn+fp)
-##             print(sens2[3, i, j])
-##             print(spec2[3, i, j])
-
-##         }
-
-##         if ("p" %in% do) {
-##             print("PCalg")
-
-##             start <- Sys.time()
-##             pc.fit <- pc(suffStat = list(C = cor(reddata2), n = nrow(reddata2)),
-##                   indepTest = gaussCItest, ## indep.test: partial correlations
-##                   alpha=0.05, labels = colnames(reddata2), verbose = F)
-##             pcadj <- graph2adj(pc.fit@graph)
-##             time[4, i, j] <- difftime(Sys.time(), start, units = "secs")
-##             print(time[4, i, j])
-
-##             tp <- sum(gtnadj == 1 & pcadj == 1)
-##             tn <- sum(gtnadj  == 0 & pcadj == 0)
-##             fp <- sum(gtnadj == 0 & pcadj == 1)
-##             fn <- sum(gtnadj == 1 & pcadj == 0)
-##             sens2[4, i, j] <- tp/(tp+fn)
-##             spec2[4, i, j] <- tn/(tn+fp)
-##             print(sens2[4, i, j])
-##             print(spec2[4, i, j])
-
-##         }
-
-##         if ("a" %in% do) {
-##             print("Aracne")
-
-##             start <- Sys.time()
-##             ares <- build.mim(reddata2)
-##             ares <- aracne(ares)
-##             ares <- disc(ares, 0)
-##             ares <- ares[order(rownames(ares)), order(colnames(ares))]
-##             nas <- which(is.na(ares) == T)
-##             ares[nas] <- 0
-##             diag(ares) <- 0
-##             time[5, i, j] <- difftime(Sys.time(), start, units = "secs")
-##             print(time[5, i, j])
-
-##             tp <- sum(gtnadj == 1 & ares == 1)
-##             tn <- sum(gtnadj == 0 & ares == 0)
-##             fp <- sum(gtnadj == 0 & ares == 1)
-##             fn <- sum(gtnadj == 1 & ares == 0)
-##             sens2[5, i, j] <- tp/(tp+fn)
-##             spec2[5, i, j] <- tn/(tn+fp)
-##             print(sens2[5, i, j])
-##             print(spec2[5, i, j])
-
-##         }
-
-##     }
-
-## }
-
-## ----simplot, fig.width=8, fig.height=8, out.width='0.95\\linewidth'--------------------
+## ---- fig.width = 7, fig.height = 7--------------------------------------
 data(sim)
 
 colvec <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)),
@@ -411,35 +406,41 @@ abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
      tick = F, pos = -0.2)
 
-## ----legendplot, fig.width=3, fig.height=3, out.width='0.24\\linewidth'-----------------
-options(warn=-1)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
+## ---- warning=FALSE, fig.width = 9, fig.height=5-------------------------
+a1 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "OR", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
+a2 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "AND", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
+a3 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
+a4 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
+a5 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "XOR", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
+a6 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
+a7 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
+a8 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
           main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
-options(warn=0)
+print(a5, position = c(0,0, .25, .5), more = TRUE)
+print(a6, position = c(.25,0, .5, .5), more = TRUE)
+print(a7, position = c(.5,0, .75, .5), more = TRUE)
+print(a8, position = c(.75,0, 1, .5), more = TRUE)
+print(a1, position = c(0,.5, .25, 1), more = TRUE)
+print(a2, position = c(.25,.5, .5, 1), more = TRUE)
+print(a3, position = c(.5,.5, .75, 1), more = TRUE)
+print(a4, position = c(.75,.5, 1, 1))
 
-## ----Holstege---------------------------------------------------------------------------
+## ------------------------------------------------------------------------
 file <-
     "http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt"
 
@@ -495,74 +496,75 @@ colnames(llmat) <- colnames(logicmat) <- doubles
 
 globalgenes <- which(apply(dataBin, 1, max) == 1)
 
-## for (i in doubles[set]) {
-##     if (which(doubles %in% i) == 8) { next() }
-##     print(i)
-##     doubles.singles <- unlist(strsplit(i, "\\."))
-##     egenes <- which(apply(dataBin[, which(colnames(dataBin) %in%
-##             c(i, doubles.singles))], 1, max) == 1)
-##     for (j in singles) {
-##         print(j)
-##         if (j %in% doubles.singles) { next() }
+## ---- eval=FALSE---------------------------------------------------------
+#  for (i in doubles) {
+#      if (which(doubles %in% i) == 8) { next() }
+#      print(i)
+#      doubles.singles <- unlist(strsplit(i, "\\."))
+#      egenes <- which(apply(dataBin[, which(colnames(dataBin) %in%
+#              c(i, doubles.singles))], 1, max) == 1)
+#      for (j in singles) {
+#          print(j)
+#          if (j %in% doubles.singles) { next() }
+#  
+#          dataTmp <- dataBin[, grep(paste(
+#               paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"),
+#                                                                colnames(dataBin))]
+#  
+#          if (path %in% "fixed_set") {
+#              dataTmp <- dataTmp[egenes, ]
+#          }
+#          if (path %in% "global") {
+#              dataTmp <- dataTmp[globalgenes, ]
+#          }
+#          if (path %in% "") {
+#              dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
+#          }
+#  
+#          i1 <- which(singles %in% j)
+#          i2 <- which(doubles %in% i)
+#  
+#          if (!(is.null(dim(dataTmp)))) {
+#  
+#              if (any(dataTmp[, j] != 0)) {
+#  
+#                  epires <- epiNEM(dataTmp, method = "exhaustive")
+#  
+#                  tmp <- epires$logics
+#                  if ("OR" %in% tmp) {
+#                      if (sum(epires$origModel[, j]) != 2) {
+#                          tmp <- "NOEPI"
+#                      } else {
+#                          if (all(tmp %in% "OR")) {
+#                              tmp <- "OR"
+#                          } else {
+#                              tmp <- tmp[which(!(tmp %in% "OR"))]
+#                          }
+#                      }
+#                  }
+#  
+#                  logicmat[i1, i2] <- tmp
+#                  llmat[i1, i2] <- epires$score
+#  
+#              } else {
+#  
+#                  logicmat[i1, i2] <- "UNCON"
+#                  llmat[i1, i2] <- -Inf
+#  
+#              }
+#  
+#          } else {
+#  
+#              logicmat[i1, i2] <- "UNCON"
+#              llmat[i1, i2] <- -Inf
+#  
+#          }
+#  
+#      }
+#  
+#  }
 
-##         dataTmp <- dataBin[, grep(paste(
-##              paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"),
-##                                                               colnames(dataBin))]
-
-##         if (path %in% "fixed_set") {
-##             dataTmp <- dataTmp[egenes, ]
-##         }
-##         if (path %in% "global") {
-##             dataTmp <- dataTmp[globalgenes, ]
-##         }
-##         if (path %in% "") {
-##             dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
-##         }
-        
-##         i1 <- which(singles %in% j)
-##         i2 <- which(doubles %in% i)
-
-##         if (!(is.null(dim(dataTmp)))) {
-            
-##             if (any(dataTmp[, j] != 0)) {
-                
-##                 epires <- epiNEM(dataTmp, method = "exhaustive")
-                
-##                 tmp <- epires$logics
-##                 if ("OR" %in% tmp) {
-##                     if (sum(epires$origModel[, j]) != 2) {
-##                         tmp <- "NOEPI"
-##                     } else {
-##                         if (all(tmp %in% "OR")) {
-##                             tmp <- "OR"
-##                         } else {
-##                             tmp <- tmp[which(!(tmp %in% "OR"))]
-##                         }
-##                     }
-##                 }
-                
-##                 logicmat[i1, i2] <- tmp
-##                 llmat[i1, i2] <- epires$score
-                
-##             } else {
-
-##                 logicmat[i1, i2] <- "UNCON"
-##                 llmat[i1, i2] <- -Inf
-                
-##             }
-            
-##         } else {
-            
-##             logicmat[i1, i2] <- "UNCON"
-##             llmat[i1, i2] <- -Inf
-            
-##         }
-        
-##     }
-    
-## }
-
-## ----wagplot, fig.width=10, fig.height=5, out.width='0.95\\linewidth'-------------------
+## ---- fig.width = 8, fig.height = 4--------------------------------------
 palette(c("#4444cc", "#77aa77", "#009933", "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
 data(wageningen_res)
@@ -667,7 +669,6 @@ for (i in 1:length(doubles)) {
     
 }
 
-## ----wagdist, fig.width=10, fig.height=5, out.width='0.95\\linewidth'-------------------
 distmat <- wageningen$logic
 
 distmat[which(distmat %in% "AND")] <- 1
@@ -720,7 +721,7 @@ heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution",
           ylab = "modulators\n(different order for each pair)",
           xrot = 45, bordercol = "transparent")
 
-## ----Sameith et al., 2015---------------------------------------------------------------
+## ------------------------------------------------------------------------
 file <- paste("http://www.holstegelab.nl/publications/GSTF_geneticinteractions/",
               "downloads/del_mutants_limma.txt", sep = "")
 
@@ -768,72 +769,73 @@ colnames(llmat) <- colnames(logicmat) <- doubles
 
 globalgenes <- which(apply(dataBin, 1, max) == 1)
 
-## for (i in doubles[set]) {
-##     print(i)
-##     doubles.singles <- unlist(strsplit(i, "\\."))
-##     egenes <- which(apply(dataBin[,
-##                 which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
-##     for (j in singles) {
-##         print(j)
-##         if (j %in% doubles.singles) { next() }
+## ---- eval=FALSE---------------------------------------------------------
+#  for (i in doubles[set]) {
+#      print(i)
+#      doubles.singles <- unlist(strsplit(i, "\\."))
+#      egenes <- which(apply(dataBin[,
+#                  which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
+#      for (j in singles) {
+#          print(j)
+#          if (j %in% doubles.singles) { next() }
+#  
+#          dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep
+#                      = ""), collapse = "|"), colnames(dataBin))]
+#  
+#          if (path %in% "fixed_set") {
+#              dataTmp <- dataTmp[egenes, ]
+#          }
+#          if (path %in% "global") {
+#              dataTmp <- dataTmp[globalgenes, ]
+#          }
+#          if (path %in% "") {
+#              dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
+#          }
+#  
+#          i1 <- which(singles %in% j)
+#          i2 <- which(doubles %in% i)
+#  
+#          if (!(is.null(dim(dataTmp)))) {
+#  
+#              if (any(dataTmp[, j] != 0)) {
+#  
+#                  epires <- epiNEM(dataTmp, method = "exhaustive")
+#  
+#                  tmp <- epires$logics
+#                  if ("OR" %in% tmp) {
+#                      if (sum(epires$origModel[, j]) != 2) {
+#                          tmp <- "NOEPI"
+#                      } else {
+#                          if (all(tmp %in% "OR")) {
+#                              tmp <- "OR"
+#                          } else {
+#                              tmp <- tmp[which(!(tmp %in% "OR"))]
+#                          }
+#                      }
+#                  }
+#  
+#                  logicmat[i1, i2] <- tmp
+#                  llmat[i1, i2] <- epires$score
+#  
+#              } else {
+#  
+#                  logicmat[i1, i2] <- "UNCON"
+#                  llmat[i1, i2] <- -Inf
+#  
+#              }
+#  
+#          } else {
+#  
+#              logicmat[i1, i2] <- "UNCON"
+#              llmat[i1, i2] <- -Inf
+#  
+#          }
+#  
+#      }
+#  
+#  }
 
-##         dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep
-##                     = ""), collapse = "|"), colnames(dataBin))]
-
-##         if (path %in% "fixed_set") {
-##             dataTmp <- dataTmp[egenes, ]
-##         }
-##         if (path %in% "global") {
-##             dataTmp <- dataTmp[globalgenes, ]
-##         }
-##         if (path %in% "") {
-##             dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
-##         }
-        
-##         i1 <- which(singles %in% j)
-##         i2 <- which(doubles %in% i)
-
-##         if (!(is.null(dim(dataTmp)))) {
-            
-##             if (any(dataTmp[, j] != 0)) {
-                
-##                 epires <- epiNEM(dataTmp, method = "exhaustive")
-                
-##                 tmp <- epires$logics
-##                 if ("OR" %in% tmp) {
-##                     if (sum(epires$origModel[, j]) != 2) {
-##                         tmp <- "NOEPI"
-##                     } else {
-##                         if (all(tmp %in% "OR")) {
-##                             tmp <- "OR"
-##                         } else {
-##                             tmp <- tmp[which(!(tmp %in% "OR"))]
-##                         }
-##                     }
-##                 }
-                
-##                 logicmat[i1, i2] <- tmp
-##                 llmat[i1, i2] <- epires$score
-                
-##             } else {
-
-##                 logicmat[i1, i2] <- "UNCON"
-##                 llmat[i1, i2] <- -Inf
-                
-##             }
-            
-##         } else {
-            
-##             logicmat[i1, i2] <- "UNCON"
-##             llmat[i1, i2] <- -Inf
-            
-##         }
-        
-##     }
-
-## }
-
-## ----samplot, fig.width=10, fig.height=5, out.width='0.95\\linewidth'-------------------
+## ---- fig.width = 8, fig.height = 4--------------------------------------
 data(sameith_res)
 
 llmat0 <- sameith$ll
@@ -933,7 +935,6 @@ for (i in 1:length(doubles)) {
     
 }
 
-## ----samdist, fig.width=10, fig.height=5, out.width='0.95\\linewidth'-------------------
 distmat <- sameith$logic
 
 distmat[which(distmat %in% "AND")] <- 1
@@ -986,7 +987,7 @@ heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "
           ylab = "modulators\n(different order for each pair)",
           xrot = 45, bordercol = "transparent")
 
-## ----bothstring, fig.width=10, fig.height=5, out.width='0.95\\linewidth'----------------
+## ---- fig.width = 8, fig.height = 4--------------------------------------
 par(mfrow=c(1,2))
 
 library(STRINGdb)
@@ -1004,32 +1005,34 @@ string.scores <- list()
 
 string.names <- character()
 
-## for (i in 1:ncol(llmat)) {
+## ---- eval=FALSE---------------------------------------------------------
+#  for (i in 1:ncol(llmat)) {
+#  
+#      if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) {
+#          top30 <- llmat[, i]
+#          top30[which(top30 == 0)] <- -Inf
+#          top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+#          top30 <- top30[order(top30,decreasing = T)[1:min(30, sum(!(llmat[, i]
+#              %in% c(0,-Inf))))]]
+#  
+#          doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+#  
+#          for (j in names(top30)) {
+#              tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+#              string.scores <- c(string.scores, tmp$combined_score)
+#              string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+#              tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+#              string.scores <- c(string.scores, tmp$combined_score)
+#              string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+#          }
+#  
+#      } else {
+#          next()
+#      }
+#  
+#  }
 
-##     if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
-##         top30 <- llmat[, i]
-##         top30[which(top30 == 0)] <- -Inf
-##         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-##         top30 <- top30[order(top30,decreasing = T)[1:min(30, sum(!(llmat[, i]
-##             %in% c(0,-Inf))))]]
-
-##         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
-
-##         for (j in names(top30)) {
-##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-##             string.scores <- c(string.scores, tmp$combined_score)
-##             string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
-##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-##             string.scores <- c(string.scores, tmp$combined_score)
-##             string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
-##         }
-        
-##     } else {
-##         next()
-##     }
-
-## }
-
+## ---- fig.width = 8, fig.height = 5--------------------------------------
 data(wageningen_string)
 
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag)
@@ -1066,32 +1069,34 @@ string.scores2 <- list()
 
 string.names2 <- character()
 
-## for (i in 1:ncol(llmat)) {
+## ---- eval=FALSE---------------------------------------------------------
+#  for (i in 1:ncol(llmat)) {
+#  
+#      if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) {
+#          top30 <- llmat[, i]
+#          top30[which(top30 == 0)] <- -Inf
+#          top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+#          top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i]
+#              %in% c(0,-Inf))))]]
+#  
+#          doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+#  
+#          for (j in names(top30)) {
+#              tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+#              string.scores2 <- c(string.scores2, tmp$combined_score)
+#              string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)), collapse = "_"))
+#              tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+#              string.scores2 <- c(string.scores2, tmp$combined_score)
+#              string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)), collapse = "_"))
+#          }
+#  
+#      } else {
+#          next()
+#      }
+#  
+#  }
 
-##     if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
-##         top30 <- llmat[, i]
-##         top30[which(top30 == 0)] <- -Inf
-##         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-##         top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i]
-##             %in% c(0,-Inf))))]]
-
-##         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
-
-##         for (j in names(top30)) {
-##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-##             string.scores2 <- c(string.scores2, tmp$combined_score)
-##             string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)), collapse = "_"))
-##             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-##             string.scores2 <- c(string.scores2, tmp$combined_score)
-##             string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)), collapse = "_"))
-##         }
-        
-##     } else {
-##         next()
-##     }
-
-## }
-
+## ---- fig.width = 8, fig.height = 5--------------------------------------
 data(sameith_string)
 
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin)
@@ -1120,7 +1125,6 @@ polygon(density(stsc), col = "#ff000066")
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
 polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
 
-
-## ----sessioninfo------------------------------------------------------------------------
+## ------------------------------------------------------------------------
 sessionInfo()
 
