@@ -2,7 +2,7 @@
 title: "Epistatic Nested Effects Models - Inferring mixed epistatis from indirect measurements of knockout screens."
 author: "Madeline Diekmann & Martin Pirkl"
 date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: rmarkdown::html_document
 vignette: >
   %\VignetteIndexEntry{epiNEM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -358,6 +358,11 @@ for (i in 1:runs) {
 ```{r, fig.width = 7, fig.height = 7}
 data(sim)
 
+sens <- sim$sens
+spec <- sim$spec
+sens2 <- sim$sens2
+spec2 <- sim$spec2
+
 colvec <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)),
             rep("darkgreen", length(noiselvls)), rep("brown", length(noiselvls)),
             rep("darkgrey", length(noiselvls)))
@@ -598,7 +603,7 @@ for (i in doubles) {
 ```{r, fig.width = 8, fig.height = 4}
 palette(c("#4444cc", "#77aa77", "#009933", "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
-data(wageningen_res)
+data(wageningen)
 
 llmat0 <- wageningen$ll
 
@@ -870,7 +875,7 @@ for (i in doubles[set]) {
 }
 ```
 ```{r, fig.width = 8, fig.height = 4}
-data(sameith_res)
+data(sameith)
 
 llmat0 <- sameith$ll
 
@@ -1072,6 +1077,9 @@ for (i in 1:ncol(llmat)) {
 ```{r, fig.width = 8, fig.height = 5}
 data(wageningen_string)
 
+string.scores <- wageningen_string$string.scores
+string.names <- wageningen_string$string.names
+
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag)
                                                                      , "\\.")))))
 
@@ -1135,6 +1143,9 @@ for (i in 1:ncol(llmat)) {
 ```
 ```{r, fig.width = 8, fig.height = 5}
 data(sameith_string)
+
+string.scores2 <- sameith_string$string.scores2
+string.names2 <- sameith_string$string.names2
 
 tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin)
                                                                     , "\\.")))))

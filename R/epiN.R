@@ -26,16 +26,16 @@ NA
 #' 
 #' @docType data
 #' @examples 
-#' data(sameith_res)
-#' @name sameith_res
+#' data(sameith)
+#' @name sameith
 NA
 
 #' Example data: epiNEM results for the Wageningen et al., 2010 knock-out screen
 #' 
 #' @docType data
 #' @examples 
-#' data(wageningen_res)
-#' @name wageningen_res
+#' data(wageningen)
+#' @name wageningen
 NA
 
 #' Example data: string db interactions of interactions identified by epiNEM for the Sameith et al., 2010 knock-out screen
