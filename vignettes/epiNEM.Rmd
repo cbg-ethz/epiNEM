@@ -17,9 +17,11 @@ However, classic Nested Effects Models do not account for double knockouts. In t
 
 ```{r, eval=FALSE}
 install.packages("devtools", verbose = FALSE, quiet = TRUE)
-
+```
+```{r}
 library(devtools)
-
+```
+```{r}
 install_github("cbg-ethz/epiNEM", quiet = TRUE)
 ```
 ```{r}
@@ -31,7 +33,9 @@ library(epiNEM)
 We compare epiNEM to several network inference methods.
 
 ```{r}
-library(bnem, quietly = TRUE, verbose = FALSE) # install_github("MartinFXP/B-NEM/package")
+install_github("MartinFXP/B-NEM")
+
+library(bnem, quietly = TRUE, verbose = FALSE)
 
 library(nem)
 
