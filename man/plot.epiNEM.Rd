@@ -7,7 +7,7 @@
 \method{plot}{epiNEM}(x, ...)
 }
 \arguments{
-\item{results}{object of class epiNEM}
+\item{x}{object of class epiNEM}
 }
 \value{
 plot of the logical network
