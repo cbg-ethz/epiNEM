@@ -32,9 +32,9 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' Phi <- matrix(sample(c(0,1), 9, replace = TRUE), 3, 3)
 #' data <- matrix(sample(c(0,1), 3*10, replace = TRUE), 10, 3)
 #' rownames(Phi) <- colnames(Phi) <- colnames(data) <- c("Ikk1", "Ikk2", "RelA")
-#' score <- MLL(Phi, D1 <- data, D0 <- 1 - data)
+#' score <- Mll(Phi, D1 <- data, D0 <- 1 - data)
 #' @return list with likelihood poster probability, egene positions
-MLL <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
+Mll <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
                                         # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
                                         # complementary data matrix D0
                                         # Function adapted from NEM package
@@ -137,9 +137,9 @@ getStarters <- function(mutants, experiments){
 #' @examples
 #' library(BoolNet)
 #' data(cellcycle)
-#' extModel <- createExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
+#' extModel <- CreateExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
 #' @return extended adjacency matrix
-createExtendedAdjacency <- function(network, mutants, experiments){
+CreateExtendedAdjacency <- function(network, mutants, experiments){
     starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
     rownames(starters) <- mutants
     colnames(starters) <- experiments
@@ -304,7 +304,7 @@ getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, exp
     randomnames <- sort(randomnames)
     path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
-    extadj2 <- createExtendedAdjacency(network, unique(mutants), experiments)
+    extadj2 <- CreateExtendedAdjacency(network, unique(mutants), experiments)
     unlink(path)
     return(list(list(origModel=adj, model=extadj2, logics=logicmatrix[modelno,], column=column)))
 }

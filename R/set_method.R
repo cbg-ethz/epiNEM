@@ -15,7 +15,7 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
     extendedModels <- includeLogic(startModel, experiments, mutants)
   }
   extendedModels <- unlist(extendedModels, recursive=FALSE)
-  result    <- sapply(extendedModels, MLL, data2, data0)
+  result    <- sapply(extendedModels, Mll, data2, data0)
   mLLscores <- unlist(result["mLL",])
   score     <- max(mLLscores)
   model <- startModel
@@ -27,7 +27,7 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
     nextGen   <- FindNeighbours(model, nonSelfEdges)
     extendedModels <- lapply(nextGen, includeLogic, experiments, mutants)
     extendedModels2 <- unlist(unlist(extendedModels, recursive=FALSE), recursive=FALSE)
-    result    <- sapply(extendedModels2, MLL, data2, data0)
+    result    <- sapply(extendedModels2, Mll, data2, data0)
     mll=unlist(result["mLL",])
     index <- which.max(mll)
 

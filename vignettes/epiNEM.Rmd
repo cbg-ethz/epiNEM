@@ -142,9 +142,9 @@ for (i in 1:runs) {
         if ("b" %in% do) {
             print("B-NEM")
 
-            gtn <- epi2bg(topology)
+            gtn <- EpiNEM2BooleanGraph(topology)
 
-            fc <- cbind(Ctrl_vs_S = -1, epi2bg(sortedData))*(-1)
+            fc <- cbind(Ctrl_vs_S = -1, EpiNEM2BooleanGraph(sortedData))*(-1)
 
             bnemnoise <- sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
             

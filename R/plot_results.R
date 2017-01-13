@@ -29,13 +29,13 @@ AddLogicGates <- function(child, logic, model) {
 
 #' Plots the winning pathway structure
 #' @importFrom igraph graph.adjacency plot.igraph
-#' @param results object created by epiNEM
+#' @param results object of class epiNEM
 #' @export
 #' @examples
 #' res <- epiNEM()
-#' epiNEM.PlotResults(res)
+#' plot(res)
 #' @return plot of the logical network
-epiNEM.PlotResults <- function(results) {
+plot.epiNEM <- function(results) {
   result <- results$origModel
   logics <- results$logics
   Egeneset <- results$EGeneset

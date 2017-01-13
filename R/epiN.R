@@ -158,7 +158,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
         index <- which.max(iterations["maxLlh",])
         reconstruct <- includeLogic(iterations[,index]$model, experiments, mutants)
         reconstruct <- unlist(reconstruct, recursive=FALSE)
-        score <- sapply(reconstruct, MLL, D1, D0, ltype, para)
+        score <- sapply(reconstruct, Mll, D1, D0, ltype, para)
         mll <- unlist(score["mLL",])
         index <- which.max(mll)
         posterior <- score[,index]$posterior
@@ -188,7 +188,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
                                         #cat("Extended to", length(extendedModels), "models, ")
                                         #cat("of which", length(uniqueModels), "are unique")
 
-        score <- sapply(uniqueModels, MLL, D1, D0, ltype, para)
+        score <- sapply(uniqueModels, Mll, D1, D0, ltype, para)
         mll  <- unlist(score["mLL",])
 
         bestModel <- uniqueModels[[which.max(mll)]]$model
@@ -220,6 +220,9 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
                                         #logic <- results$logic
 
     }
+
+    class(results) <- "epiNEM"
+    
     return(results)#results)
 }
 
@@ -291,9 +294,9 @@ IsBestModel <- function(thisModel, bestModel) {
 #' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
-#' b <- epi2bg(extTopology)
+#' b <- EpiNEM2BooleanGraph(extTopology)
 #' @return boolean hyper-graph
-epi2bg <- function(t) {
+EpiNEM2BooleanGraph <- function(t) {
     adj2dnf <- function(A) {
 
         dnf <- NULL
