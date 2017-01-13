@@ -30,6 +30,7 @@ AddLogicGates <- function(child, logic, model) {
 #' Plots the winning pathway structure
 #' @importFrom igraph graph.adjacency plot.igraph
 #' @param x object of class epiNEM
+#' @param ... other arguments
 #' @export
 #' @examples
 #' res <- epiNEM()

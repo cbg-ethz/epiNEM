@@ -8,6 +8,8 @@
 }
 \arguments{
 \item{x}{object of class epiNEM}
+
+\item{...}{other arguments}
 }
 \value{
 plot of the logical network
