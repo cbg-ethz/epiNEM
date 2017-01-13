@@ -17,6 +17,9 @@ MLL(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05))
 
 \item{para}{false positive and false negative rates}
 }
+\value{
+list with likelihood poster probability, egene positions
+}
 \description{
 Computes marginal log-likelihood for model Phi given observed data matrix D1
 }

@@ -11,6 +11,9 @@ CreateRandomGraph(pathwayGenes, edgeProb = 0.5)
 
 \item{edgeProb}{probability of random edge}
 }
+\value{
+adjacency matrix
+}
 \description{
 Returns a model graph with randomly sampled edges. Every possible edge has a probability to exist in the graph.
 }

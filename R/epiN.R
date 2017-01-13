@@ -72,6 +72,7 @@ NA
 #' @import
 #' igraph
 #' e1071
+#' @return optimized logical network
 #' @examples
 #' res <- epiNEM()
 epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0,
@@ -234,10 +235,8 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 #' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
+#' @return extended topology in which reporters are linked to pathway genes
 ExtendTopology <- function(topology, nReporters) {
-                                        # Returns an extended topology in which reporters are linked to pathway genes.
-                                        # The reporter genes are uniformly distributed over the pathway genes.
-
     reporters     <- unlist(lapply(1:nReporters, function(n) paste("reporter", n,
                                                                    sep="-")))
     linkedEffects <- sample(1:ncol(topology), nReporters, replace=TRUE)
@@ -262,6 +261,7 @@ ExtendTopology <- function(topology, nReporters) {
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
 #' sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
+#' @return data matrix
 GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
                                         # Returns an artificial noisy data matrix
     perfectData <- extTopology %*% t(model)
@@ -292,6 +292,7 @@ IsBestModel <- function(thisModel, bestModel) {
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
 #' b <- epi2bg(extTopology)
+#' @return boolean hyper-graph
 epi2bg <- function(t) {
     adj2dnf <- function(A) {
 

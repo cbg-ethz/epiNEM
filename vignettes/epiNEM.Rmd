@@ -2,7 +2,7 @@
 title: "Epistatic Nested Effects Models - Inferring mixed epistatis from indirect measurements of knockout screens."
 author: "Madeline Diekmann & Martin Pirkl"
 date: "`r Sys.Date()`"
-output: rmarkdown::html_document
+output: rmarkdown::pdf_document
 vignette: >
   %\VignetteIndexEntry{epiNEM}
   %\VignetteEngine{knitr::rmarkdown}
@@ -16,11 +16,11 @@ However, classic Nested Effects Models do not account for double knockouts. In t
 ## Loading epiNEM
 
 ```{r, eval=FALSE}
-install.packages("devtools", verbose = F, quiet = T)
+install.packages("devtools", verbose = FALSE, quiet = TRUE)
 
 library(devtools)
 
-install_github("cbg-ethz/epiNEM", quiet = T)
+install_github("cbg-ethz/epiNEM", quiet = TRUE)
 ```
 ```{r}
 library(epiNEM)
@@ -31,7 +31,7 @@ library(epiNEM)
 We compare epiNEM to several network inference methods.
 
 ```{r}
-library(bnem, quietly = T, verbose = F) # install_github("MartinFXP/B-NEM/package")
+library(bnem, quietly = TRUE, verbose = FALSE) # install_github("MartinFXP/B-NEM/package")
 
 library(nem)
 
@@ -56,9 +56,9 @@ do <- c("e", "b", do)
 
 popSize <- 100
 
-maxTime <- F
+maxTime <- FALSE
 
-forcelogic <- T
+forcelogic <- TRUE
 
 epinemsearch <- "greedy"
 
@@ -193,8 +193,8 @@ for (i in 1:runs) {
                         CNOlist=CNOlist,
                         model=model,
                         initBstring=initBstring,
-                        draw = F,
-                        verbose = F,
+                        draw = FALSE,
+                        verbose = FALSE,
                         popSize = popSize,
                         maxTime = maxTime2,
                         parallel = parallel
@@ -264,8 +264,8 @@ for (i in 1:runs) {
 
             reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
             gtnadj <- topology$origModel
-            gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = T),
-                                        order(apply(gtnadj, 2, sum), decreasing = F)]
+            gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = TRUE),
+                                        order(apply(gtnadj, 2, sum), decreasing = FALSE)]
             gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
             gtnadj <- gtnadj[order(rownames(gtnadj)), order(colnames(gtnadj))]
             eadj <- topology$origModel
@@ -310,7 +310,7 @@ for (i in 1:runs) {
             start <- Sys.time()
             pc.fit <- pc(suffStat = list(C = cor(reddata2), n = nrow(reddata2)),
                   indepTest = gaussCItest, ## indep.test: partial correlations
-                  alpha=0.05, labels = colnames(reddata2), verbose = F)
+                  alpha=0.05, labels = colnames(reddata2), verbose = FALSE)
             pcadj <- graph2adj(pc.fit@graph)
             time[4, i, j] <- difftime(Sys.time(), start, units = "secs")
             print(time[4, i, j])
@@ -334,7 +334,7 @@ for (i in 1:runs) {
             ares <- aracne(ares)
             ares <- disc(ares, 0)
             ares <- ares[order(rownames(ares)), order(colnames(ares))]
-            nas <- which(is.na(ares) == T)
+            nas <- which(is.na(ares) == TRUE)
             ares[nas] <- 0
             diag(ares) <- 0
             time[5, i, j] <- difftime(Sys.time(), start, units = "secs")
@@ -362,6 +362,8 @@ sens <- sim$sens
 spec <- sim$spec
 sens2 <- sim$sens2
 spec2 <- sim$spec2
+logics <- sim$logics
+time <- sim$time
 
 colvec <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)),
             rep("darkgreen", length(noiselvls)), rep("brown", length(noiselvls)),
@@ -387,7 +389,7 @@ boxplot(timeframe, col = colvec, main = "running time", ylab = "seconds")
 abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 
 axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = F, pos = -25)
+     tick = FALSE, pos = -25)
 
 accframe2 <- as.data.frame(
     cbind(data.frame(epiNEM = acc2[1,,]),
@@ -401,7 +403,7 @@ boxplot(accframe2, col = colvec, main = "accuracy of the inferred edges", ylim =
 abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 
 axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = F, pos = -0.2)
+     tick = FALSE, pos = -0.2)
 
 ## logical nems:
 
@@ -418,7 +420,7 @@ boxplot(logicsframe, col = colvec2, main = "accuracy of the inferred logic gate"
 abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 
 axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = F, pos = -0.2)
+     tick = FALSE, pos = -0.2)
 
 accframe <- as.data.frame(cbind(data.frame(epiNEM = acc[1,,]),
                                 data.frame(BNEM = acc[2,,])))
@@ -431,7 +433,7 @@ boxplot(accframe, col = colvec2, main = "accuracy of the inferred expected data"
 abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 
 axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = F, pos = -0.2)
+     tick = FALSE, pos = -0.2)
 ```
 
 ## Yeast knockout screens
@@ -441,28 +443,28 @@ The results of the knockout screens have been annotated according to the followi
 
 ```{r, warning=FALSE, fig.width = 9, fig.height=5}
 a1 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "OR", col = "Greys", sub = "", colorkey = NULL)
 a2 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "AND", col = "Greys", sub = "", colorkey = NULL)
 a3 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
 a4 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
 a5 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "XOR", col = "Greys", sub = "", colorkey = NULL)
 a6 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 a7 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 a8 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = F, Rowv = F,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
           main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
 print(a5, position = c(0,0, .25, .5), more = TRUE)
 print(a6, position = c(.25,0, .5, .5), more = TRUE)
@@ -617,9 +619,9 @@ for (i in 1:length(doubles)) {
 
     llvec <- llmat0[, i]
 
-    logicvec <- logicvec[order(llvec, decreasing = T)]
+    logicvec <- logicvec[order(llvec, decreasing = TRUE)]
 
-    llvec <- llvec[order(llvec, decreasing = T)]
+    llvec <- llvec[order(llvec, decreasing = TRUE)]
 
     parents <- unlist(strsplit(doubles[i], "\\."))
 
@@ -639,7 +641,7 @@ for (i in 1:length(doubles)) {
 
     colvec <- pchvec
     
-    if (all(is.infinite(llvec) == T)) {
+    if (all(is.infinite(llvec) == TRUE)) {
 
         llvec[1:length(llvec)] <- -1000
 
@@ -649,22 +651,22 @@ for (i in 1:length(doubles)) {
 
     } else {
         
-        llvec[which(is.infinite(llvec) == T)] <- NA
+        llvec[which(is.infinite(llvec) == TRUE)] <- NA
         
-        ## llvec[which(is.infinite(llvec) == T)] <- min(llvec) - 100
+        ## llvec[which(is.infinite(llvec) == TRUE)] <- min(llvec) - 100
         
-        margin <- abs(max(llvec[1:30], na.rm = T) - min(llvec[1:30], na.rm = T))
+        margin <- abs(max(llvec[1:30], na.rm = TRUE) - min(llvec[1:30], na.rm = TRUE))
 
         offset <- 0.075
 
         if (margin == 0) { margin <- 10; offset <- 0.0375 }
 
-        donames <- 30 - sum(is.na(llvec[1:30]) == T)
+        donames <- 30 - sum(is.na(llvec[1:30]) == TRUE)
 
-        if (any(is.na(llvec[1:30]) == T)) { margin2 <- margin*2
+        if (any(is.na(llvec[1:30]) == TRUE)) { margin2 <- margin*2
         } else { margin2 <- margin }
         
-        llvec[which(is.na(llvec) == T)] <- min(llvec, na.rm = T) - margin
+        llvec[which(is.na(llvec) == TRUE)] <- min(llvec, na.rm = TRUE) - margin
         
         margin <- margin2
 
@@ -698,7 +700,7 @@ for (i in 1:length(doubles)) {
     text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
                 labels = names(llvec)[1:thetop], cex = 0.6, srt = 45, pos = 3,
                 offset = 0)
-    mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
+    mtext = mtext(mark, side = 3, line = 1, outer = FALSE, cex = 4, adj = 0)
     legend = legend(legendx, p2max,
                     legend = legendtext,
                     col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)
@@ -747,7 +749,7 @@ rownames(distmat) <- NULL
 labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n","masking (NOT B)\n\n\n",
               "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
 
-heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution",
+heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
           sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8),
           cexRow = 0, cexCol = 0.4, aspect = "fill",
           colorkey = list(space = "right",
@@ -887,9 +889,9 @@ for (i in 1:length(doubles)) {
 
   llvec <- llmat0[, i]
 
-  logicvec <- logicvec[order(llvec, decreasing = T)]
+  logicvec <- logicvec[order(llvec, decreasing = TRUE)]
 
-  llvec <- llvec[order(llvec, decreasing = T)]
+  llvec <- llvec[order(llvec, decreasing = TRUE)]
 
   parents <- unlist(strsplit(doubles[i], "\\."))
 
@@ -909,7 +911,7 @@ for (i in 1:length(doubles)) {
 
     colvec <- pchvec
 
-    if (all(is.infinite(llvec) == T)) {
+    if (all(is.infinite(llvec) == TRUE)) {
 
         llvec[1:length(llvec)] <- -1000
 
@@ -919,18 +921,18 @@ for (i in 1:length(doubles)) {
 
     } else {
         
-        llvec[which(is.infinite(llvec) == T)] <- NA
+        llvec[which(is.infinite(llvec) == TRUE)] <- NA
         
-        margin <- abs(max(llvec[1:30], na.rm = T) - min(llvec[1:30], na.rm = T))
+        margin <- abs(max(llvec[1:30], na.rm = TRUE) - min(llvec[1:30], na.rm = TRUE))
 
         if (margin == 0) { margin <- 10 }
 
-        donames <- 30 - sum(is.na(llvec[1:30]) == T)
+        donames <- 30 - sum(is.na(llvec[1:30]) == TRUE)
 
-        if (any(is.na(llvec[1:30]) == T)) { margin2 <- margin*2
+        if (any(is.na(llvec[1:30]) == TRUE)) { margin2 <- margin*2
         } else { margin2 <- margin }
         
-        llvec[which(is.na(llvec) == T)] <- min(llvec, na.rm = T) - margin
+        llvec[which(is.na(llvec) == TRUE)] <- min(llvec, na.rm = TRUE) - margin
         
         margin <- margin2
 
@@ -967,7 +969,7 @@ for (i in 1:length(doubles)) {
     text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
                 labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3,
                 offset = 0)
-    mtext = mtext(mark, side = 3, line = 1, outer = F, cex = 4, adj = 0)
+    mtext = mtext(mark, side = 3, line = 1, outer = FALSE, cex = 4, adj = 0)
     legend = legend(legendx, p2max,
                     legend = labeltext, col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
                     cex = 0.7)  
@@ -1017,7 +1019,7 @@ labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n",
                "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
 
-heatmapOP(distmat, Colv = F, Rowv = F, main = "logic gate distribution", sub = "",
+heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution", sub = "",
           col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0,
           cexCol = 0.4, aspect = "fill",
           colorkey = list(space = "right", labels = rev(labeltext), width = 1,
@@ -1054,7 +1056,7 @@ for (i in 1:ncol(llmat)) {
         top30 <- llmat[, i]
         top30[which(top30 == 0)] <- -Inf
         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30,decreasing = T)[1:min(30, sum(!(llmat[, i]
+        top30 <- top30[order(top30,decreasing = TRUE)[1:min(30, sum(!(llmat[, i]
             %in% c(0,-Inf))))]]
 
         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
@@ -1121,7 +1123,7 @@ for (i in 1:ncol(llmat)) {
         top30 <- llmat[, i]
         top30[which(top30 == 0)] <- -Inf
         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30, decreasing = T)[1:min(30, sum(!(llmat[, i]
+        top30 <- top30[order(top30, decreasing = TRUE)[1:min(30, sum(!(llmat[, i]
             %in% c(0,-Inf))))]]
 
         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))

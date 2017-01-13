@@ -17,6 +17,9 @@ GenerateData(model, extTopology, FPrate, FNrate, replicates)
 
 \item{replicates}{number of replicates}
 }
+\value{
+data matrix
+}
 \description{
 Generate data from extended model
 }

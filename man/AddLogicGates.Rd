@@ -13,6 +13,9 @@ AddLogicGates(child, logic, model)
 
 \item{model}{normal model}
 }
+\value{
+model list with additional logic gate
+}
 \description{
 extend model with node representing logic gate
 }

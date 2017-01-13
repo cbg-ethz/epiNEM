@@ -8,6 +8,7 @@
 #' @examples
 #' model <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
 #' model2 <- AddLogicGates("RelA", "OR", model)
+#' @return model list with additional logic gate
 AddLogicGates <- function(child, logic, model) {
   #Extends model with a node representing a logic gate for plotting
   parents <- names(which(model[,child]==1))
@@ -33,6 +34,7 @@ AddLogicGates <- function(child, logic, model) {
 #' @examples
 #' res <- epiNEM()
 #' epiNEM.PlotResults(res)
+#' @return plot of the logical network
 epiNEM.PlotResults <- function(results) {
   result <- results$origModel
   logics <- results$logics

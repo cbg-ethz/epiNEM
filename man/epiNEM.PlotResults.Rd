@@ -9,6 +9,9 @@ epiNEM.PlotResults(results)
 \arguments{
 \item{results}{object created by epiNEM}
 }
+\value{
+plot of the logical network
+}
 \description{
 Plots the winning pathway structure
 }

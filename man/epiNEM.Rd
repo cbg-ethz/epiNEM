@@ -28,6 +28,9 @@ FP-rate, FN-rate, no. of replicates}
 
 \item{para}{false positive and false negative rates}
 }
+\value{
+optimized logical network
+}
 \description{
 Epistatic NEMs - main function
 }

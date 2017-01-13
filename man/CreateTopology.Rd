@@ -4,7 +4,7 @@
 \alias{CreateTopology}
 \title{create topology for a randomly generated pathway topology}
 \usage{
-CreateTopology(single, double, force = T)
+CreateTopology(single, double, force = TRUE)
 }
 \arguments{
 \item{single}{number of single knockouts}
@@ -12,6 +12,9 @@ CreateTopology(single, double, force = T)
 \item{double}{number of double knockouts}
 
 \item{force}{if true the random model will have a sophisticated logical gate}
+}
+\value{
+adjacency matrix
 }
 \description{
 create topology for a randomly generated pathway topology

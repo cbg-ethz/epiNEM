@@ -9,6 +9,9 @@ epi2bg(t)
 \arguments{
 \item{t}{full epiNEM model}
 }
+\value{
+boolean hyper-graph
+}
 \description{
 Convert epiNEM model into general Boolean graph
 }

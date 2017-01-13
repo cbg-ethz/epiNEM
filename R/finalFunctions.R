@@ -7,6 +7,7 @@
 #' @export
 #' @examples
 #' graph <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
+#' @return adjacency matrix
 CreateRandomGraph <- function(pathwayGenes, edgeProb=0.5) {
     size     <- length(pathwayGenes)
     model    <- diag(size)
@@ -32,6 +33,7 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' data <- matrix(sample(c(0,1), 3*10, replace = TRUE), 10, 3)
 #' rownames(Phi) <- colnames(Phi) <- colnames(data) <- c("Ikk1", "Ikk2", "RelA")
 #' score <- MLL(Phi, D1 <- data, D0 <- 1 - data)
+#' @return list with likelihood poster probability, egene positions
 MLL <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
                                         # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
                                         # complementary data matrix D0
@@ -133,8 +135,10 @@ getStarters <- function(mutants, experiments){
 #' @importFrom BoolNet getPathToAttractor
 #' @export
 #' @examples
+#' library(BoolNet)
 #' data(cellcycle)
 #' extModel <- createExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
+#' @return extended adjacency matrix
 createExtendedAdjacency <- function(network, mutants, experiments){
     starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
     rownames(starters) <- mutants
@@ -165,7 +169,7 @@ includeLogic <- function(adj, experiments, mutants){
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
-    # adj <- adj[order(apply(adj, 1, sum), decreasing = T), order(apply(adj, 1, sum), decreasing = T)]
+    # adj <- adj[order(apply(adj, 1, sum), decreasing = TRUE), order(apply(adj, 1, sum), decreasing = TRUE)]
     # adj[lower.tri(adj)] <- 0
     adj <- adj[order(rownames(adj)), order(colnames(adj))]
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
@@ -405,7 +409,8 @@ AttachEGenes <- function(posterior, experiments){
 #' @export
 #' @examples
 #' model <- CreateTopology(3, 1)
-CreateTopology <- function(single, double, force = T) {
+#' @return adjacency matrix
+CreateTopology <- function(single, double, force = TRUE) {
     extendedModels <- list()
     singleKOs <- LETTERS[1:single]
     experiments <- singleKOs
@@ -416,7 +421,7 @@ CreateTopology <- function(single, double, force = T) {
 
     while (length(extendedModels)==0){
         startModel   <- CreateRandomGraph(singleKOs)
-        startModel <- startModel[order(apply(startModel, 1, sum), decreasing = T), order(apply(startModel, 1, sum), decreasing = T)]
+        startModel <- startModel[order(apply(startModel, 1, sum), decreasing = TRUE), order(apply(startModel, 1, sum), decreasing = TRUE)]
         startModel[lower.tri(startModel)] <- 0
         startModel <- startModel[order(rownames(startModel)), order(colnames(startModel))]
         diag(startModel) <- 0
