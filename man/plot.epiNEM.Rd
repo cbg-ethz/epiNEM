@@ -4,7 +4,7 @@
 \alias{plot.epiNEM}
 \title{Plots the winning pathway structure}
 \usage{
-\method{plot}{epiNEM}(results)
+\method{plot}{epiNEM}(x, ...)
 }
 \arguments{
 \item{results}{object of class epiNEM}

@@ -35,7 +35,8 @@ AddLogicGates <- function(child, logic, model) {
 #' res <- epiNEM()
 #' plot(res)
 #' @return plot of the logical network
-plot.epiNEM <- function(results) {
+plot.epiNEM <- function(x, ...) {
+    results <- x
   result <- results$origModel
   logics <- results$logics
   Egeneset <- results$EGeneset
