@@ -20,6 +20,8 @@ install.packages("devtools", verbose = FALSE, quiet = TRUE)
 ```
 ```{r}
 library(devtools)
+
+install_github("rstudio/rmarkdown") 
 ```
 ```{r}
 install_github("cbg-ethz/epiNEM", quiet = TRUE)
