@@ -2,7 +2,10 @@
 % Please edit documentation in R/epiN.R
 \name{EpiNEM2BooleanGraph}
 \alias{EpiNEM2BooleanGraph}
-\title{Convert epiNEM model into general Boolean graph}
+\title{Convert epiNEM model into general Boolean graph.
+Only needed for comparing accuracy of inferred network for bnem and epiNEM.
+Needs the package bnem from https://github.com/MartinFXP/bnem.
+In the future bnem will be submitted to bioconductor.}
 \usage{
 EpiNEM2BooleanGraph(t)
 }
@@ -13,7 +16,10 @@ EpiNEM2BooleanGraph(t)
 boolean hyper-graph
 }
 \description{
-Convert epiNEM model into general Boolean graph
+Convert epiNEM model into general Boolean graph.
+Only needed for comparing accuracy of inferred network for bnem and epiNEM.
+Needs the package bnem from https://github.com/MartinFXP/bnem.
+In the future bnem will be submitted to bioconductor.
 }
 \examples{
 topology <- CreateTopology(3, 1, force = TRUE)
