@@ -3,9 +3,9 @@
 \docType{data}
 \name{wageningen_string}
 \alias{wageningen_string}
-\title{Example data: string db interactions of interactions identified by epiNEM for the Wageningen et al., 2010 knock-out screen}
+\title{sig. of string interaction scores for van Wageningen et al., 2010 data}
 \description{
-Example data: string db interactions of interactions identified by epiNEM for the Wageningen et al., 2010 knock-out screen
+sig. of string interaction scores for van Wageningen et al., 2010 data
 }
 \examples{
 data(wageningen_string)

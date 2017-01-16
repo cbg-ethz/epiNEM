@@ -10,8 +10,9 @@ epiNEM(filename = "random", method = "greedy", nIterations = 10,
   para = c(0.13, 0.05))
 }
 \arguments{
-\item{filename}{A binary, tab-delimited matrix. Columns: single and double knockdowns. Rows: genes showing effect or not?
-Default: random; artificial data is generated according to 'random' specifications}
+\item{filename}{A binary, tab-delimited matrix.
+Columns: single and double knockdowns. Rows: genes showing effect or not?
+Default: random; artificial data is generated to 'random' specifications}
 
 \item{method}{greedy or exhaustive search. Default: greedy}
 
@@ -19,7 +20,8 @@ Default: random; artificial data is generated according to 'random' specificatio
 
 \item{nModels}{number of Models. Default: 0}
 
-\item{random}{list specifying how the data should be generated: no. of single mutants, no. of double mutants, no. of reporterGenes,
+\item{random}{list specifying how the data should be generated:
+no. of single mutants, no. of double mutants, no. of reporterGenes,
 FP-rate, FN-rate, no. of replicates}
 
 \item{plotsy}{atm not used}

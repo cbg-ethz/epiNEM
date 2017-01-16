@@ -3,9 +3,9 @@
 \docType{data}
 \name{sameith_string}
 \alias{sameith_string}
-\title{Example data: string db interactions of interactions identified by epiNEM for the Sameith et al., 2010 knock-out screen}
+\title{sig. of string interaction scores for Sameith et al., 2015 data}
 \description{
-Example data: string db interactions of interactions identified by epiNEM for the Sameith et al., 2010 knock-out screen
+sig. of string interaction scores for Sameith et al., 2015 data
 }
 \examples{
 data(sameith_string)
