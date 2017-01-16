@@ -58,6 +58,8 @@ NA
 #' @import
 #' igraph
 #' e1071
+#' nem
+#' utils
 #' @return optimized logical network
 #' @examples
 #' data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
@@ -145,12 +147,10 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
             identity((e["model"]))))
         uniqueModels <- uniqueModels#[1:length(uniqueModels)-1] # what is this?
 
-        if (length(doubleKOs) == 0) {
-            require(nem)
-            print("No double perturbations available --> computing NEM")
+        if (length(doubleKOs) == 0) {            print("No double perturbations available --> computing NEM")
             if (method == "exhaustive") { inference <- "search" }
             if (method == "greedy") { inference <- "nem.greedy" } 
-            return(nem(sortedData, inference = inference))
+            return(nem::nem(sortedData, inference = inference))
         }
 
         score <- sapply(uniqueModels, Mll, D1, D0, ltype, para)
@@ -161,8 +161,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
             identity(extendedModels[[i]]$model))
         isBest    <- lapply(allModels, IsBestModel, bestModel)
         results   <- extendedModels[isBest == TRUE]
-        require(utils)
-        results <- lapply(results, modifyList, list(score=mll[which.max(mll)]))
+        results <- lapply(results, utils::modifyList, list(score=mll[which.max(mll)]))
         results <- results[[1]]
         posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
 

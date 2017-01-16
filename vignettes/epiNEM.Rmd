@@ -10,29 +10,26 @@ vignette: >
 ---
 ## Introduction
 
-This package is an extension of the classic Nested Effects Models provided in package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of a pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
-However, classic Nested Effects Models do not account for double knockouts. In this package \emph{epiNEM}, one additional layer of complexity is added. For every two genes, acting on one gene together, the relationship is evaluated and added to the model as a logic gate. Genetic relationships are represented by the logics OR (no relationship), AND (functional overlap), NOT (masking or inhibiting) and XOR (mutual prevention from acting on gene C).
+The method in this package is an extension of the classic Nested Effects Models provided in the package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of an upstream pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
+However, classic Nested Effects Models do not account for double knockouts. In this package \emph{epiNEM}, one additional layer of complexity is added. For every two genes, acting on one gene together, the relationship is evaluated and added to the model as a logical gate. Genetic relationships are represented by the logics OR (no relationship), AND (functional overlap), NOT (masking or inhibiting) and XOR (mutual prevention from acting on gene C).
 
 ## Loading epiNEM
 
-```{r, eval=FALSE}
-install.packages("devtools", verbose = FALSE, quiet = TRUE)
-```
 ```{r}
+install.packages("devtools", verbose = FALSE, quiet = TRUE)
+
 library(devtools)
 
-install_github("rstudio/rmarkdown") 
-```
-```{r}
+install_github("rstudio/rmarkdown")
+
 install_github("cbg-ethz/epiNEM", quiet = TRUE)
-```
-```{r}
+
 library(epiNEM)
 ```
 
 ## Simulations
 
-We compare epiNEM to several network inference methods.
+We compare epiNEM to Boolean Nested Effects Models, Aracne and the PC algorithm.
 
 ```{r}
 install_github("MartinFXP/B-NEM")

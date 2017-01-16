@@ -105,6 +105,8 @@ getStarters <- function(mutants, experiments){
 #' @param mutants vector of single knockouts
 #' @param experiments vector of all knockouts
 #' @importFrom BoolNet getPathToAttractor
+#' @import
+#' stats
 #' @export
 #' @examples
 #' library(BoolNet)
@@ -200,8 +202,7 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
-        require(stats)
-        randomnames <- sort(runif(nrow(logicmatrix)))
+        randomnames <- sort(stats::runif(nrow(logicmatrix)))
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
             if (!dir.exists("temp")) {

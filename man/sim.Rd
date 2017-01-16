@@ -3,22 +3,9 @@
 \docType{data}
 \name{sim}
 \alias{sim}
-\title{A binary effect matrix for a given set of knockouts.}
-\format{A binary matrix with 2274 rows and 5 variables:
-\describe{
-  \item{row}{knockouts, E-Genes}
-  \item{column}{S-Genes}
-  ...
-}}
-\source{
-\url{http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt}
-Example data: simulation results
-
-Contains simulation results
-}
+\title{Example data: simulation results}
 \description{
-A publicly availiable example data set for demonstrating the use of the epiNEM package.
-For data preprocessing steps please check vignette.
+Contains simulation results
 }
 \examples{
 data(sim)
