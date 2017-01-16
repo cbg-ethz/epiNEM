@@ -32,6 +32,7 @@ AddLogicGates <- function(child, logic, model) {
 #' @param x object of class epiNEM
 #' @param ... other arguments
 #' @export
+#' @method plot epiNEM
 #' @examples
 #' res <- epiNEM()
 #' plot(res)
