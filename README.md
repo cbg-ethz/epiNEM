@@ -39,5 +39,7 @@ colnames(data) <- c("A", "A.B", "B", "C")
 rownames(data) <- paste("E", 1:100, sep = "_")
 
 res <- epiNEM(data, method = "exhaustive")
+
+plot(res)
 ```
 
