@@ -13,10 +13,12 @@ vignette: >
 The method in this package is an extension of the classic Nested Effects Models provided in the package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of an upstream pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
 However, classic Nested Effects Models do not account for double knockouts. In this package \emph{epiNEM}, one additional layer of complexity is added. For every two genes, acting on one gene together, the relationship is evaluated and added to the model as a logical gate. Genetic relationships are represented by the logics OR (no relationship), AND (functional overlap), NOT (masking or inhibiting) and XOR (mutual prevention from acting on gene C).
 
+Simulation and application results are imported from pre-calculated data sets to shorten the runtime of this vignette.
+
 ## Loading epiNEM
 
 ```{r}
-install.packages("devtools", verbose = FALSE, quiet = TRUE)
+## install.packages("devtools")
 
 library(devtools)
 
@@ -29,7 +31,7 @@ library(epiNEM)
 
 ## Simulations
 
-We compare epiNEM to Boolean Nested Effects Models, Aracne and the PC algorithm.
+We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM), Aracne and the PC algorithm for 100 four node networks and respective data experiencing different levels of noise. The evaluation is done by accounting for the accuracy of discovered edges and in the case of B-NEM and epiNEM also the truth tables and logical gates.
 
 ```{r}
 install_github("MartinFXP/B-NEM")
@@ -1186,3 +1188,16 @@ sessionInfo()
 *__Reference:__*
 
 Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz. Inferring Modulators of Genetic Interactions with Epistatic Nested Effects Models. submitted.
+
+Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, {Dalla Favera} R, et~al. ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context. BMC Bioinformatics. 2006;7 Suppl 1:S7.
+
+Kalisch M, B\"{u}hlmann P. Estimating High-Dimensional Directed Acyclic Graphs with the PC-Algorithm. J Mach Learn Res. 2007;8.
+
+Markowetz F, Bloch J, Spang R. Non-transcriptional pathway features reconstructed from secondary effects of RNA interference. Bioinformatics. 2005;21(21):4026--4032.
+
+Pirkl M, Hand E, Kube D, Spang R. Analyzing synergistic and non-synergistic interactions in signalling pathways using Boolean Nested Effect Models. Bioinformatics. 2016;32(6):893--900.
+
+van Wageningen S, Kemmeren P, Lijnzaad P, Margaritis T, Benschop JJ, de Castro IJ, et~al. Functional overlap and regulatory links shape genetic interactions between signaling pathways. Cell. 2010 Dec;143(6):991--1004.
+
+Sameith K, Amini S, Groot~Koerkamp MJA, van Leenen D, Brok M, Brabers N, et~al. A high-resolution gene expression atlas of epistasis between gene-specific transcription factors exposes potential mechanisms for genetic interactions. BMC biology. 2015 Dec;13:112.
+
