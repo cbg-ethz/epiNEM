@@ -60,34 +60,6 @@ Mll <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
 }
 
 #' @noRd
-colours <- function(logic, parents2){
-                                        #defines colorcode for results
-                                        #logic=as.character(logic[2])
-    if (logic==NOT2){
-        col <- "green3"
-        pch <- 21
-        log <- NOT2
-    }else if (logic=="AND"){
-        col <- "red"
-        pch <- 22
-        log <- "and"
-    }else if (logic=="OR"){
-        col <- "royalblue1"
-        pch <- 23
-        log <- "or"
-    }else if (logic=="XOR"){
-        col <- "orange"
-        pch <- 24
-        log <- "or"
-    }else if (logic==NOT1){
-        col <- "purple"
-        pch <- 25
-        log <- NOT1
-    }
-    return(list(col=col, pch=pch, log=log))
-}
-
-#' @noRd
 getStarters <- function(mutants, experiments){
     ## get positions of doublemutants
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
@@ -169,8 +141,6 @@ includeLogic <- function(adj, experiments, mutants){
     rownames(adj) <- experiments
     colnames(adj) <- rownames(adj)
     diag(adj)=0
-    # adj <- adj[order(apply(adj, 1, sum), decreasing = TRUE), order(apply(adj, 1, sum), decreasing = TRUE)]
-    # adj[lower.tri(adj)] <- 0
     adj <- adj[order(rownames(adj)), order(colnames(adj))]
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
     doublepos <- c()
@@ -230,6 +200,7 @@ includeLogic <- function(adj, experiments, mutants){
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix using logics provided by logic vector
         ## ready for using BoolNet
+        require(stats)
         randomnames <- sort(runif(nrow(logicmatrix)))
         for (modelno in 1:nrow(logicmatrix)){
             lo <- 0
@@ -246,7 +217,7 @@ includeLogic <- function(adj, experiments, mutants){
                 if (sum(adj[, which(colnames(adj) %in% c)]) == 0) {
                     tmp <- paste(tmp, paste(c, ", ", c, sep=""), sep = "")
                 } else {
-                  tmp <- paste(tmp, paste(c, ", ", sep=""), sep = "")
+                    tmp <- paste(tmp, paste(c, ", ", sep=""), sep = "")
                 }
                 count2 <- 0
                 count3 <- 0
@@ -256,7 +227,7 @@ includeLogic <- function(adj, experiments, mutants){
                             help <- r
                             count <- count+1
                             if (sum(adj[, c]) == 1) {
-                              tmp <- paste(tmp, paste(r, sep=""), sep = "")
+                                tmp <- paste(tmp, paste(r, sep=""), sep = "")
                                 lo <- lo + 1
                             }
                         }
@@ -277,10 +248,10 @@ includeLogic <- function(adj, experiments, mutants){
                         else {
                             count2 <- count2 + 1
                             if (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
-                               tmp <- paste(tmp, paste(r, " | ", sep=""), sep = "")
+                                tmp <- paste(tmp, paste(r, " | ", sep=""), sep = "")
                             } else {
-                               tmp <- paste(tmp, paste(r, sep=""), sep = "")
-                               lo <- lo + 1
+                                tmp <- paste(tmp, paste(r, sep=""), sep = "")
+                                lo <- lo + 1
                             }
                         }
                     }
@@ -300,7 +271,6 @@ includeLogic <- function(adj, experiments, mutants){
 #' @importFrom BoolNet loadNetwork
 #' @noRd
 getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
-                                        #creates file read by boolNet
     randomnames <- sort(randomnames)
     path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
@@ -357,51 +327,6 @@ AttachEGenes <- function(posterior, experiments){
     return(Egeneset)
 }
 
-                                        # AttachEGenes <- function(posterior, experiments){
-                                        #   maxpost <- lapply(1:nrow(posterior), function(x) length(which(posterior[x,]==max(posterior[x,]))))
-                                        #   attachedEs <- matrix()
-                                        #   names <- c()
-                                        #   attachedEsADD <- matrix()
-                                        #   namesADD <- c()
-                                        #   Egeneset <- matrix()
-                                        #   Egeneset <- NULL
-                                        #   EgeneADD <- matrix()
-                                        #   EgeneADD <- NULL
-                                        #   j <- 1
-                                        #   k <- 1
-                                        #   Epos <- c()
-                                        #   for (i in 1:length(maxpost)){
-                                        #     if (maxpost[i]==1){
-                                        #       Epos <- cbind(Epos, i)
-                                        #       attachedEs[j] <- names(which.max(posterior[i,]))
-                                        #       names[j] <- rownames(posterior)[i]
-                                        #       j <- j+1
-                                        #     } else {
-                                        #       for (e in 1:unlist(maxpost[i])){
-                                        #         attachedEsADD[k] <- names(which(posterior[i,]==max(posterior[i,]))[e])
-                                        #         namesADD[k] <- rownames(posterior)[i]
-                                        #         k <- k+1
-                                        #       }
-                                        #     }
-                                        #   }
-                                        #   attachedEs=as.matrix(attachedEs)
-                                        #   rownames(attachedEs) <- names
-                                        #   attachedEsADD=as.matrix(attachedEsADD)
-                                        #   rownames(attachedEsADD) <- namesADD
-                                        #
-                                        #   for (i in experiments){
-                                        #     if (is.na(table(attachedEs)[i])){
-                                        #       tablt=0
-                                        #     } else tablt=table(attachedEs)[i]
-                                        #     if (is.na(table(attachedEsADD)[i])){
-                                        #       Egeneset <- rbind(Egeneset, tablt)
-                                        #     }else Egeneset <- rbind(Egeneset, paste(tablt, "+", table(attachedEsADD)[i], sep=""))
-                                        #   }
-                                        #   rownames(Egeneset)=experiments
-                                        #   colnames(Egeneset)="noE"
-                                        #   return(Egeneset)
-                                        # }
-
 #' create topology for a randomly generated pathway topology
 #' @param single number of single knockouts
 #' @param double number of double knockouts
@@ -445,9 +370,9 @@ CreateTopology <- function(single, double, force = TRUE) {
         }
     }
     if (length(extendedModels) == 5) {
-        prob <- c(0.018, 0.49, 0.49, 0.001, 0.001) # or = [1] is normal nem so has a higher prob for networks > 3, and the nots = [4:5] have sure probs if parents are related
+        prob <- c(0.018, 0.49, 0.49, 0.001, 0.001)
     } else {
-        prob <- rep(1/length(extendedModels), length(extendedModels)) # this does not make sense because length should be equal to 1, right?
+        prob <- rep(1/length(extendedModels), length(extendedModels))
     }
 
     selectedModel <- sample(1:length(extendedModels), 1, prob = prob)
@@ -465,12 +390,4 @@ GenerateDoubleKO <- function(d, singleKOs) {
     doubleKO      <- allDoubles[d, ]
     doubleKO      <- do.call(paste, as.list(c(doubleKO, sep=".")))
     return(doubleKO)
-}
-
-#' @noRd
-getGeneName <- function(symbol){
-    name <- as.character(unlist(xx[which(xx==symbol)], recursive=FALSE))
-    if (length(name)==0){
-        return(symbol)
-    }else return(name)
 }

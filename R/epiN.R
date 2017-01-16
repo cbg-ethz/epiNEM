@@ -1,17 +1,3 @@
-#' A binary effect matrix for a given set of knockouts.
-#'
-#' A publicly availiable example data set for demonstrating the use of the epiNEM package.
-#' For data preprocessing steps please check vignette.
-#'
-#' @format A binary matrix with 2274 rows and 5 variables:
-#' \describe{
-#'   \item{row}{knockouts, E-Genes}
-#'   \item{column}{S-Genes}
-#'   ...
-#' }
-#' @source \url{http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt}
-                                        # "epiNEMdata"
-
 #' Example data: simulation results
 #' 
 #' Contains simulation results
@@ -83,7 +69,7 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
                    random=list(single=4, double=1, reporters=100, FPrate=0.1,
                                FNrate=0.1, replicates=1), plotsy=TRUE, ltype = "marginal", para = c(0.13, 0.05)) {
 
-                                        #--- Sanity checks ---#
+    ##--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
     if (!method %in% methods)
         stop("Please enter a valid method: 'greedy' or 'exhaustive'.\n")
@@ -91,10 +77,10 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
     if ((method == "greedy") && (nIterations < 1))
         stop("Please enter a positive number of iterations\n")
 
-                                        #--- Process input ---#
+    ##--- Process input ---#
     if (is.character(filename)){
         if (filename == "random") {
-                                        # Generate artificial data
+            ## Generate artificial data
             topology    <- CreateTopology(random$single, random$double)
             topology    <- unlist(topology, recursive=FALSE)
             extTopology <- ExtendTopology(topology$model, random$reporters)
@@ -106,9 +92,9 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
             experiments <- singleKOs
             doubleKOs <- mutants[!mutants %in% singleKOs]
         } else {
-                                        # Use data from file
-            data        <- read.table(filename)
-            sortedData  <- data[, order(unlist(sortedKOs))]
+            ## Use data from file
+            ## data        <- read.table(filename)
+            ## sortedData  <- data[, order(unlist(sortedKOs))]
         }
     } else sortedData = filename
 
@@ -116,34 +102,12 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
     singleKOs <- sort(unique(unlist(strsplit(mutants, '[.]'))))
     experiments <- singleKOs
     doubleKOs <- mutants[!mutants %in% singleKOs]
-
-                                        #     mutants     = unique(sapply(strsplit(colnames(data), "_"), function(x){x[[1]]}))
-                                        #     experiments = mutants[!grepl("\\.", mutants)]
-                                        #     reporters   <- unique(rownames(data))
-                                        #     dataNoWT    <- data[, (experiments[!experiments %in% grep('WT', experiments,
-                                        #                                                               value=TRUE)])]
-                                        #     singleKOs   <- sort(unique(unlist(strsplit(mutants, '[.]'))))
-                                        #     parents = mutants[which(!mutants %in% experiments)]
-                                        #     parents = unlist(strsplit(parents, ".", fixed=TRUE))
-                                        #     #--- Sort mutant names (important for later use) ---#
-                                        #     mutants[grep('[.]', mutants)] <- strsplit(mutants[grep('[.]', mutants)], '[.]')
-                                        #     sortedKOs   <- lapply(mutants, function(d) do.call(paste, c(as.list(sort(d)),
-                                        #                                                                 sep="")))
-                                        #     data <- data.frame(data)
-                                        #     #sortedData  <- data %>% select(order(unlist(sortedKOs)))
-                                        #     sortedData  <- data[, order(unlist(sortedKOs))]
-                                        #     mutants     <- sort(unlist(sortedKOs))
-                                        #     doubleKOs   <- mutants[!mutants %in% singleKOs]
-                                        #     #colnames(sortedData) <- mutants
-
-                                        #data_inv <- 1-data
-
-                                        #--- Initialize data matrices (this takes care of replicate experiments) ---#
+    ##--- Initialize data matrices (this takes care of replicate experiments) ---#
     D1 <- sapply(mutants, function(s)
         rowSums(sortedData[, colnames(sortedData) == s, drop=FALSE]))
     D0 <- sapply(mutants, function(s) sum(colnames(sortedData) == s)) - D1
 
-                                        #--- Optimize models ---#
+    ##--- Optimize models ---#
     if (method == "exhaustive" & length(singleKOs) > 5) {
         cat("\nSorry, too many nodes for exhaustive search,\n")
         cat("doing greedy hill climbing instead.\n")
@@ -156,7 +120,6 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 
     if (method == "greedy") {
         print(paste("Progress (of ", nIterations, " iterations):", sep = ''))
-                                        #iterations <- sapply(nIterations, GreedyHillClimber, experiments, dataset, data_inv)
         iterations <- sapply(1:nIterations, GreedyHillClimber, experiments, D1, D0, mutants)
 
         index <- which.max(iterations["maxLlh",])
@@ -177,20 +140,18 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
     else if (method == "exhaustive") {
         basicModels    <- EnumerateModels(length(singleKOs), singleKOs)
         extendedModels <- lapply(basicModels, includeLogic, experiments, unique(mutants))
-        extendedModels <- unlist(unlist(extendedModels, recursive=FALSE) , recursive = FALSE) # so you just throw away models without a logic gate??? is this supposed to be like this?
+        extendedModels <- unlist(unlist(extendedModels, recursive=FALSE) , recursive = FALSE)
         uniqueModels   <- unique(lapply(extendedModels, function(e)
             identity((e["model"]))))
         uniqueModels <- uniqueModels#[1:length(uniqueModels)-1] # what is this?
 
         if (length(doubleKOs) == 0) {
+            require(nem)
             print("No double perturbations available --> computing NEM")
             if (method == "exhaustive") { inference <- "search" }
             if (method == "greedy") { inference <- "nem.greedy" } 
             return(nem(sortedData, inference = inference))
         }
-                                        #else
-                                        #cat("Extended to", length(extendedModels), "models, ")
-                                        #cat("of which", length(uniqueModels), "are unique")
 
         score <- sapply(uniqueModels, Mll, D1, D0, ltype, para)
         mll  <- unlist(score["mLL",])
@@ -200,34 +161,18 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
             identity(extendedModels[[i]]$model))
         isBest    <- lapply(allModels, IsBestModel, bestModel)
         results   <- extendedModels[isBest == TRUE]
+        require(utils)
         results <- lapply(results, modifyList, list(score=mll[which.max(mll)]))
         results <- results[[1]]
         posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
 
         results$EGeneset <- posterior
-                                        #results <- lapply(results, modifyList, list(EGeneset = posterior))
-
-                                        #     index <- which.max(mll)
-                                        #     posterior <- score[,index]$posterior
-                                        #
-                                        #     results <- unlist(uniqueModels[index], recursive=FALSE)
-                                        #
-                                        #     results2 <- unlist(extendedModels[index], recursive=FALSE)
-                                        #     results$score <- mll[index]
-                                        #     results$EGeneset <- AttachEGenes(posterior, experiments)
-                                        #
-                                        #if (plotsy==TRUE){
-                                        #       PlotResults(results, EGeneset)
-                                        #     }
-                                        #best_model <- index
-                                        #best_score <- mll[index]
-                                        #logic <- results$logic
 
     }
 
     class(results) <- "epiNEM"
     
-    return(results)#results)
+    return(results)
 }
 
 ###--- HELPER FUNCTIONS ---###
@@ -283,7 +228,6 @@ GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
 
 #' @noRd
 IsBestModel <- function(thisModel, bestModel) {
-                                        # Returns whether or not thisModel equals bestModel
     if (any(dim(thisModel) != dim(bestModel))) return(FALSE)
     else if (any(thisModel != bestModel)) return(FALSE)
     return(TRUE)
@@ -301,6 +245,63 @@ IsBestModel <- function(thisModel, bestModel) {
 #' b <- EpiNEM2BooleanGraph(extTopology)
 #' @return boolean hyper-graph
 EpiNEM2BooleanGraph <- function(t) {
+    transRed <- function(g, max.iter = NULL, verbose = FALSE) {
+        v <- unique(gsub("!", "", unlist(strsplit(unlist(strsplit(g, "=")), "\\+"))))
+        if (is.null(max.iter)) {
+            max.iter <- length(v) - 2
+        }
+        a <- dnf2adj(g)
+        g2 <- g
+        h <- getHierarchy(g2)
+        if (length(h) > 2) {
+            for (i in 1:(length(h)-2)) {
+                for (j in h[[i]]) {
+                    for (k in (i+2):length(h)) {
+                        for (l in h[[k]]) {
+                            if (length(grep(paste(".*", j, ".*=", l, sep = ""), g2)) != 0) {
+                                if (length(grep(paste(".*=", l, sep = ""), g2)) > 1) {
+                                    g2 <- g2[-grep(paste(".*", j, ".*=", l, sep = ""), g2)]
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        g3 <- transClose(g2, max.iter)
+        if (sum(g %in% g3) > 0) {
+            g4 <- g[-which(g %in% g3)]
+        }
+        g5 <- unique(c(g2, g4))
+        return(g5)
+    }
+    convertGraph <- function(g) {
+        g <- sort(g)
+        targets <- gsub(".*=", "", g)
+        g.new <- NULL
+        for (i in unique(targets)) {
+            dnf <- list()
+            count <- 1
+            for (j in g[grep(paste("=", i, sep = ""), g)]) {
+                dnf[[count]] <- sort(unique(unlist(strsplit(gsub("=.*", "", j), "\\+"))))
+                count <- count + 1
+            }
+            cnf <- expand.grid(dnf)
+            dnf <- NULL
+            for (j in 1:dim(cnf)[1]) {
+                dnf <- c(dnf, paste(sort(unique(unlist(cnf[j, ]))), collapse = "+"))
+            }
+            dnf <- paste(sort(dnf), "=", i, sep = "")
+            g.new <- c(g.new, dnf)
+        }
+        vertices <- sort(unique(unlist(strsplit(unlist(strsplit(g.new, "=")), "\\+"))))
+        for (i in vertices) {
+            if (length(grep(paste(i, ".*", i, ".*=", sep = ""), g.new)) > 0) {
+                g.new <- g.new[-grep(paste(i, ".*", i, ".*=", sep = ""), g.new)]
+            }
+        }
+        return(g.new)
+    }
     adj2dnf <- function(A) {
 
         dnf <- NULL
@@ -345,60 +346,60 @@ EpiNEM2BooleanGraph <- function(t) {
 
             if (length(parents) == 2) {
 
-            if (t$logics[i] %in% "OR") {
+                if (t$logics[i] %in% "OR") {
 
-                graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
-
-            }
-
-            if (t$logics[i] %in% "AND") {
-
-                graph <- unique(c(graph, transRed(convertGraph(adj2dnf(t$origModel)))))
-
-
-                graph <- c(graph, convertGraph(graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))
-
-                graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
-
-            }
-
-            if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
-
-                graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
-
-                graph <- c(graph, gsub(parents[2], paste("!", parents[2], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
-
-                graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
-
-            }
-
-            if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
-
-                graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
-
-                graph <- c(graph, gsub(parents[1], paste("!", parents[1], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
-
-                graph <- gsub("\\+=", "=", graph)
-                
-                graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
-
-            }
-
-            if (t$logics[i] %in% "XOR") {
-
-                graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
-
-                edge <-  graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
-
-                for (j in parents) {
-
-                    edge <- gsub(j, paste("!", j, sep = ""), edge)
+                    graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
 
                 }
 
-                graph <- unique(c(graph, edge))
+                if (t$logics[i] %in% "AND") {
 
-            }
+                    graph <- unique(c(graph, transRed(convertGraph(adj2dnf(t$origModel)))))
+
+
+                    graph <- c(graph, convertGraph(graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))
+
+                    graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
+
+                }
+
+                if (t$logics[i] %in% paste(parents[2], " masks the effect of ", parents[1], sep = "")) {
+
+                    graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
+
+                    graph <- c(graph, gsub(parents[2], paste("!", parents[2], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
+
+                    graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
+
+                }
+
+                if (t$logics[i] %in% paste(parents[1], " masks the effect of ", parents[2], sep = "")) {
+
+                    graph <- c(graph, unique(convertGraph(adj2dnf(t$origModel))))
+
+                    graph <- c(graph, gsub(parents[1], paste("!", parents[1], sep = ""), gsub("\\+\\+|^\\+", "", gsub(parents[2], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))), gsub("\\+=", "=", gsub("\\+\\+|^\\+", "", gsub(parents[1], "", graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]))))
+
+                    graph <- gsub("\\+=", "=", graph)
+                    
+                    graph <- graph[-grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
+
+                }
+
+                if (t$logics[i] %in% "XOR") {
+
+                    graph <- unique(c(graph, convertGraph(adj2dnf(t$origModel))))
+
+                    edge <-  graph[grep(paste(paste(parents, collapse = ".*\\+.*"), child, sep = "="), graph)]
+
+                    for (j in parents) {
+
+                        edge <- gsub(j, paste("!", j, sep = ""), edge)
+
+                    }
+
+                    graph <- unique(c(graph, edge))
+
+                }
 
             }
 
