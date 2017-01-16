@@ -56,7 +56,6 @@ NA
 #' @seealso nem
 #' @export
 #' @import
-#' stats
 #' igraph
 #' e1071
 #' nem
