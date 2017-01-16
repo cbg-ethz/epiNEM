@@ -340,4 +340,223 @@ EpiNEM2BooleanGraph <- function(t) {
 
 }
 
+#' @noRd
+convertGraph <- function(g) { ## input graph as disjunctive normal form like that: c("A+B=D", "C=D", "G+F=U", ...); output is the dual element also in disjunctive normal form;
+  g <- sort(g)
+  targets <- gsub(".*=", "", g)
+  g.new <- NULL
+  for (i in unique(targets)) {
+    dnf <- list()
+    count <- 1
+    for (j in g[grep(paste("=", i, sep = ""), g)]) {
+      dnf[[count]] <- sort(unique(unlist(strsplit(gsub("=.*", "", j), "\\+"))))
+      count <- count + 1
+    }
+    cnf <- expand.grid(dnf)
+    dnf <- NULL
+    for (j in 1:dim(cnf)[1]) {
+      dnf <- c(dnf, paste(sort(unique(unlist(cnf[j, ]))), collapse = "+"))
+    }
+    dnf <- paste(sort(dnf), "=", i, sep = "")
+    g.new <- c(g.new, dnf)
+  }
+  vertices <- sort(unique(unlist(strsplit(unlist(strsplit(g.new, "=")), "\\+"))))
+  for (i in vertices) {
+    if (length(grep(paste(i, ".*", i, ".*=", sep = ""), g.new)) > 0) {
+      g.new <- g.new[-grep(paste(i, ".*", i, ".*=", sep = ""), g.new)]
+    }
+  }
+  return(g.new)
+}
+
+#' @noRd
+dnf2adj <- function(dnf, closed = FALSE) {
+  if (length(dnf) == 0) {
+    return(NULL)
+  } else {
+    nodes <- character()
+    for (i in dnf) {
+      tmp <- unlist(strsplit(i, "="))
+      nodes <- c(nodes, tmp[2], unlist(strsplit(tmp[1], "\\+")))
+    }
+    nodes <- unique(gsub("!", "", nodes))
+    adjmat <- matrix(0, length(nodes), length(nodes))
+    colnames(adjmat) <- nodes
+    rownames(adjmat) <- nodes
+    for (i in dnf) {
+      tmp <- unlist(strsplit(i, "="))
+      child <- tmp[2]
+      parents <- unlist(strsplit(tmp[1], "\\+"))
+      for (j in parents) {
+        if (gsub("!", "", j) %in% j) {
+          adjmat[which(rownames(adjmat) %in% j), which(colnames(adjmat) %in% child)] <- 1
+        } else {
+          adjmat[which(rownames(adjmat) %in% gsub("!", "", j)), which(colnames(adjmat) %in% child)] <- -1
+        }
+      }
+    }
+    diag(adjmat) <- 1
+    if (closed) {
+      stop <- FALSE
+      cons <- c(TRUE, rep(FALSE, (length(adjmat) - 1)))
+      while(!stop) {
+        adjmat <- adjmat%*%adjmat
+        if (all(cons == (adjmat != 0))) {
+          stop <- TRUE
+        } else {
+          cons <- (adjmat != 0)
+        }
+      }
+      adjmat[adjmat > 1] <- 1
+      adjmat[adjmat < -1] <- -1
+    }
+    return(adjmat)
+  }
+}
+
+#' @noRd
+getHierarchy <- function(graph) {
+  adj <- dnf2adj(graph)
+  dnf <- adj2dnf(adj)
+  g <- plotDnf(dnf, draw = FALSE)
+  Ypos <- g@renderInfo@nodes$labelY
+  Ynames <- names(g@renderInfo@nodes$labelY)
+  ## Ypos <- Ypos[-grep("and", Ynames)]
+  ## Ynames <- Ynames[-grep("and", Ynames)]
+  hierarchy <- list()
+  count <- 0
+  for (i in sort(unique(Ypos), decreasing = TRUE)) {
+    count <- count + 1
+    hierarchy[[count]] <- Ynames[which(Ypos == i)]
+  }
+  return(hierarchy)
+}
+
+#' @noRd
+transClose <- function(g, max.iter = NULL, verbose = FALSE) { # does soemthign strange!!!
+  v <- unique(gsub("!", "", unlist(strsplit(unlist(strsplit(g, "=")), "\\+"))))
+  if (is.null(max.iter)) {
+    ## max.iter <- length(v) - 2 # too conservative
+    h <- getHierarchy(g)
+    max.iter <- length(h) - 2 # should be sufficient
+  }
+  if (verbose) {
+    print(paste("maximum iterations: ", max.iter, sep = ""))
+  }
+  g.out <- unique(gsub(".*=", "", g))
+  g.closed <- g
+  for (iter in 1:max.iter) {
+    g.old <- g.closed
+    
+    if (verbose) {
+      cat('\r', paste("iteration: ", iter, sep = ""))
+      flush.console()
+    }
+    for (i in g.closed) {
+      input <- gsub("!", "", unlist(strsplit(unlist(strsplit(i, "="))[1], "\\+")))
+      input <- intersect(input, g.out)
+      output <- gsub(".*=", "", i)
+      if (length(input) == 0) { next() }
+      for (j in unique(input)) {
+        if (j %in% unlist(strsplit(unlist(strsplit(i, "="))[1], "\\+"))) {
+          for (k in gsub("=.*", "", g[grep(paste("=", j, sep = ""), g)])) {
+            g.closed <- c(g.closed, gsub(j, k, i))
+          }
+        } else {
+          literals <- list()
+          count <- 0
+          for (k in unique(gsub("=.*", "", g[grep(paste("=", j, sep = ""), g)]))) {
+            count <- count + 1
+            literals[[count]] <- gsub("!!", "", paste("!", unlist(strsplit(k, "\\+")), sep = ""))
+          }
+          combis <- expand.grid(literals)
+          combis <- apply(combis, c(1,2), as.character)
+          for (k in 1:nrow(combis)) {
+            g.closed <- c(g.closed, gsub(paste("!", j, sep = ""), paste(combis[k, ], collapse = "+"), i))
+          }
+        }
+      }
+    }
+    g.closed <- unique(g.closed)
+    if (all(g.closed %in% g.old)) {
+      if (verbose) {
+        cat("\n")
+        print(paste("successfull convergence", sep = ""))
+      }
+      break()
+    }
+  }
+  if (verbose) {
+    cat("\n")
+  }
+  g.closed <- unique(g.closed)
+  for (j in 1:length(g.closed)) {
+    i <- g.closed[j]
+    input <- unlist(strsplit(i, "="))
+    output <- input[2]
+    input <- unlist(strsplit(input[1], "\\+"))
+    input <- unique(input)
+    g.closed[j] <- paste(paste(input, collapse = "+"), output, sep = "=")
+  }
+  if (length(grep(paste(paste(v, ".*", v, ".*=", sep = ""), collapse = "|"), g.closed)) > 0) {
+    g.closed <- g.closed[-grep(paste(paste(v, ".*", v, ".*=", sep = ""), collapse = "|"), g.closed)]
+  }
+  return(g.closed)
+}
+
+#' @noRd
+transRed <- function(g, max.iter = NULL, verbose = FALSE) { # general transitive reduction:
+  v <- unique(gsub("!", "", unlist(strsplit(unlist(strsplit(g, "=")), "\\+"))))
+  if (is.null(max.iter)) {
+    max.iter <- length(v) - 2
+  }
+  a <- dnf2adj(g)
+  g2 <- g
+  h <- getHierarchy(g2)
+  if (length(h) > 2) {
+    for (i in 1:(length(h)-2)) {
+      for (j in h[[i]]) {
+        for (k in (i+2):length(h)) {
+          for (l in h[[k]]) {
+            if (length(grep(paste(".*", j, ".*=", l, sep = ""), g2)) != 0) {
+              if (length(grep(paste(".*=", l, sep = ""), g2)) > 1) {
+                g2 <- g2[-grep(paste(".*", j, ".*=", l, sep = ""), g2)]
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+  g3 <- transClose(g2, max.iter)
+  if (sum(g %in% g3) > 0) {
+    g4 <- g[-which(g %in% g3)]
+  }
+  g5 <- unique(c(g2, g4))
+  return(g5)
+}
+
+#' @noRd
+adj2dnf <- function(A) {
+
+  dnf <- NULL
+  
+  for (i in 1:ncol(A)) {
+    for (j in 1:nrow(A)) {
+      if (i %in% j) { next() }
+      if (A[i, j] == 1) {
+        dnf <- c(dnf, paste(colnames(A)[i], rownames(A)[j], sep = "="))
+      }
+      if (A[i, j] == -1) {
+        dnf <- c(dnf, paste("!", colnames(A)[i], "=", rownames(A)[j], sep = ""))
+      }
+    }
+  }
+
+  dnf <- unique(dnf)
+  
+  return(dnf)
+
+}
+
 ###--- END OF HELPER FUNCTIONS ---###
