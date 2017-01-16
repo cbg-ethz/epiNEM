@@ -56,6 +56,7 @@ NA
 #' @seealso nem
 #' @export
 #' @import
+#' stats
 #' igraph
 #' e1071
 #' nem
@@ -67,9 +68,7 @@ NA
 #' rownames(data) <- paste("E", 1:100, sep = "_")
 #' res <- epiNEM(data, method = "exhaustive")
 #' plot(res)
-epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0,
-                   random=list(single=4, double=1, reporters=100, FPrate=0.1,
-                               FNrate=0.1, replicates=1), plotsy=TRUE, ltype = "marginal", para = c(0.13, 0.05)) {
+epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0, random=list(single=4, double=1, reporters=100, FPrate=0.1, FNrate=0.1, replicates=1), plotsy=TRUE, ltype = "marginal", para = c(0.13, 0.05)) {
 
     ##--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
@@ -188,11 +187,9 @@ epiNEM <- function(filename="random", method="greedy", nIterations=10, nModels=0
 #' extTopology <- ExtendTopology(topology$model, 100)
 #' @return extended topology in which reporters are linked to pathway genes
 ExtendTopology <- function(topology, nReporters) {
-    reporters     <- unlist(lapply(1:nReporters, function(n) paste("reporter", n,
-                                                                   sep="-")))
+    reporters     <- unlist(lapply(1:nReporters, function(n) paste("reporter", n, sep="-")))
     linkedEffects <- sample(1:ncol(topology), nReporters, replace=TRUE)
-    extTopology   <- sapply(linkedEffects, function(e) lapply(1:ncol(topology),
-                                                              function(c) ifelse(e == c, 1, 0)))
+    extTopology   <- sapply(linkedEffects, function(e) lapply(1:ncol(topology), function(c) ifelse(e == c, 1, 0)))
     extTopology   <- matrix(unlist(extTopology), ncol=ncol(topology), byrow=TRUE)
     dimnames(extTopology) <- list(reporters, colnames(topology))
     return(extTopology)
@@ -213,8 +210,7 @@ ExtendTopology <- function(topology, nReporters) {
 #' extTopology <- ExtendTopology(topology$model, 100)
 #' sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
 #' @return data matrix
-GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
-                                        # Returns an artificial noisy data matrix
+GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) { # Returns an artificial noisy data matrix
     perfectData <- extTopology %*% t(model)
     perfectData <- perfectData[, rep(seq_len(ncol(perfectData)), replicates)]
     fps <- sample(which(perfectData == 0), floor(sum(perfectData == 0)*FPrate))
@@ -245,6 +241,137 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @return boolean hyper-graph
 EpiNEM2BooleanGraph <- function(t) {
     transRed <- function(g, max.iter = NULL, verbose = FALSE) {
+        getHierarchy <- function(graph) {
+            adj <- dnf2adj(graph)
+            dnf <- adj2dnf(adj)
+            g <- plotDnf(dnf, draw = FALSE)
+            Ypos <- g@renderInfo@nodes$labelY
+            Ynames <- names(g@renderInfo@nodes$labelY)
+            ## Ypos <- Ypos[-grep("and", Ynames)]
+            ## Ynames <- Ynames[-grep("and", Ynames)]
+            hierarchy <- list()
+            count <- 0
+            for (i in sort(unique(Ypos), decreasing = TRUE)) {
+                count <- count + 1
+                hierarchy[[count]] <- Ynames[which(Ypos == i)]
+            }
+            return(hierarchy)
+        }
+
+        transClose <- function(g, max.iter = NULL, verbose = FALSE) { # does soemthign strange!!!
+            v <- unique(gsub("!", "", unlist(strsplit(unlist(strsplit(g, "=")), "\\+"))))
+            if (is.null(max.iter)) {
+                ## max.iter <- length(v) - 2 # too conservative
+                h <- getHierarchy(g)
+                max.iter <- length(h) - 2 # should be sufficient
+            }
+            if (verbose) {
+                print(paste("maximum iterations: ", max.iter, sep = ""))
+            }
+            g.out <- unique(gsub(".*=", "", g))
+            g.closed <- g
+            for (iter in 1:max.iter) {
+                g.old <- g.closed
+                
+                if (verbose) {
+                    cat('\r', paste("iteration: ", iter, sep = ""))
+                    flush.console()
+                }
+                for (i in g.closed) {
+                    input <- gsub("!", "", unlist(strsplit(unlist(strsplit(i, "="))[1], "\\+")))
+                    input <- intersect(input, g.out)
+                    output <- gsub(".*=", "", i)
+                    if (length(input) == 0) { next() }
+                    for (j in unique(input)) {
+                        if (j %in% unlist(strsplit(unlist(strsplit(i, "="))[1], "\\+"))) {
+                            for (k in gsub("=.*", "", g[grep(paste("=", j, sep = ""), g)])) {
+                                g.closed <- c(g.closed, gsub(j, k, i))
+                            }
+                        } else {
+                            literals <- list()
+                            count <- 0
+                            for (k in unique(gsub("=.*", "", g[grep(paste("=", j, sep = ""), g)]))) {
+                                count <- count + 1
+                                literals[[count]] <- gsub("!!", "", paste("!", unlist(strsplit(k, "\\+")), sep = ""))
+                            }
+                            combis <- expand.grid(literals)
+                            combis <- apply(combis, c(1,2), as.character)
+                            for (k in 1:nrow(combis)) {
+                                g.closed <- c(g.closed, gsub(paste("!", j, sep = ""), paste(combis[k, ], collapse = "+"), i))
+                            }
+                        }
+                    }
+                }
+                g.closed <- unique(g.closed)
+                if (all(g.closed %in% g.old)) {
+                    if (verbose) {
+                        cat("\n")
+                        print(paste("successfull convergence", sep = ""))
+                    }
+                    break()
+                }
+            }
+            if (verbose) {
+                cat("\n")
+            }
+            g.closed <- unique(g.closed)
+            for (j in 1:length(g.closed)) {
+                i <- g.closed[j]
+                input <- unlist(strsplit(i, "="))
+                output <- input[2]
+                input <- unlist(strsplit(input[1], "\\+"))
+                input <- unique(input)
+                g.closed[j] <- paste(paste(input, collapse = "+"), output, sep = "=")
+            }
+            if (length(grep(paste(paste(v, ".*", v, ".*=", sep = ""), collapse = "|"), g.closed)) > 0) {
+                g.closed <- g.closed[-grep(paste(paste(v, ".*", v, ".*=", sep = ""), collapse = "|"), g.closed)]
+            }
+            return(g.closed)
+        }
+        dnf2adj <- function(dnf, closed = FALSE) {
+            if (length(dnf) == 0) {
+                return(NULL)
+            } else {
+                nodes <- character()
+                for (i in dnf) {
+                    tmp <- unlist(strsplit(i, "="))
+                    nodes <- c(nodes, tmp[2], unlist(strsplit(tmp[1], "\\+")))
+                }
+                nodes <- unique(gsub("!", "", nodes))
+                adjmat <- matrix(0, length(nodes), length(nodes))
+                colnames(adjmat) <- nodes
+                rownames(adjmat) <- nodes
+                for (i in dnf) {
+                    tmp <- unlist(strsplit(i, "="))
+                    child <- tmp[2]
+                    parents <- unlist(strsplit(tmp[1], "\\+"))
+                    for (j in parents) {
+                        if (gsub("!", "", j) %in% j) {
+                            adjmat[which(rownames(adjmat) %in% j), which(colnames(adjmat) %in% child)] <- 1
+                        } else {
+                            adjmat[which(rownames(adjmat) %in% gsub("!", "", j)), which(colnames(adjmat) %in% child)] <- -1
+                        }
+                    }
+                }
+                diag(adjmat) <- 1
+                if (closed) {
+                    stop <- FALSE
+                    cons <- c(TRUE, rep(FALSE, (length(adjmat) - 1)))
+                    while(!stop) {
+                        adjmat <- adjmat%*%adjmat
+                        if (all(cons == (adjmat != 0))) {
+                            stop <- TRUE
+                        } else {
+                            cons <- (adjmat != 0)
+                        }
+                    }
+                    adjmat[adjmat > 1] <- 1
+                    adjmat[adjmat < -1] <- -1
+                }
+                return(adjmat)
+            }
+        }
+
         v <- unique(gsub("!", "", unlist(strsplit(unlist(strsplit(g, "=")), "\\+"))))
         if (is.null(max.iter)) {
             max.iter <- length(v) - 2

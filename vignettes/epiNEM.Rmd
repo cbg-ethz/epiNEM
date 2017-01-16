@@ -18,13 +18,13 @@ Simulation and application results are imported from pre-calculated data sets to
 ## Loading epiNEM
 
 ```{r}
-## install.packages("devtools")
+install.packages("devtools", repos = "https://cloud.r-project.org/")
 
 library(devtools)
 
 install_github("rstudio/rmarkdown")
 
-install_github("cbg-ethz/epiNEM", quiet = TRUE)
+install_github("cbg-ethz/epiNEM")
 
 library(epiNEM)
 ```
