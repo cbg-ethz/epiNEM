@@ -232,7 +232,6 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @author Madeline Diekmann
 #' @seealso CreateTopology
 #' @export
-#' @import bnem
 #' @examples
 #' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
