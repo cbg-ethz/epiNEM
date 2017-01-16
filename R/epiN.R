@@ -239,9 +239,6 @@ IsBestModel <- function(thisModel, bestModel) {
 #' b <- EpiNEM2BooleanGraph(extTopology)
 #' @return boolean hyper-graph
 EpiNEM2BooleanGraph <- function(t) {
-    devtools::use_package("bnem")
-    devtools::document()
-  
     if (is.matrix(t)) {
 
         colnames(t) <- paste("S_vs_S_", gsub("\\.", "_", colnames(t)), sep = "")
