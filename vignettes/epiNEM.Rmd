@@ -4,9 +4,9 @@ author: "Madeline Diekmann & Martin Pirkl"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
 vignette: >
-%\VignetteIndexEntry{epiNEM}
-%\VignetteEngine{knitr::rmarkdown}
-%\VignetteEncoding{UTF-8}
+    %\VignetteIndexEntry{epiNEM}
+    %\VignetteEngine{knitr::rmarkdown}
+    %\VignetteEncoding{UTF-8}
 ---
 ## Introduction
 

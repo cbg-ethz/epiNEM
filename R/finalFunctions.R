@@ -155,9 +155,10 @@ includeLogic <- function(adj, experiments, mutants){
     adj <- adj[order(rownames(adj)), order(colnames(adj))]
     mutantslist <- strsplit(mutants, ".", fixed=TRUE)
     doublepos <- c()
-    for (i in 1:length(mutantslist)){
-        if (length(unlist(mutantslist[i])) == 2)
+    for (i in 1:length(mutantslist)) {
+        if (length(unlist(mutantslist[i])) == 2) {
             doublepos <- c(doublepos, i)
+        }
     }
     ## look for suitable triples and create logic vector depending
     ## on the relationship of the parents
@@ -165,13 +166,13 @@ includeLogic <- function(adj, experiments, mutants){
     logic <- c()
     liste <- list()
     column <- c()
-    for (c in 1:length(experiments)){
+    for (c in 1:length(experiments)) {
         singles <- c()
         parents <- names(which(adj[,c]==1))
         if ((length(parents) == 2) &&
             ##check whether double mutant is available in the data
             (parents[1] %in% unlist(mutantslist[doublepos])) &&
-            parents[2] %in% unlist(mutantslist[doublepos])){
+            parents[2] %in% unlist(mutantslist[doublepos])) {
             for (i in 1:length(parents)) {
                 singles <- cbind(singles, parents[i])
             }
@@ -180,7 +181,7 @@ includeLogic <- function(adj, experiments, mutants){
             diag(relation) <- 0
             NOT2 <- paste(parents[2], "masks the effect of", parents[1])
             NOT1 <- paste(parents[1], "masks the effect of", parents[2])
-            if (sum(relation) == 0){
+            if (sum(relation) == 0) {
                 logic <- c("OR", "XOR", "AND", NOT1, NOT2)
             }
             if (relation[2] == 1) {
@@ -209,13 +210,13 @@ includeLogic <- function(adj, experiments, mutants){
             column <- cbind(column, c)
         }
     }
-    if (length(liste) > 0){
+    if (length(liste) > 0) {
         logicmatrix <- as.matrix(expand.grid(liste))
         ## create logics file from adjacency matrix
         ## using logics provided by logic vector
         ## ready for using BoolNet
         randomnames <- sort(runif(nrow(logicmatrix)))
-        for (modelno in 1:nrow(logicmatrix)){
+        for (modelno in 1:nrow(logicmatrix)) {
             lo <- 0
             if (!dir.exists("temp")) {
                 dir.create("temp")
@@ -235,9 +236,9 @@ includeLogic <- function(adj, experiments, mutants){
                 }
                 count2 <- 0
                 count3 <- 0
-                for (r in experiments){
+                for (r in experiments) {
                     if (adj[r,c]==1) {
-                        if ((count==1) && (which(rownames(adj)==c) %in% column)){
+                        if ((count==1) && (which(rownames(adj)==c) %in% column)) { 
                             help <- r
                             count <- count+1
                             if (sum(adj[, c]) == 1) {
@@ -245,7 +246,7 @@ includeLogic <- function(adj, experiments, mutants){
                                 lo <- lo + 1
                             }
                         }
-                        else if ((count == 2) && (which(rownames(adj)==c) %in% column)){
+                        else if ((count == 2) && (which(rownames(adj)==c) %in% column)) {
                             NOT2 <- paste(r, "masks the effect of", help)
                             NOT1 <- paste(help, "masks the effect of", r)
                             if (count3 < 1) {
@@ -276,7 +277,7 @@ includeLogic <- function(adj, experiments, mutants){
                                           paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")",
                                                 sep = ""),
                                           sep = "")
-                            ## help refers to the first element
+                                ## help refers to the first element
                             } else if
                             (logicmatrix[modelno, lo]==NOT2) {
                                 tmp <-
@@ -291,15 +292,16 @@ includeLogic <- function(adj, experiments, mutants){
                                           paste("(", r, " & ! ", help, ")",
                                                 sep=""),
                                           sep = "")
-                        } else {
-                            count2 <- count2 + 1
-                            if
-                            (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
-                                tmp <- paste(tmp,
-                                             paste(r, " | ", sep=""), sep = "")
                             } else {
-                                tmp <- paste(tmp, paste(r, sep=""), sep = "")
-                                lo <- lo + 1
+                                count2 <- count2 + 1
+                                if
+                                (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
+                                    tmp <- paste(tmp,
+                                                 paste(r, " | ", sep=""), sep = "")
+                                } else {
+                                    tmp <- paste(tmp, paste(r, sep=""), sep = "")
+                                    lo <- lo + 1
+                                }
                             }
                         }
                     }
@@ -309,11 +311,11 @@ includeLogic <- function(adj, experiments, mutants){
             }
             write(network, file = path)
         }
-            test <- lapply(1:nrow(logicmatrix),
-                           function(x) getExtendedAdjacency(x,logicmatrix,
-                                                            column, adj, mutants,
-                                                            experiments,
-                                                            sort(randomnames)))
+        test <- lapply(1:nrow(logicmatrix),
+                       function(x) getExtendedAdjacency(x,logicmatrix,
+                                                        column, adj, mutants,
+                                                        experiments,
+                                                        sort(randomnames)))
         return(test)
     }
 }
@@ -322,9 +324,9 @@ includeLogic <- function(adj, experiments, mutants){
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
 #' @noRd
-    getExtendedAdjacency <-function(modelno, logicmatrix,
-                                    column, adj, mutants,
-                                    experiments, randomnames) {
+getExtendedAdjacency <-function(modelno, logicmatrix,
+                                column, adj, mutants,
+                                experiments, randomnames) {
     randomnames <- sort(randomnames)
     path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
