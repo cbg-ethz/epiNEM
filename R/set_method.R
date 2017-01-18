@@ -5,31 +5,31 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
     cat("\n")
     cat(n)
     maxLlh <- -Inf
-    startModel   <- CreateRandomGraph(experiments)
+    startModel <- CreateRandomGraph(experiments)
     nonSelfEdges <- which(diag(nrow(startModel)) < 1)
 
     ##--- Iteratively update model and find highest scoring logics ---#
     extendedModels <- includeLogic(startModel, experiments, mutants)
-    while (length(extendedModels)==0){
-        startModel   <- CreateRandomGraph(experiments)
+    while (length(extendedModels)==0) {
+        startModel <- CreateRandomGraph(experiments)
         extendedModels <- includeLogic(startModel, experiments, mutants)
     }
     extendedModels <- unlist(extendedModels, recursive=FALSE)
-    result    <- sapply(extendedModels, Mll, data2, data0)
+    result <- sapply(extendedModels, Mll, data2, data0)
     mLLscores <- unlist(result["mLL",])
-    score     <- max(mLLscores)
+    score <- max(mLLscores)
     model <- startModel
 
-    while (score > maxLlh) { # Climb that hill!
+    while (score > maxLlh) {
         cat('.')
-        maxLlh    <- score
+        maxLlh <- score
         prevModel <- model
-        nextGen   <- FindNeighbours(model, nonSelfEdges)
+        nextGen <- FindNeighbours(model, nonSelfEdges)
         extendedModels <- lapply(nextGen, includeLogic, experiments, mutants)
         extendedModels2 <- unlist(unlist(extendedModels, recursive=FALSE),
                                   recursive=FALSE)
-        result    <- sapply(extendedModels2, Mll, data2, data0)
-        mll=unlist(result["mLL",])
+        result <- sapply(extendedModels2, Mll, data2, data0)
+        mll <- unlist(result["mLL",])
         index <- which.max(mll)
 
         score <- mll[index]
@@ -39,7 +39,7 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
 }
 
 #' @noRd
-FindNeighbours <- function(model, edges){
+FindNeighbours <- function(model, edges) {
     ## Return all models that differ only one edge from the current model by
     ## removing or adding a non-self edge.
     ChangeEdge <- function(edge, model) {
@@ -56,7 +56,7 @@ FindNeighbours <- function(model, edges){
 }
 
 #' @noRd
-EnumerateModels <- function(size, nodes="none") {
+EnumerateModels <- function(size, nodes=NULL) {
     ## Enumerates all possible adjacency matrices for a given size.
     ## Returns a list of
     ## all unique transitively closed adjacency matrices.
@@ -64,7 +64,9 @@ EnumerateModels <- function(size, nodes="none") {
     if (!size %in% 2:5) {
         stop("Enumeration only feasible for networks up to 5 nodes.\n")
     }
-    if (length(nodes) == 0) nodes <- LETTERS[1:size]
+    if (length(nodes) == 0) {
+        nodes <- LETTERS[1:size]
+    }
 
     createModels <- function(bincom, size, nodes) {
         model <- diag(size)
