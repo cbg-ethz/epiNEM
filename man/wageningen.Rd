@@ -3,9 +3,11 @@
 \docType{data}
 \name{wageningen}
 \alias{wageningen}
-\title{Example data: epiNEM results for the Wageningen et al., 2010 knock-out screen}
+\title{Example data: epiNEM results for
+the Wageningen et al., 2010 knock-out screen}
 \description{
-Example data: epiNEM results for the Wageningen et al., 2010 knock-out screen
+Example data: epiNEM results for
+the Wageningen et al., 2010 knock-out screen
 }
 \examples{
 data(wageningen)

@@ -3,9 +3,11 @@
 \docType{data}
 \name{sameith_string}
 \alias{sameith_string}
-\title{sig. of string interaction scores for Sameith et al., 2015 data}
+\title{sig. of string interaction scores
+for Sameith et al., 2015 data}
 \description{
-sig. of string interaction scores for Sameith et al., 2015 data
+sig. of string interaction scores
+for Sameith et al., 2015 data
 }
 \examples{
 data(sameith_string)

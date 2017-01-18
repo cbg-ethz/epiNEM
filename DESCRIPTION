@@ -14,4 +14,4 @@ biocViews: Pathways, SystemsBiology, NetworkInference, Network
 RoxygenNote: 5.0.1
 Imports: BoolNet, e1071, gtools, stats, igraph, nem, utils
 VignetteBuilder: knitr
-Suggests: knitr
+Suggests: knitr, RUunit, BiocGenerics

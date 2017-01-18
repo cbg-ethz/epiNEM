@@ -3,9 +3,11 @@
 \docType{data}
 \name{wageningen_string}
 \alias{wageningen_string}
-\title{sig. of string interaction scores for van Wageningen et al., 2010 data}
+\title{sig. of string interaction scores
+for van Wageningen et al., 2010 data}
 \description{
-sig. of string interaction scores for van Wageningen et al., 2010 data
+sig. of string interaction scores
+for van Wageningen et al., 2010 data
 }
 \examples{
 data(wageningen_string)

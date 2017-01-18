@@ -12,7 +12,8 @@ ExtendTopology(topology, nReporters)
 \item{nReporters}{number of effects reporters}
 }
 \value{
-extended topology in which reporters are linked to pathway genes
+extended topology in which reporters
+are linked to pathway genes
 }
 \description{
 Extending topology of normal "nem"

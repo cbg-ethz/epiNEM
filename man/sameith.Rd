@@ -3,9 +3,11 @@
 \docType{data}
 \name{sameith}
 \alias{sameith}
-\title{Example data: epiNEM results for the Sameith et al., 2015 knock-out screen}
+\title{Example data: epiNEM results for
+the Sameith et al., 2015 knock-out screen}
 \description{
-Example data: epiNEM results for the Sameith et al., 2015 knock-out screen
+Example data: epiNEM results for
+the Sameith et al., 2015 knock-out screen
 }
 \examples{
 data(sameith)

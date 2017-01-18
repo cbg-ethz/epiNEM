@@ -11,24 +11,32 @@ epiNEM(filename = "random", method = "greedy", nIterations = 10,
 }
 \arguments{
 \item{filename}{A binary, tab-delimited matrix.
-Columns: single and double knockdowns. Rows: genes showing effect or not?
-Default: random; artificial data is generated to 'random' specifications}
+Columns: single and double knockdowns.
+Rows: genes showing effect or not?
+Default: random; artificial data is
+generated to 'random' specifications}
 
-\item{method}{greedy or exhaustive search. Default: greedy}
+\item{method}{greedy or exhaustive search.
+Default: greedy}
 
-\item{nIterations}{number of iterations. Default: 10}
+\item{nIterations}{number of iterations.
+Default: 10}
 
 \item{nModels}{number of Models. Default: 0}
 
-\item{random}{list specifying how the data should be generated:
-no. of single mutants, no. of double mutants, no. of reporterGenes,
+\item{random}{list specifying how the
+data should be generated:
+no. of single mutants, no. of
+double mutants, no. of reporterGenes,
 FP-rate, FN-rate, no. of replicates}
 
 \item{plotsy}{atm not used}
 
-\item{ltype}{likelihood either "marginal" or "maximum"}
+\item{ltype}{likelihood either
+"marginal" or "maximum"}
 
-\item{para}{false positive and false negative rates}
+\item{para}{false positive and
+false negative rates}
 }
 \value{
 optimized logical network

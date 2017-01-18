@@ -1,5 +1,6 @@
 ---
-title: "Epistatic Nested Effects Models - Inferring mixed epistatis from indirect measurements of knockout screens."
+title: "Epistatic Nested Effects Models
+- Inferring mixed epistatis from indirect measurements of knockout screens."
 author: "Madeline Diekmann & Martin Pirkl"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
@@ -10,11 +11,22 @@ vignette: >
 ---
 ## Introduction
 
-The method in this package is an extension of the classic Nested Effects Models provided in the package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of an upstream pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
-However, classic Nested Effects Models do not account for double knockouts. In this package \emph{epiNEM}, one additional layer of complexity is added. For every two genes, acting on one gene together, the relationship is evaluated and added to the model as a logical gate. Genetic relationships are represented by the logics OR (no relationship), AND (functional overlap), NOT (masking or inhibiting) and XOR (mutual prevention from acting on gene C).
+The method in this package is an extension of the classic Nested Effects
+Models provided in the package \emph{nem}. Nested Effects Models is a pathway
+reconstruction method, which takes into account effects of downstream genes.
+Those effects are observed for every knockout of an upstream pathway gene, and
+the nested structure of observed effects can then be used to reconstruct the
+pathway structure.
+However, classic Nested Effects Models do not account for double knockouts.
+In this package \emph{epiNEM}, one additional layer of complexity is added.
+For every two genes, acting on one gene together, the relationship is evaluated
+and added to the model as a logical gate. Genetic relationships are represented
+by the logics OR (no relationship), AND (functional overlap),
+NOT (masking or inhibiting) and XOR (mutual prevention from acting on gene C).
 Please see the references for a more detailed description of NEMs and epiNEMs.
 
-Simulation and application results are imported from pre-calculated data sets to shorten the runtime of this vignette.
+Simulation and application results are imported from pre-calculated data sets
+to shorten the runtime of this vignette.
 
 ## Loading epiNEM
 
@@ -30,7 +42,11 @@ library(epiNEM)
 
 ## Simulations
 
-We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM), Aracne and the PC algorithm for 100 four node networks and respective data experiencing different levels of noise. The evaluation is done by accounting for the accuracy of discovered edges and in the case of B-NEM and epiNEM also the truth tables and logical gates.
+We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM),
+Aracne and the PC algorithm for 100 four node networks and respective data
+experiencing different levels of noise. The evaluation is done by accounting
+for the accuracy of discovered edges and in the case of B-NEM and epiNEM also
+the truth tables and logical gates.
 
 ```{r}
 install_github("MartinFXP/B-NEM")
@@ -85,14 +101,16 @@ for (i in 1:runs) {
 
         print(paste("noiselvl ", j, sep = ""))
         
-        topology <- CreateTopology(random$single, random$double, force = forcelogic)
+        topology <- CreateTopology(random$single, random$double,
+                                   force = forcelogic)
 
         topology <- unlist(unique(topology), recursive = FALSE)
 
         extTopology <- ExtendTopology(topology$model, random$reporters)
 
         sortedData <- GenerateData(topology$model, extTopology, 
-                                   random$FPrate, random$FNrate[j], random$replicates)
+                                   random$FPrate, random$FNrate[j],
+                                   random$replicates)
 
         logicgate[i, j] <- paste(topology$logics, collapse = "_")
 
@@ -164,7 +182,8 @@ for (i in 1:runs) {
             parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.",
                                colnames(sortedData))], "\\.")))
 
-            nodes <- unique(colnames(sortedData)[-grep("\\.", colnames(sortedData))])
+            nodes <-
+            unique(colnames(sortedData)[-grep("\\.", colnames(sortedData))])
 
             child <- nodes[-which(nodes %in% parents)]
 
@@ -174,7 +193,8 @@ for (i in 1:runs) {
                 for (l in LETTERS[1:random$single]) {
                     if (k %in% l) { next() }
                     if (k %in% parents) {
-                        sifMatrix <- rbind(sifMatrix, c(k, "1", l), c(k, "-1", l))
+                        sifMatrix <-
+                        rbind(sifMatrix, c(k, "1", l), c(k, "-1", l))
                     } else {
                         sifMatrix <- rbind(sifMatrix, c(k, "1", l))
                     }
@@ -206,8 +226,9 @@ for (i in 1:runs) {
             time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
             print(time[2, i, j])
 
-            ers2 <- computeFc(CNOlist, t(simulateStatesRecursive(CNOlist,
-                                                                 model, bga$bString)))
+            ers2 <- computeFc(CNOlist,
+                              t(simulateStatesRecursive(CNOlist,
+                                                        model, bga$bString)))
             ers2 <- ers2[, unique(colnames(fc))]
             ers2 <- ers2[, order(colnames(ers2))]
 
@@ -219,7 +240,8 @@ for (i in 1:runs) {
             spec[2, i, j] <- tn/(tn+fp)
             gtn2 <- abs(dnf2adj(gtn))
             if (length(grep("S", rownames(gtn2))) > 0) {
-                gtn2 <- gtn2[-grep("S", rownames(gtn2)), -grep("S", colnames(gtn2))]
+                gtn2 <-
+                gtn2[-grep("S", rownames(gtn2)), -grep("S", colnames(gtn2))]
             }
             gtn2 <- gtn2[order(rownames(gtn2)), order(colnames(gtn2))]
             res <- abs(dnf2adj(bga$graph))
@@ -233,8 +255,9 @@ for (i in 1:runs) {
                 res <- res[order(rownames(res)), order(colnames(res))]
             }
             if (nrow(res) < nrow(gtn2)) {
-                res2 <- rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
-                              matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
+                res2 <-
+                rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
+                      matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
                 colnames(res2)[(ncol(res)+1):ncol(res2)] <-
                                      colnames(gtn2)[which(!(colnames(gtn2)
                                      %in% colnames(res)))]
@@ -268,8 +291,9 @@ for (i in 1:runs) {
 
             reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
             gtnadj <- topology$origModel
-            gtnadj <- gtnadj[order(apply(gtnadj, 1, sum), decreasing = TRUE),
-                                        order(apply(gtnadj, 2, sum), decreasing = FALSE)]
+            gtnadj <-
+            gtnadj[order(apply(gtnadj, 1, sum), decreasing = TRUE),
+                   order(apply(gtnadj, 2, sum), decreasing = FALSE)]
             gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
             gtnadj <- gtnadj[order(rownames(gtnadj)), order(colnames(gtnadj))]
             eadj <- topology$origModel
@@ -277,8 +301,9 @@ for (i in 1:runs) {
             reddata2 <- matrix(0, nrow(reddata)*random$replicates,
                                          length(unique(colnames(reddata))))
             for (k in 1:length(unique(colnames(reddata)))) {
-                reddata2[, k] <- as.vector(reddata[, which(colnames(reddata) %in%
-                                                     unique(colnames(reddata))[k])])
+                reddata2[, k] <-
+                as.vector(reddata[, which(colnames(reddata) %in%
+                          unique(colnames(reddata))[k])])
             }
             colnames(reddata2) <- unique(colnames(reddata))
 
@@ -369,8 +394,10 @@ spec2 <- sim$spec2
 logics <- sim$logics
 time <- sim$time
 
-colvec <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)),
-            rep("darkgreen", length(noiselvls)), rep("brown", length(noiselvls)),
+colvec <- c(rep("orange", length(noiselvls)),
+            rep("blue", length(noiselvls)),
+            rep("darkgreen", length(noiselvls)),
+            rep("brown", length(noiselvls)),
             rep("darkgrey", length(noiselvls)))
 
 acc <- (sens + spec)/2
@@ -392,7 +419,8 @@ boxplot(timeframe, col = colvec, main = "running time", ylab = "seconds")
 
 abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+axis(1, c(3, 11, 19, 28, 36)+1,
+     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
      tick = FALSE, pos = -25)
 
 accframe2 <- as.data.frame(
@@ -402,11 +430,13 @@ accframe2 <- as.data.frame(
 
 colnames(accframe2) <- rep(noiselvls, 5)
 
-boxplot(accframe2, col = colvec, main = "accuracy of the inferred edges", ylim = c(0,1))
+boxplot(accframe2, col = colvec,
+                   main = "accuracy of the inferred edges", ylim = c(0,1))
 
 abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+axis(1, c(3, 11, 19, 28, 36)+1,
+     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
      tick = FALSE, pos = -0.2)
 
 ## logical nems:
@@ -418,12 +448,14 @@ logicsframe <- as.data.frame(cbind(data.frame(epiNEM = logics[1,,]),
 
 colnames(logicsframe) <- rep(noiselvls, 2)
 
-boxplot(logicsframe, col = colvec2, main = "accuracy of the inferred logic gate",
+boxplot(logicsframe, col = colvec2,
+        main = "accuracy of the inferred logic gate",
         ylim = c(0,1))
 
 abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+axis(1, c(3, 11, 19, 28, 36)+1,
+     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
      tick = FALSE, pos = -0.2)
 
 accframe <- as.data.frame(cbind(data.frame(epiNEM = acc[1,,]),
@@ -431,46 +463,64 @@ accframe <- as.data.frame(cbind(data.frame(epiNEM = acc[1,,]),
 
 colnames(accframe) <- rep(noiselvls, 2)
 
-boxplot(accframe, col = colvec2, main = "accuracy of the inferred expected data",
+boxplot(accframe, col = colvec2,
+        main = "accuracy of the inferred expected data",
         ylim = c(0,1))
 
 abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
 
-axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
+axis(1, c(3, 11, 19, 28, 36)+1,
+     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
      tick = FALSE, pos = -0.2)
 ```
 
 ## Yeast knockout screens
 
-In this section we analyse previously published yeast knockout screens. The screens consist of gene expression data derived from double and single knockout mutants. We use epiNEM on each double mutant combined with each single mutant.
+In this section we analyse previously published yeast knockout
+screens. The screens consist of gene expression data derived from
+double and single knockout mutants. We use epiNEM on each double
+mutant combined with each single mutant.
 
-The results (logics) of the knockout screens have been annotated according to the following legend, where the x-axis denotes the effect on the gene and the y-axis denotes the type of knock-out:
+The results (logics) of the knockout screens have been annotated
+according to the following legend, where the x-axis denotes the
+effect on the gene and the y-axis denotes the type of knock-out:
 
 ```{r, warning=FALSE, fig.width = 9, fig.height=5}
 a1 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
           main = "OR", col = "Greys", sub = "", colorkey = NULL)
 a2 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
           main = "AND", col = "Greys", sub = "", colorkey = NULL)
 a3 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
-          main = "B masks effect of A", col = "Greys", sub = "", colorkey = NULL)
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
+          main = "B masks effect of A", col = "Greys", sub = "",
+          colorkey = NULL)
 a4 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
-          main = "A masks effect of B", col = "Greys", sub = "", colorkey = NULL)
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
+          main = "A masks effect of B", col = "Greys", sub = "",
+          colorkey = NULL)
 a5 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
           main = "XOR", col = "Greys", sub = "", colorkey = NULL)
 a6 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 a7 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 a8 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])), Colv = FALSE, Rowv = FALSE,
-          main = "No epistasis (unconnected)", col = "Greys", sub = "", colorkey = NULL)
+                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                 Colv = FALSE, Rowv = FALSE,
+          main = "No epistasis (unconnected)", col = "Greys", sub = "",
+          colorkey = NULL)
 print(a5, position = c(0,0, .25, .5), more = TRUE)
 print(a6, position = c(.25,0, .5, .5), more = TRUE)
 print(a7, position = c(.5,0, .75, .5), more = TRUE)
@@ -483,15 +533,21 @@ print(a4, position = c(.75,.5, 1, 1))
 
 ### Wageningen et al., 2010
 
-The first knock-out screen is from van Wageningen et al., 2010 and was created to investigate relationships between phosphorylation based pathways.
+The first knock-out screen is from van Wageningen et al., 2010 and
+was created to investigate relationships between phosphorylation based pathways.
 
-Each figure visualizes the top scoring single knock-out or modulators for a specific double knock-out pair. The x-axis corresponds to the ranks of the single knock-outs and the y-axsis to the likelihood for each triple (double plus single knock-outs).
+Each figure visualizes the top scoring single knock-out or modulators
+for a specific double knock-out pair. The x-axis corresponds to the
+ranks of the single knock-outs and the y-axsis to the likelihood for
+each triple (double plus single knock-outs).
 
-The final figure shows the global distribution of the top scoring logics we identified.
+The final figure shows the global distribution of the top scoring
+logics we identified.
 
 ```{r}
-file <-
-    "http://www.holstegelab.nl/publications/sv/signaling_redundancy/downloads/DataS1.txt"
+file <- paste("http://www.holstegelab.nl/",
+              "publications/sv/signaling_redundancy/downloads/DataS1.txt",
+              sep = "")
 
 data <- read.delim(file)
 
@@ -557,8 +613,9 @@ for (i in doubles) {
         if (j %in% doubles.singles) { next() }
 
         dataTmp <- dataBin[, grep(paste(
-             paste("^", c(i, j, doubles.singles), "$", sep = ""), collapse = "|"),
-                                                              colnames(dataBin))]
+             paste("^", c(i, j, doubles.singles), "$", sep = ""),
+             collapse = "|"),
+             colnames(dataBin))]
 
         if (path %in% "fixed_set") {
             dataTmp <- dataTmp[egenes, ]
@@ -614,7 +671,8 @@ for (i in doubles) {
 }
 ```
 ```{r, fig.width = 8, fig.height = 4}
-palette(c("#4444cc", "#77aa77", "#009933", "#ff0000", "#dd8811", "#aa44bb", "#999900"))
+palette(c("#4444cc", "#77aa77", "#009933",
+          "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
 data(wageningen)
 
@@ -666,7 +724,8 @@ for (i in 1:length(doubles)) {
         
         ## llvec[which(is.infinite(llvec) == TRUE)] <- min(llvec) - 100
         
-        margin <- abs(max(llvec[1:30], na.rm = TRUE) - min(llvec[1:30], na.rm = TRUE))
+        margin <- abs(max(llvec[1:30], na.rm = TRUE) -
+                  min(llvec[1:30], na.rm = TRUE))
 
         offset <- 0.075
 
@@ -700,14 +759,17 @@ for (i in 1:length(doubles)) {
     if (p2max == min(llvec[1:thetop])) {
         p2max <- p2max+margin*0.2
     }
-    legendtext <- c("AND", "OR", "XOR", paste(parents[1]," masks ", parents[2], sep = ""),
-                    paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis")
+    legendtext <- c("AND", "OR", "XOR",
+                    paste(parents[1]," masks ", parents[2], sep = ""),
+                    paste(parents[2], " masks ", parents[1], sep = ""),
+                    "no epistasis")
     if (thetop == 0) { next() }
     plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop],
                 ylab = "likelihood", xlab = "ranked single knockouts",
                 ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2),
                 xlim = c(1, thetop+(thetop/100)),
-                main = paste(unlist(strsplit(doubles[i], "\\.")), collapse = " and "))
+                main = paste(unlist(strsplit(doubles[i], "\\.")),
+                collapse = " and "))
     text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
                 labels = names(llvec)[1:thetop], cex = 0.6, srt = 45, pos = 3,
                 offset = 0)
@@ -731,11 +793,13 @@ for (i in 1:ncol(distmat)) {
     genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
     
     distmat[which(distmat[, i] %in%
-                  paste(genes[1], " masks the effect of ", genes[2], sep = "")), i] <- 4
+                  paste(genes[1], " masks the effect of ", genes[2],
+                  sep = "")), i] <- 4
 
     
     distmat[which(distmat[, i] %in%
-                  paste(genes[2], " masks the effect of ", genes[1], sep = "")), i] <- 5
+                  paste(genes[2], " masks the effect of ", genes[1],
+                  sep = "")), i] <- 5
 
 }
 
@@ -747,17 +811,20 @@ for (i in 1:ncol(distmat)) {
 
 distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
 
-distmat <- distmat[, -which(apply(distmat, 2, max) == 0 | apply(distmat, 2, min) == 7)]
+distmat <-
+    distmat[, -which(apply(distmat, 2, max) == 0 | apply(distmat, 2, min) == 7)]
 
 y <- distmat
 
-distmat <- distmat[, order(apply(distmat, 2, function(x) { return(sum(x == 1)) }))]
+distmat <-
+    distmat[, order(apply(distmat, 2, function(x) { return(sum(x == 1)) }))]
 
 y[which(y == 5)] <- 4
 
 rownames(distmat) <- NULL
 
-labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n","masking (NOT B)\n\n\n",
+labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
+              "masking (NOT B)\n\n\n",
               "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
 
 heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
@@ -773,11 +840,13 @@ heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
 
 ### Sameith et al., 2015
 
-The second knock-out screen by Sameith et al., 2015 was created to investigate growth based genetic interactions.
+The second knock-out screen by Sameith et al., 2015 was created to
+investigate growth based genetic interactions.
 
 ```{r}
-file <- paste("http://www.holstegelab.nl/publications/GSTF_geneticinteractions/",
-              "downloads/del_mutants_limma.txt", sep = "")
+file <- paste("http://www.holstegelab.nl/",
+"publications/GSTF_geneticinteractions/",
+"downloads/del_mutants_limma.txt", sep = "")
 
 data <- read.delim(file)
 
@@ -828,13 +897,15 @@ for (i in doubles[set]) {
     print(i)
     doubles.singles <- unlist(strsplit(i, "\\."))
     egenes <- which(apply(dataBin[,
-                which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max) == 1)
+              which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max)
+              == 1)
     for (j in singles) {
         print(j)
         if (j %in% doubles.singles) { next() }
 
-        dataTmp <- dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$", sep
-                    = ""), collapse = "|"), colnames(dataBin))]
+        dataTmp <-
+            dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$",
+            sep = ""), collapse = "|"), colnames(dataBin))]
 
         if (path %in% "fixed_set") {
             dataTmp <- dataTmp[egenes, ]
@@ -936,7 +1007,8 @@ for (i in 1:length(doubles)) {
         
         llvec[which(is.infinite(llvec) == TRUE)] <- NA
         
-        margin <- abs(max(llvec[1:30], na.rm = TRUE) - min(llvec[1:30], na.rm = TRUE))
+        margin <- abs(max(llvec[1:30], na.rm = TRUE) - min(llvec[1:30],
+                      na.rm = TRUE))
 
         if (margin == 0) { margin <- 10 }
 
@@ -961,8 +1033,10 @@ for (i in 1:length(doubles)) {
         
     }
     
-    labeltext <- c("AND", "OR", "XOR", paste(parents[1], " masks ", parents[2], sep = ""),
-                   paste(parents[2], " masks ", parents[1], sep = ""), "no epistasis")
+    labeltext <- c("AND", "OR", "XOR", paste(parents[1], " masks ",
+                   parents[2], sep = ""),
+                   paste(parents[2], " masks ", parents[1], sep = ""),
+                   "no epistasis")
 
     mark <- ""
     pointx <- 10000
@@ -980,11 +1054,13 @@ for (i in 1:length(doubles)) {
                 main = paste(tolower(unlist(strsplit(doubles[i], "\\."))),
                              collapse = " and "))
     text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
-                labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45, pos = 3,
+                labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45,
+                pos = 3,
                 offset = 0)
     mtext = mtext(mark, side = 3, line = 1, outer = FALSE, cex = 4, adj = 0)
     legend = legend(legendx, p2max,
-                    legend = labeltext, col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
+                    legend = labeltext, col = 1:6, pch = 1:6, xjust = 1,
+                    yjust = 1,
                     cex = 0.7)  
     
 }
@@ -1022,7 +1098,8 @@ library(bnem)
 
 y <- distmat
 
-distmat <- distmat[, order(apply(distmat, 2, function(x) { return(sum(x == 1)) }))]
+distmat <- distmat[, order(apply(distmat, 2, function(x) {
+                           return(sum(x == 1)) }))]
 
 y[which(y == 5)] <- 4
 
@@ -1032,7 +1109,8 @@ labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n",
                "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
 
-heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution", sub = "",
+heatmapOP(distmat, Colv = FALSE, Rowv = FALSE,
+          main = "logic gate distribution", sub = "",
           col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0,
           cexCol = 0.4, aspect = "fill",
           colorkey = list(space = "right", labels = rev(labeltext), width = 1,
@@ -1042,7 +1120,9 @@ heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
           xrot = 45, bordercol = "transparent")
 ```
 
-We plot the densities of the string-db interaction scores of our identified modulators and a random draw to visualize the significance of the interaction identified by epiNEM.
+We plot the densities of the string-db interaction scores of our
+identified modulators and a random draw to visualize the significance
+of the interaction identified by epiNEM.
 
 ```{r, fig.width = 8, fig.height = 4}
 par(mfrow=c(1,2))
@@ -1081,10 +1161,12 @@ for (i in 1:ncol(llmat)) {
         for (j in names(top30)) {
             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
             string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[1], j)), collapse = "_"))
+            string.names <- c(string.names, paste(sort(c(doubles[1], j)),
+                                                  collapse = "_"))
             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
             string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[2], j)), collapse = "_"))
+            string.names <- c(string.names, paste(sort(c(doubles[2], j)),
+                                                  collapse = "_"))
         }
         
     } else {
@@ -1099,12 +1181,13 @@ data(wageningen_string)
 string.scores <- wageningen_string$string.scores
 string.names <- wageningen_string$string.names
 
-tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBinWag)
-                                                                     , "\\.")))))
+tmp <- string_db$get_interactions(
+       string_db$mp(unique(unlist(strsplit(colnames(dataBinWag), "\\.")))))
 
 stsc <- unlist(string.scores)
 
-denspval <- wilcox.test(stsc, unlist(tmp$combined_score), alternative = "greater")$p.value
+denspval <- wilcox.test(stsc, unlist(tmp$combined_score),
+            alternative = "greater")$p.value
 
 for (i in 100:1) {
 
@@ -1117,7 +1200,8 @@ for (i in 100:1) {
 }
 
 plot(density(stsc), col = "#00000000",
-     ylim = c(0, max(c(max(density(stsc)$y),max(density(unlist(tmp$combined_score))$y)))),
+     ylim = c(0, max(c(max(density(stsc)$y),
+     max(density(unlist(tmp$combined_score))$y)))),
      main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
      cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
@@ -1140,18 +1224,20 @@ for (i in 1:ncol(llmat)) {
         top30 <- llmat[, i]
         top30[which(top30 == 0)] <- -Inf
         top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30, decreasing = TRUE)[1:min(30, sum(!(llmat[, i]
-            %in% c(0,-Inf))))]]
+        top30 <- top30[order(top30, decreasing = TRUE)[1:min(30,
+        sum(!(llmat[, i] %in% c(0,-Inf))))]]
 
         doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
         for (j in names(top30)) {
             tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
             string.scores2 <- c(string.scores2, tmp$combined_score)
-            string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)), collapse = "_"))
+            string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)),
+            collapse = "_"))
             tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
             string.scores2 <- c(string.scores2, tmp$combined_score)
-            string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)), collapse = "_"))
+            string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)),
+            collapse = "_"))
         }
         
     } else {
@@ -1166,12 +1252,13 @@ data(sameith_string)
 string.scores2 <- sameith_string$string.scores2
 string.names2 <- sameith_string$string.names2
 
-tmp <- string_db$get_interactions(string_db$mp(unique(unlist(strsplit(colnames(dataBin)
-                                                                    , "\\.")))))
+tmp <- string_db$get_interactions(
+       string_db$mp(unique(unlist(strsplit(colnames(dataBin), "\\.")))))
 
 stsc <- unlist(string.scores2)
 
-denspval <- wilcox.test(stsc, unlist(tmp$combined_score), alternative = "greater")$p.value
+denspval <- wilcox.test(stsc, unlist(tmp$combined_score),
+            alternative = "greater")$p.value
 
 for (i in 100:1) {
 
@@ -1184,7 +1271,8 @@ for (i in 100:1) {
 }
 
 plot(density(stsc), col = "#00000000",
-     ylim = c(0, max(c(max(density(stsc)$y), max(density(unlist(tmp$combined_score))$y)))),
+     ylim = c(0, max(c(max(density(stsc)$y),
+     max(density(unlist(tmp$combined_score))$y)))),
      main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
      cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
@@ -1199,17 +1287,31 @@ sessionInfo()
 
 *__Reference:__*
 
-Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz. Inferring Modulators of Genetic Interactions with Epistatic Nested Effects Models. submitted.
+Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel,
+Holger Fröhlich, Florian Markowetz. Inferring Modulators of Genetic
+Interactions with Epistatic Nested Effects Models. submitted.
 
-Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, {Dalla Favera} R, et~al. ARACNE: an algorithm for the reconstruction of gene regulatory networks in a mammalian cellular context. BMC Bioinformatics. 2006;7 Suppl 1:S7.
+Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, {Dalla Favera} R,
+et~al. ARACNE: an algorithm for the reconstruction of gene regulatory networks
+in a mammalian cellular context. BMC Bioinformatics. 2006;7 Suppl 1:S7.
 
-Kalisch M, B\"{u}hlmann P. Estimating High-Dimensional Directed Acyclic Graphs with the PC-Algorithm. J Mach Learn Res. 2007;8.
+Kalisch M, B\"{u}hlmann P. Estimating High-Dimensional Directed Acyclic Graphs
+with the PC-Algorithm. J Mach Learn Res. 2007;8.
 
-Markowetz F, Bloch J, Spang R. Non-transcriptional pathway features reconstructed from secondary effects of RNA interference. Bioinformatics. 2005;21(21):4026--4032.
+Markowetz F, Bloch J, Spang R. Non-transcriptional pathway features
+reconstructed from secondary effects of RNA interference. Bioinformatics.
+2005;21(21):4026--4032.
 
-Pirkl M, Hand E, Kube D, Spang R. Analyzing synergistic and non-synergistic interactions in signalling pathways using Boolean Nested Effect Models. Bioinformatics. 2016;32(6):893--900.
+Pirkl M, Hand E, Kube D, Spang R. Analyzing synergistic and non-synergistic
+interactions in signalling pathways using Boolean Nested Effect Models.
+Bioinformatics. 2016;32(6):893--900.
 
-van Wageningen S, Kemmeren P, Lijnzaad P, Margaritis T, Benschop JJ, de Castro IJ, et~al. Functional overlap and regulatory links shape genetic interactions between signaling pathways. Cell. 2010 Dec;143(6):991--1004.
+van Wageningen S, Kemmeren P, Lijnzaad P, Margaritis T, Benschop JJ,
+de Castro IJ, et~al. Functional overlap and regulatory links shape genetic
+interactions between signaling pathways. Cell. 2010 Dec;143(6):991--1004.
 
-Sameith K, Amini S, Groot~Koerkamp MJA, van Leenen D, Brok M, Brabers N, et~al. A high-resolution gene expression atlas of epistasis between gene-specific transcription factors exposes potential mechanisms for genetic interactions. BMC biology. 2015 Dec;13:112.
+Sameith K, Amini S, Groot~Koerkamp MJA, van Leenen D, Brok M, Brabers N, et~al.
+A high-resolution gene expression atlas of epistasis between gene-specific
+transcription factors exposes potential mechanisms for genetic interactions.
+BMC biology. 2015 Dec;13:112.
 

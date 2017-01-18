@@ -8,7 +8,8 @@
 #' @name sim
 NA
 
-#' Example data: epiNEM results for the Sameith et al., 2015 knock-out screen
+#' Example data: epiNEM results for
+#' the Sameith et al., 2015 knock-out screen
 #' 
 #' @docType data
 #' @examples 
@@ -16,7 +17,8 @@ NA
 #' @name sameith
 NA
 
-#' Example data: epiNEM results for the Wageningen et al., 2010 knock-out screen
+#' Example data: epiNEM results for
+#' the Wageningen et al., 2010 knock-out screen
 #' 
 #' @docType data
 #' @examples 
@@ -24,7 +26,8 @@ NA
 #' @name wageningen
 NA
 
-#' sig. of string interaction scores for Sameith et al., 2015 data
+#' sig. of string interaction scores
+#' for Sameith et al., 2015 data
 #' 
 #' @docType data
 #' @examples 
@@ -32,7 +35,8 @@ NA
 #' @name sameith_string
 NA
 
-#' sig. of string interaction scores for van Wageningen et al., 2010 data
+#' sig. of string interaction scores
+#' for van Wageningen et al., 2010 data
 #' 
 #' @docType data
 #' @examples 
@@ -43,17 +47,25 @@ NA
 ###--- MAIN SCRIPT ---###
 #' Epistatic NEMs - main function
 #' @param filename A binary, tab-delimited matrix.
-#' Columns: single and double knockdowns. Rows: genes showing effect or not?
-#' Default: random; artificial data is generated to 'random' specifications
-#' @param method greedy or exhaustive search. Default: greedy
-#' @param nIterations number of iterations. Default: 10
+#' Columns: single and double knockdowns.
+#' Rows: genes showing effect or not?
+#' Default: random; artificial data is
+#' generated to 'random' specifications
+#' @param method greedy or exhaustive search.
+#' Default: greedy
+#' @param nIterations number of iterations.
+#' Default: 10
 #' @param nModels number of Models. Default: 0
-#' @param random list specifying how the data should be generated:
-#' no. of single mutants, no. of double mutants, no. of reporterGenes,
+#' @param random list specifying how the
+#' data should be generated:
+#' no. of single mutants, no. of
+#' double mutants, no. of reporterGenes,
 #' FP-rate, FN-rate, no. of replicates
 #' @param plotsy atm not used
-#' @param ltype likelihood either "marginal" or "maximum"
-#' @param para false positive and false negative rates
+#' @param ltype likelihood either
+#' "marginal" or "maximum"
+#' @param para false positive and
+#' false negative rates
 #' @author Madeline Diekmann
 #' @seealso nem
 #' @export
@@ -82,7 +94,7 @@ epiNEM <- function(filename="random",
                    plotsy=TRUE,
                    ltype = "marginal",
                    para = c(0.13, 0.05)) {
-
+    
     ##--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
     if (!method %in% methods)
@@ -99,8 +111,8 @@ epiNEM <- function(filename="random",
             topology    <- unlist(topology, recursive=FALSE)
             extTopology <- ExtendTopology(topology$model, random$reporters)
             sortedData <-
-                 GenerateData(topology$model, extTopology, random$FPrate,
-                                        random$FNrate, random$replicates)
+                GenerateData(topology$model, extTopology, random$FPrate,
+                             random$FNrate, random$replicates)
 
             mutants   <- rownames(topology$model)
             singleKOs <- sort(colnames(topology$model))
@@ -209,7 +221,8 @@ epiNEM <- function(filename="random",
 #' topology <- CreateTopology(3, 1, force = TRUE)
 #' topology <- unlist(unique(topology), recursive = FALSE)
 #' extTopology <- ExtendTopology(topology$model, 100)
-#' @return extended topology in which reporters are linked to pathway genes
+#' @return extended topology in which reporters
+#' are linked to pathway genes
 ExtendTopology <- function(topology, nReporters) {
     reporters     <- unlist(lapply(1:nReporters,
                                    function(n) paste("reporter", n, sep="-")))
@@ -225,7 +238,8 @@ ExtendTopology <- function(topology, nReporters) {
 }
 
 #' Generate data from extended model
-#' @param model model of a topology from CreateTopology
+#' @param model model of a topology
+#' from CreateTopology
 #' @param extTopology extended topology
 #' @param FPrate false positive rate
 #' @param FNrate false negative rate
@@ -234,10 +248,14 @@ ExtendTopology <- function(topology, nReporters) {
 #' @seealso CreateTopology
 #' @export
 #' @examples
-#' topology <- CreateTopology(3, 1, force = TRUE)
-#' topology <- unlist(unique(topology), recursive = FALSE)
-#' extTopology <- ExtendTopology(topology$model, 100)
-#' sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
+#' topology <-
+#' CreateTopology(3, 1, force = TRUE)
+#' topology <-
+#' unlist(unique(topology), recursive = FALSE)
+#' extTopology <-
+#' ExtendTopology(topology$model, 100)
+#' sortedData <-
+#' GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
 #' @return data matrix
 GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
     perfectData <- extTopology %*% t(model)

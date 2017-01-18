@@ -7,7 +7,8 @@
 GenerateData(model, extTopology, FPrate, FNrate, replicates)
 }
 \arguments{
-\item{model}{model of a topology from CreateTopology}
+\item{model}{model of a topology
+from CreateTopology}
 
 \item{extTopology}{extended topology}
 
@@ -24,10 +25,14 @@ data matrix
 Generate data from extended model
 }
 \examples{
-topology <- CreateTopology(3, 1, force = TRUE)
-topology <- unlist(unique(topology), recursive = FALSE)
-extTopology <- ExtendTopology(topology$model, 100)
-sortedData <- GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
+topology <-
+CreateTopology(3, 1, force = TRUE)
+topology <-
+unlist(unique(topology), recursive = FALSE)
+extTopology <-
+ExtendTopology(topology$model, 100)
+sortedData <-
+GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
 }
 \author{
 Madeline Diekmann
