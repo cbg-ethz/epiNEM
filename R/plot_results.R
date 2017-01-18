@@ -73,8 +73,12 @@ plot.epiNEM <- function(x, ...) {
     EGeneSize  <- rep(30, nEGenes)
     ## lay3 as layout
     g <- graph.adjacency(result)
-    plot.igraph(g, vertex.color=c(geneColor, logicColor, EGeneColor), vertex.size=c(geneSize, logicSize, EGeneSize),
-                vertex.size2=c(rep(30,nGenes), rep(15,nLogics), rep(30, nEGenes)),
-                vertex.shape=c(geneShape, logicShape, EGeneShape), edge.arrow.size=c(rep(0.3, nGenes+nLogics+nEGenes)),
-                vertex.label=labels, layout = layout.fruchterman.reingold)
+    plot.igraph(g, vertex.color=c(geneColor, logicColor, EGeneColor),
+                vertex.size=c(geneSize, logicSize, EGeneSize),
+                vertex.size2=c(rep(30,nGenes), rep(15,nLogics),
+                               rep(30, nEGenes)),
+                vertex.shape=c(geneShape, logicShape, EGeneShape),
+                edge.arrow.size=c(rep(0.3, nGenes+nLogics+nEGenes)),
+                vertex.label=labels,
+                layout = layout.fruchterman.reingold)
 }

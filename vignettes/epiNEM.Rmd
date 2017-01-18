@@ -4,14 +4,15 @@ author: "Madeline Diekmann & Martin Pirkl"
 date: "`r Sys.Date()`"
 output: rmarkdown::pdf_document
 vignette: >
-  %\VignetteIndexEntry{epiNEM}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
+%\VignetteIndexEntry{epiNEM}
+%\VignetteEngine{knitr::rmarkdown}
+%\VignetteEncoding{UTF-8}
 ---
 ## Introduction
 
 The method in this package is an extension of the classic Nested Effects Models provided in the package \emph{nem}. Nested Effects Models is a pathway reconstruction method, which takes into account effects of downstream genes. Those effects are observed for every knockout of an upstream pathway gene, and the nested structure of observed effects can then be used to reconstruct the pathway structure.
 However, classic Nested Effects Models do not account for double knockouts. In this package \emph{epiNEM}, one additional layer of complexity is added. For every two genes, acting on one gene together, the relationship is evaluated and added to the model as a logical gate. Genetic relationships are represented by the logics OR (no relationship), AND (functional overlap), NOT (masking or inhibiting) and XOR (mutual prevention from acting on gene C).
+Please see the references for a more detailed description of NEMs and epiNEMs.
 
 Simulation and application results are imported from pre-calculated data sets to shorten the runtime of this vignette.
 
@@ -23,8 +24,6 @@ install.packages("devtools", repos = "https://cloud.r-project.org/")
 library(devtools)
 
 install_github("rstudio/rmarkdown")
-
-install_github("cbg-ethz/epiNEM")
 
 library(epiNEM)
 ```
@@ -143,9 +142,9 @@ for (i in 1:runs) {
         if ("b" %in% do) {
             print("B-NEM")
 
-            gtn <- EpiNEM2BooleanGraph(topology)
+            gtn <- epiNEM2Bg(topology)
 
-            fc <- cbind(Ctrl_vs_S = -1, EpiNEM2BooleanGraph(sortedData))*(-1)
+            fc <- cbind(Ctrl_vs_S = -1, epiNEM2Bg(sortedData))*(-1)
 
             bnemnoise <- sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
             
@@ -442,9 +441,10 @@ axis(1, c(3, 11, 19, 28, 36)+1, c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARA
 ```
 
 ## Yeast knockout screens
-In this section we analyse previously published yeast knockout screens. The screens consist of gene expression data derived from double and single knockout mutants. We use epiNEM on each double mutant combined with each single mutant.\\
 
-The results of the knockout screens have been annotated according to the following legend:
+In this section we analyse previously published yeast knockout screens. The screens consist of gene expression data derived from double and single knockout mutants. We use epiNEM on each double mutant combined with each single mutant.
+
+The results (logics) of the knockout screens have been annotated according to the following legend, where the x-axis denotes the effect on the gene and the y-axis denotes the type of knock-out:
 
 ```{r, warning=FALSE, fig.width = 9, fig.height=5}
 a1 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
@@ -482,6 +482,12 @@ print(a4, position = c(.75,.5, 1, 1))
 ```
 
 ### Wageningen et al., 2010
+
+The first knock-out screen is from van Wageningen et al., 2010 and was created to investigate relationships between phosphorylation based pathways.
+
+Each figure visualizes the top scoring single knock-out or modulators for a specific double knock-out pair. The x-axis corresponds to the ranks of the single knock-outs and the y-axsis to the likelihood for each triple (double plus single knock-outs).
+
+The final figure shows the global distribution of the top scoring logics we identified.
 
 ```{r}
 file <-
@@ -767,6 +773,8 @@ heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
 
 ### Sameith et al., 2015
 
+The second knock-out screen by Sameith et al., 2015 was created to investigate growth based genetic interactions.
+
 ```{r}
 file <- paste("http://www.holstegelab.nl/publications/GSTF_geneticinteractions/",
               "downloads/del_mutants_limma.txt", sep = "")
@@ -1034,10 +1042,14 @@ heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
           xrot = 45, bordercol = "transparent")
 ```
 
-Now we plot the densities of the string-db interaction scores of our identified modulators and a random draw.
+We plot the densities of the string-db interaction scores of our identified modulators and a random draw to visualize the significance of the interaction identified by epiNEM.
 
 ```{r, fig.width = 8, fig.height = 4}
 par(mfrow=c(1,2))
+
+source("https://bioconductor.org/biocLite.R")
+
+biocLite("STRINGdb")
 
 library(STRINGdb)
 

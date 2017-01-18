@@ -1,7 +1,8 @@
 ## functions needed in order to run LogicNEM
 
 #' Create a random graph
-#' @description Returns a model graph with randomly sampled edges. Every possible edge has a probability to exist in the graph.
+#' @description Returns a model graph with randomly sampled edges.
+#' Every possible edge has a probability to exist in the graph.
 #' @param pathwayGenes vector of genes in the pathway
 #' @param edgeProb probability of random edge
 #' @export
@@ -12,7 +13,8 @@ CreateRandomGraph <- function(pathwayGenes, edgeProb=0.5) {
     size     <- length(pathwayGenes)
     model    <- diag(size)
     nEdges   <- size * (size - 1)
-    model[which(model == 0)] <- sample(0:1, nEdges, TRUE, c(1 - edgeProb, edgeProb))
+    model[which(model == 0)] <-
+        sample(0:1, nEdges, TRUE, c(1 - edgeProb, edgeProb))
     dimnames(model) <- list(pathwayGenes, pathwayGenes)
     return(model)
 }
@@ -26,7 +28,8 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' @param D0 complementary D1
 #' @param ltype likelihood type either "marginal" or "maximum"
 #' @param para false positive and false negative rates
-#' @description Computes marginal log-likelihood for model Phi given observed data matrix D1
+#' @description Computes marginal log-likelihood
+#' for model Phi given observed data matrix D1
 #' @export
 #' @examples
 #' Phi <- matrix(sample(c(0,1), 9, replace = TRUE), 3, 3)
@@ -35,17 +38,20 @@ get_row <- function(i, m) (i-1) %% nrow(m) + 1
 #' score <- Mll(Phi, D1 <- data, D0 <- 1 - data)
 #' @return list with likelihood poster probability, egene positions
 Mll <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
-                                        # Computes marginal log-likelihood for model Phi, observed data matrix D1, and
-                                        # complementary data matrix D0
-                                        # Function adapted from NEM package
+    ## Computes marginal log-likelihood for model Phi,
+    ## observed data matrix D1, and
+    ## complementary data matrix D0
+    ## Function adapted from NEM package
     if (is.matrix(Phi)) {
         Phi2 <- Phi
     } else {
         Phi2 <- as.matrix(Phi$model)
     }
     Phi2 <- Phi2[colnames(D1), ]
-    L    <- para[1]^(D1 %*% (1 - Phi2)) * (1 - para[1])^(D0 %*% (1 - Phi2)) *
-                                                            (1 - para[2])^(D1 %*% Phi2) * para[2]^(D0 %*% Phi2)
+    L    <- para[1]^(D1 %*% (1 - Phi2)) *
+                        (1 - para[1])^(D0 %*% (1 - Phi2)) *
+                                          (1 - para[2])^(D1 %*% Phi2) *
+                                                            para[2]^(D0 %*% Phi2)
     posterior <- L / (rowSums(L))
     LLperGene <- log(rowSums(L))
     mLL       <- sum(LLperGene)
@@ -99,7 +105,8 @@ getStarters <- function(mutants, experiments){
 }
 
 #' Create an extended adjacency matrix
-#' @description extend adjacency matrices taking cycles and logics into account. For every given start state, the final state
+#' @description extend adjacency matrices taking cycles and logics into account.
+#' For every given start state, the final state
 #' is computed yu using BoolNet.
 #' @param network network created by BoolNet from file
 #' @param mutants vector of single knockouts
@@ -110,10 +117,12 @@ getStarters <- function(mutants, experiments){
 #' @examples
 #' library(BoolNet)
 #' data(cellcycle)
-#' extModel <- CreateExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
+#' extModel <- CreateExtendedAdjacency(cellcycle,
+#' c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
 #' @return extended adjacency matrix
 CreateExtendedAdjacency <- function(network, mutants, experiments){
-    starters <- matrix(getStarters(mutants, experiments), length(mutants), byrow=TRUE)
+    starters <- matrix(getStarters(mutants, experiments),
+                       length(mutants), byrow=TRUE)
     rownames(starters) <- mutants
     colnames(starters) <- experiments
 
@@ -122,7 +131,8 @@ CreateExtendedAdjacency <- function(network, mutants, experiments){
         network$fixed[which(e == 1)] <- 1
         return(getPathToAttractor(network, e, includeAttractorStates))
     }
-    data <- apply(starters, 1, getMyAttractor, network, includeAttractorStates="all")
+    data <- apply(starters, 1, getMyAttractor, network,
+                  includeAttractorStates="all")
 
     ## get observed data by taking final state from all the random startStates.
     extadj <- data[[1]][nrow(data[[1]]),]
@@ -160,7 +170,8 @@ includeLogic <- function(adj, experiments, mutants){
         parents <- names(which(adj[,c]==1))
         if ((length(parents) == 2) &&
             ##check whether double mutant is available in the data
-            (parents[1] %in% unlist(mutantslist[doublepos])) && parents[2] %in% unlist(mutantslist[doublepos])){
+            (parents[1] %in% unlist(mutantslist[doublepos])) &&
+            parents[2] %in% unlist(mutantslist[doublepos])){
             for (i in 1:length(parents)) {
                 singles <- cbind(singles, parents[i])
             }
@@ -181,7 +192,8 @@ includeLogic <- function(adj, experiments, mutants){
             liste[[notriples]] <- logic
             column <- cbind(column, c)
         }
-        if (length(parents) == 2 & !(all(parents %in% unlist(mutantslist[doublepos])))) {
+        if (length(parents) == 2 &
+            !(all(parents %in% unlist(mutantslist[doublepos])))) {
             notriples <- notriples + 1
             liste[[notriples]] <- "OR"
             column <- cbind(column, c)
@@ -199,7 +211,8 @@ includeLogic <- function(adj, experiments, mutants){
     }
     if (length(liste) > 0){
         logicmatrix <- as.matrix(expand.grid(liste))
-        ## create logics file from adjacency matrix using logics provided by logic vector
+        ## create logics file from adjacency matrix
+        ## using logics provided by logic vector
         ## ready for using BoolNet
         randomnames <- sort(runif(nrow(logicmatrix)))
         for (modelno in 1:nrow(logicmatrix)){
@@ -207,7 +220,8 @@ includeLogic <- function(adj, experiments, mutants){
             if (!dir.exists("temp")) {
                 dir.create("temp")
             }
-            path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="") # change that
+            ## change that in the future:
+            path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
             network <- character()
             countline <- 1
             network[countline] <- "targets, factors"
@@ -237,18 +251,52 @@ includeLogic <- function(adj, experiments, mutants){
                             if (count3 < 1) {
                                 lo <- lo+1
                             }
-                            if (logicmatrix[modelno, lo]=="OR" & count3 == 0) { tmp <- paste(tmp, paste(help, " | ", r, sep=""), sep = ""); count3 <- count3 + 1 }
-                            else if (logicmatrix[modelno, lo]=="OR" & count3 > 0) tmp <- paste(tmp, paste(" | ", help, " | ", r, sep=""), sep = "")
-                            else if (logicmatrix[modelno, lo]=="AND") tmp <- paste(tmp, paste("(", help, " & ", r, ")", sep=""), sep = "")
-                            else if (logicmatrix[modelno, lo]=="XOR") tmp <- paste(tmp, paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")"), sep = "")
+                            if (logicmatrix[modelno, lo]=="OR" & count3 == 0) {
+                                tmp <-
+                                    paste(tmp, paste(help, " | ", r, sep=""),
+                                          sep = "")
+                                count3 <- count3 + 1
+                            } else if
+                            (logicmatrix[modelno, lo]=="OR" & count3 > 0) {
+                                tmp <-
+                                    paste(tmp,
+                                          paste(" | ", help, " | ", r, sep=""),
+                                          sep = "")
+                            } else if
+                            (logicmatrix[modelno, lo]=="AND") {
+                                tmp <-
+                                    paste(tmp,
+                                          paste("(", help, " & ", r, ")",
+                                                sep=""),
+                                          sep = "")
+                            } else if
+                            (logicmatrix[modelno, lo]=="XOR") {
+                                tmp <-
+                                    paste(tmp,
+                                          paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")",
+                                                sep = ""),
+                                          sep = "")
                             ## help refers to the first element
-                            else if (logicmatrix[modelno, lo]==NOT2) tmp <- paste(tmp, paste("(", help, " & ! ", r, ")", sep=""), sep = "")
-                            else if (logicmatrix[modelno, lo]==NOT1) tmp <- paste(tmp, paste("(", r, " & ! ", help, ")", sep=""), sep = "")
-                        }
-                        else {
+                            } else if
+                            (logicmatrix[modelno, lo]==NOT2) {
+                                tmp <-
+                                    paste(tmp,
+                                          paste("(", help, " & ! ", r, ")",
+                                                sep=""),
+                                          sep = "")
+                            } else if
+                            (logicmatrix[modelno, lo]==NOT1) {
+                                tmp <-
+                                    paste(tmp,
+                                          paste("(", r, " & ! ", help, ")",
+                                                sep=""),
+                                          sep = "")
+                        } else {
                             count2 <- count2 + 1
-                            if (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
-                                tmp <- paste(tmp, paste(r, " | ", sep=""), sep = "")
+                            if
+                            (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
+                                tmp <- paste(tmp,
+                                             paste(r, " | ", sep=""), sep = "")
                             } else {
                                 tmp <- paste(tmp, paste(r, sep=""), sep = "")
                                 lo <- lo + 1
@@ -261,7 +309,11 @@ includeLogic <- function(adj, experiments, mutants){
             }
             write(network, file = path)
         }
-        test <- lapply(1:nrow(logicmatrix), function(x) getExtendedAdjacency(x, logicmatrix, column, adj, mutants, experiments, sort(randomnames)))
+            test <- lapply(1:nrow(logicmatrix),
+                           function(x) getExtendedAdjacency(x,logicmatrix,
+                                                            column, adj, mutants,
+                                                            experiments,
+                                                            sort(randomnames)))
         return(test)
     }
 }
@@ -270,18 +322,23 @@ includeLogic <- function(adj, experiments, mutants){
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
 #' @noRd
-getExtendedAdjacency <- function(modelno, logicmatrix, column, adj, mutants, experiments, randomnames){
+    getExtendedAdjacency <-function(modelno, logicmatrix,
+                                    column, adj, mutants,
+                                    experiments, randomnames) {
     randomnames <- sort(randomnames)
     path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
     network <- loadNetwork(path)
     extadj2 <- CreateExtendedAdjacency(network, unique(mutants), experiments)
     unlink(path)
-    return(list(list(origModel=adj, model=extadj2, logics=logicmatrix[modelno,], column=column)))
+    return(list(list(origModel=adj, model=extadj2,
+                     logics=logicmatrix[modelno,], column=column)))
 }
 
 #' @noRd
 AttachEGenes <- function(posterior, experiments){
-    maxpost <- lapply(1:nrow(posterior), function(x) length(which(posterior[x,]==max(posterior[x,]))))
+    maxpost <-
+        lapply(1:nrow(posterior),
+               function(x) length(which(posterior[x,]==max(posterior[x,]))))
     attachedEs <- matrix()
     names <- c()
     attachedEsADD <- 0
@@ -300,11 +357,11 @@ AttachEGenes <- function(posterior, experiments){
             names[j] <- rownames(posterior)[i]
             j <- j+1
         } else {
-                                        # for (e in 1:unlist(maxpost[i])){
+            ## for (e in 1:unlist(maxpost[i])){
             attachedEsADD <- attachedEsADD+1
-                                        #   namesADD[k] <- rownames(posterior)[i]
-                                        #   k <- k+1
-                                        #}
+            ##   namesADD[k] <- rownames(posterior)[i]
+            ##   k <- k+1
+            ## }
         }
     }
     attachedEs=as.matrix(attachedEs)
@@ -316,9 +373,10 @@ AttachEGenes <- function(posterior, experiments){
         if (is.na(table(attachedEs)[i])){
             tablt=0
         } else tablt=table(attachedEs)[i]
-                                        # if (is.na(table(attachedEsADD)[i])){
+        ## if (is.na(table(attachedEsADD)[i])){
         Egeneset <- rbind(Egeneset, tablt)
-                                        #}else Egeneset <- rbind(Egeneset, paste(tablt, "+", table(attachedEsADD)[i], sep=""))
+        ## } else Egeneset <- rbind(Egeneset,
+        ## paste(tablt, "+", table(attachedEsADD)[i], sep=""))
     }
     Egeneset <- rbind(Egeneset, attachedEsADD)
 
@@ -346,13 +404,18 @@ CreateTopology <- function(single, double, force = TRUE) {
 
     while (length(extendedModels)==0){
         startModel   <- CreateRandomGraph(singleKOs)
-        startModel <- startModel[order(apply(startModel, 1, sum), decreasing = TRUE), order(apply(startModel, 1, sum), decreasing = TRUE)]
+        startModel <- startModel[order(apply(startModel, 1, sum),
+                                       decreasing = TRUE),
+                                 order(apply(startModel, 1, sum),
+                                       decreasing = TRUE)]
         startModel[lower.tri(startModel)] <- 0
-        startModel <- startModel[order(rownames(startModel)), order(colnames(startModel))]
+        startModel <- startModel[order(rownames(startModel)),
+                                 order(colnames(startModel))]
         diag(startModel) <- 0
         if (force) {
             if (sum(apply(startModel, 2, sum) >= 2) > 0) {
-                if (sum(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1) > 0) {
+                if (sum(startModel[,which(
+                    apply(startModel, 2, sum) >= 2)[1]] == 1) > 0) {
                     if (!(paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".") %in% mutants)) {
                         mutants <- sort(c(singleKOs, paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".")))
                     }
