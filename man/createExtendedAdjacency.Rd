@@ -17,12 +17,14 @@ CreateExtendedAdjacency(network, mutants, experiments)
 extended adjacency matrix
 }
 \description{
-extend adjacency matrices taking cycles and logics into account. For every given start state, the final state
+extend adjacency matrices taking cycles and logics into account.
+For every given start state, the final state
 is computed yu using BoolNet.
 }
 \examples{
 library(BoolNet)
 data(cellcycle)
-extModel <- CreateExtendedAdjacency(cellcycle, c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
+extModel <- CreateExtendedAdjacency(cellcycle,
+c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
 }
 

@@ -21,7 +21,8 @@ Mll(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05))
 list with likelihood poster probability, egene positions
 }
 \description{
-Computes marginal log-likelihood for model Phi given observed data matrix D1
+Computes marginal log-likelihood
+for model Phi given observed data matrix D1
 }
 \examples{
 Phi <- matrix(sample(c(0,1), 9, replace = TRUE), 3, 3)

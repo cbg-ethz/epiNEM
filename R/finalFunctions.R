@@ -48,10 +48,10 @@ Mll <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
         Phi2 <- as.matrix(Phi$model)
     }
     Phi2 <- Phi2[colnames(D1), ]
-    L    <- para[1]^(D1 %*% (1 - Phi2)) *
-                        (1 - para[1])^(D0 %*% (1 - Phi2)) *
-                                          (1 - para[2])^(D1 %*% Phi2) *
-                                                            para[2]^(D0 %*% Phi2)
+    L <- para[1]^(D1 %*% (1 - Phi2)) *
+                     (1 - para[1])^(D0 %*% (1 - Phi2)) *
+                                       (1 - para[2])^(D1 %*% Phi2) *
+                                                         para[2]^(D0 %*% Phi2)
     posterior <- L / (rowSums(L))
     LLperGene <- log(rowSums(L))
     mLL       <- sum(LLperGene)
@@ -61,7 +61,10 @@ Mll <- function(Phi, D1, D0, ltype = "marginal", para = c(0.13, 0.05)) {
     if (ltype %in% "maximum") {
         mLL <- sum(apply(L, 1, max))
     }
-    return(list(posterior=posterior, LLperGene=LLperGene, mLL=mLL, mappos=mappos,
+    return(list(posterior=posterior,
+                LLperGene=LLperGene,
+                mLL=mLL,
+                mappos=mappos,
                 para=para))
 }
 
@@ -238,7 +241,8 @@ includeLogic <- function(adj, experiments, mutants){
                 count3 <- 0
                 for (r in experiments) {
                     if (adj[r,c]==1) {
-                        if ((count==1) && (which(rownames(adj)==c) %in% column)) { 
+                        if ((count==1) &&
+                            (which(rownames(adj)==c) %in% column)) { 
                             help <- r
                             count <- count+1
                             if (sum(adj[, c]) == 1) {
@@ -246,7 +250,8 @@ includeLogic <- function(adj, experiments, mutants){
                                 lo <- lo + 1
                             }
                         }
-                        else if ((count == 2) && (which(rownames(adj)==c) %in% column)) {
+                        else if ((count == 2) &&
+                                 (which(rownames(adj)==c) %in% column)) {
                             NOT2 <- paste(r, "masks the effect of", help)
                             NOT1 <- paste(help, "masks the effect of", r)
                             if (count3 < 1) {
@@ -274,7 +279,8 @@ includeLogic <- function(adj, experiments, mutants){
                             (logicmatrix[modelno, lo]=="XOR") {
                                 tmp <-
                                     paste(tmp,
-                                          paste("( ", help, " & ! ", r ,") | (", r, " & ! ", help, ")",
+                                          paste("( ", help, " & ! ", r
+                                               ,") | (", r, " & ! ", help, ")",
                                                 sep = ""),
                                           sep = "")
                                 ## help refers to the first element
@@ -295,11 +301,16 @@ includeLogic <- function(adj, experiments, mutants){
                             } else {
                                 count2 <- count2 + 1
                                 if
-                                (count2 < sum(adj[, which(colnames(adj) %in% c)])) {
+                                (count2 <
+                                 sum(adj[, which(colnames(adj) %in% c)])) {
                                     tmp <- paste(tmp,
-                                                 paste(r, " | ", sep=""), sep = "")
+                                                 paste(r, " | ",
+                                                       sep=""),
+                                                 sep = "")
                                 } else {
-                                    tmp <- paste(tmp, paste(r, sep=""), sep = "")
+                                    tmp <- paste(tmp, paste(r,
+                                                            sep=""),
+                                                 sep = "")
                                     lo <- lo + 1
                                 }
                             }
@@ -312,8 +323,11 @@ includeLogic <- function(adj, experiments, mutants){
             write(network, file = path)
         }
         test <- lapply(1:nrow(logicmatrix),
-                       function(x) getExtendedAdjacency(x,logicmatrix,
-                                                        column, adj, mutants,
+                       function(x) getExtendedAdjacency(x,
+                                                        logicmatrix,
+                                                        column,
+                                                        adj,
+                                                        mutants,
                                                         experiments,
                                                         sort(randomnames)))
         return(test)
@@ -418,8 +432,22 @@ CreateTopology <- function(single, double, force = TRUE) {
             if (sum(apply(startModel, 2, sum) >= 2) > 0) {
                 if (sum(startModel[,which(
                     apply(startModel, 2, sum) >= 2)[1]] == 1) > 0) {
-                    if (!(paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".") %in% mutants)) {
-                        mutants <- sort(c(singleKOs, paste(rownames(startModel)[which(startModel[, which(apply(startModel, 2, sum) >= 2)[1]] == 1)[1:2]], collapse = ".")))
+                    if (!(paste(
+                             rownames(
+                                 startModel)[which(
+                                         startModel[, which(
+                                             apply(startModel, 2, sum) >= 2)[1]]
+                                         == 1)[1:2]], collapse = ".") %in%
+                          mutants)) {
+                        mutants <-
+                            sort(c(singleKOs,
+                                   paste(rownames(
+                                       startModel)[which(startModel[,which(
+                                                     apply(startModel,
+                                                           2,
+                                                           sum) >= 2)[1]]
+                                                     == 1)[1:2]],
+                                       collapse = ".")))
                     }
                     donotextend <- FALSE
                 } else {

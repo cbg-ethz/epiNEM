@@ -69,11 +69,19 @@ NA
 #' rownames(data) <- paste("E", 1:100, sep = "_")
 #' res <- epiNEM(data, method = "exhaustive")
 #' plot(res)
-epiNEM <- function(filename="random", method="greedy",
-                   nIterations=10, nModels=0,
-                   random=list(single=4, double=1, reporters=100,
-                               FPrate=0.1, FNrate=0.1, replicates=1),
-                   plotsy=TRUE, ltype = "marginal", para = c(0.13, 0.05)) {
+epiNEM <- function(filename="random",
+                   method="greedy",
+                   nIterations=10,
+                   nModels=0,
+                   random=list(single=4,
+                               double=1,
+                               reporters=100,
+                               FPrate=0.1,
+                               FNrate=0.1,
+                               replicates=1),
+                   plotsy=TRUE,
+                   ltype = "marginal",
+                   para = c(0.13, 0.05)) {
 
     ##--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
@@ -206,10 +214,12 @@ ExtendTopology <- function(topology, nReporters) {
     reporters     <- unlist(lapply(1:nReporters,
                                    function(n) paste("reporter", n, sep="-")))
     linkedEffects <- sample(1:ncol(topology), nReporters, replace=TRUE)
-    extTopology   <- sapply(linkedEffects,
-                            function(e) lapply(1:ncol(topology),
-                                               function(c) ifelse(e == c, 1, 0)))
-    extTopology   <- matrix(unlist(extTopology), ncol=ncol(topology), byrow=TRUE)
+    extTopology   <-
+        sapply(linkedEffects,
+               function(e) lapply(1:ncol(topology),
+                                  function(c) ifelse(e == c, 1, 0)))
+    extTopology <-
+        matrix(unlist(extTopology), ncol=ncol(topology), byrow=TRUE)
     dimnames(extTopology) <- list(reporters, colnames(topology))
     return(extTopology)
 }
