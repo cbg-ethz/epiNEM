@@ -1,7 +1,7 @@
 Package: epiNEM
 Type: Package
 Title: epiNEM
-Version: 0.99.28
+Version: 0.99.29
 Author: Madeline Diekmann & Martin Pirkl
 Maintainer: Martin Pirkl <martin.pirkl@bsse.ethz.ch>
 Description: epiNEM is an extension of the original Nested Effects Models (NEM). EpiNEM is able to take into account double knockouts and infer more complex network signalling pathways.

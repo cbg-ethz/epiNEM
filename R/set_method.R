@@ -43,8 +43,11 @@ FindNeighbours <- function(model, edges){
     ## Return all models that differ only one edge from the current model by
     ## removing or adding a non-self edge.
     ChangeEdge <- function(edge, model) {
-        if (model[edge] == 1) model[edge] = 0
-        else if (model[edge] == 0) model[edge] = 1
+        if (model[edge] == 1) {
+            model[edge] = 0
+        } else if (model[edge] == 0) {
+            model[edge] = 1
+        }
         return(model)
     }
     models <- lapply(edges, ChangeEdge, model)
