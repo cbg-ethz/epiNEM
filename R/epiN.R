@@ -161,8 +161,12 @@ epiNEM <- function(filename="random",
 
         results <- unlist(reconstruct[index], recursive=FALSE)
         results$score <- mll[index]
+        if (ltype %in% "maximum") {
+            names(results$score) <- "max"
+        } else {
+            names(results$score) <- "mLL"
+        }
         results$EGeneset <- AttachEGenes(posterior, experiments)
-
         cat("\n")
     }
 
@@ -198,8 +202,12 @@ epiNEM <- function(filename="random",
         results <- lapply(results, utils::modifyList,
                           list(score=mll[which.max(mll)]))
         results <- results[[1]]
+        if (ltype %in% "maximum") {
+            names(results$score) <- "max"
+        } else {
+            names(results$score) <- "mLL"
+        }
         posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
-
         results$EGeneset <- posterior
 
     }
