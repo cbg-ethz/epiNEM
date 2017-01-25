@@ -92,6 +92,7 @@ NA
 #' "marginal" or "maximum"
 #' @param para false positive and
 #' false negative rates
+#' @param init adjacency matrix to initialise the greedy search
 #' @author Madeline Diekmann
 #' @seealso nem
 #' @export
@@ -123,7 +124,8 @@ epiNEM <- function(filename="random",
                                FNrate=0.1,
                                replicates=1),
                    ltype = "marginal",
-                   para = c(0.13, 0.05)) {
+                   para = c(0.13, 0.05),
+                   init = NULL) {
     
     ##--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
@@ -178,7 +180,7 @@ epiNEM <- function(filename="random",
     if (method == "greedy") {
         print(paste("Progress (of ", nIterations, " iterations):", sep = ''))
         iterations <- sapply(1:nIterations, GreedyHillClimber,
-                             experiments, D1, D0, mutants)
+                             experiments, D1, D0, mutants, init)
 
         index <- which.max(iterations["maxLlh",])
         reconstruct <- includeLogic(iterations[,index]$model,

@@ -9,7 +9,7 @@ double knock-downs.}
 epiNEM(filename = "random", method = "greedy", nIterations = 10,
   nModels = 0, random = list(single = 4, double = 1, reporters = 100, FPrate
   = 0.1, FNrate = 0.1, replicates = 1), ltype = "marginal", para = c(0.13,
-  0.05))
+  0.05), init = NULL)
 }
 \arguments{
 \item{filename}{A binary, tab-delimited matrix.
@@ -37,6 +37,8 @@ FP-rate, FN-rate, no. of replicates}
 
 \item{para}{false positive and
 false negative rates}
+
+\item{init}{adjacency matrix to initialise the greedy search}
 }
 \value{
 List object with an adjacency matrix denoting the network,

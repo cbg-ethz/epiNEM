@@ -1,7 +1,8 @@
 ## optional functions
 
 #' @noRd
-GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
+GreedyHillClimber <- function(n, experiments, data2,
+                              data0, mutants, init = NULL) {
     cat("\n")
     cat(n)
     maxLlh <- -Inf
@@ -18,7 +19,11 @@ GreedyHillClimber <- function(n, experiments, data2, data0, mutants) {
     result <- sapply(extendedModels, Mll, data2, data0)
     mLLscores <- unlist(result["mLL",])
     score <- max(mLLscores)
-    model <- startModel
+    if (is.null(init)) {
+        model <- startModel
+    } else {
+        model <- init
+    }
 
     while (score > maxLlh) {
         cat('.')
