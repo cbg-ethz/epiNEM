@@ -300,6 +300,8 @@ each triple (double plus single knock-outs).
 The final figure shows the global distribution of the top scoring
 logics we identified.
 
+We load and preprocess the data set.
+
 ```{r}
 file <- paste("http://www.holstegelab.nl/",
               "publications/sv/signaling_redundancy/downloads/DataS1.txt",
@@ -333,99 +335,24 @@ dataBin <- dataBin[-which(apply(dataBin, 1, max) == 0), ]
 
 dataBinWag <- dataBin
 
-genelist <- toupper(c('hsl1', 'cla4', 'gin4', 'swe1', 'hsl1.cla4'))
-
 colnames(dataBin) <- gsub(".del.vs..wt", "", colnames(dataBin))
 
 colnames(dataBin) <- gsub(".del", "", colnames(dataBin))
-
-doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
-
-doubles <- sort(doubles[-grep("vs", doubles)])
-
-doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
-
-singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
-
-singles <- unique(sort(singles))
-
-llmat <- logicmat <- matrix(0, length(singles), length(doubles))
-
-rownames(llmat) <- rownames(logicmat) <- singles
-
-colnames(llmat) <- colnames(logicmat) <- doubles
-
-globalgenes <- which(apply(dataBin, 1, max) == 1)
 ```
+
+We apply epiNEM so all triples and infer logics and calculate the log-likelihood.
+
 ```{r, eval=FALSE}
-for (i in doubles) {
-    if (which(doubles %in% i) == 8) { next() }
-    print(i)
-    doubles.singles <- unlist(strsplit(i, "\\."))
-    egenes <- which(apply(dataBin[, which(colnames(dataBin) %in%
-            c(i, doubles.singles))], 1, max) == 1)
-    for (j in singles) {
-        print(j)
-        if (j %in% doubles.singles) { next() }
+wagscreen <- epiScreen(dataBin)
 
-        dataTmp <- dataBin[, grep(paste(
-             paste("^", c(i, j, doubles.singles), "$", sep = ""),
-             collapse = "|"),
-             colnames(dataBin))]
-
-        if (path %in% "fixed_set") {
-            dataTmp <- dataTmp[egenes, ]
-        }
-        if (path %in% "global") {
-            dataTmp <- dataTmp[globalgenes, ]
-        }
-        if (path %in% "") {
-            dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
-        }
-        
-        i1 <- which(singles %in% j)
-        i2 <- which(doubles %in% i)
-
-        if (!(is.null(dim(dataTmp)))) {
-            
-            if (any(dataTmp[, j] != 0)) {
-                
-                epires <- epiNEM(dataTmp, method = "exhaustive")
-                
-                tmp <- epires$logics
-                if ("OR" %in% tmp) {
-                    if (sum(epires$origModel[, j]) != 2) {
-                        tmp <- "NOEPI"
-                    } else {
-                        if (all(tmp %in% "OR")) {
-                            tmp <- "OR"
-                        } else {
-                            tmp <- tmp[which(!(tmp %in% "OR"))]
-                        }
-                    }
-                }
-                
-                logicmat[i1, i2] <- tmp
-                llmat[i1, i2] <- epires$score
-                
-            } else {
-
-                logicmat[i1, i2] <- "UNCON"
-                llmat[i1, i2] <- -Inf
-                
-            }
-            
-        } else {
-            
-            logicmat[i1, i2] <- "UNCON"
-            llmat[i1, i2] <- -Inf
-            
-        }
-        
-    }
-    
-}
+doubles <- wagscreen$doubles,
+singles <- wagscreen$singles
+llmat <- wagscreen$llmat
+logicmat <- wagscreen$logicmat
 ```
+
+We plot the significant results for all triples with log-likelihoods on the y-axis and ranked triples on the x-axis.
+
 ```{r, fig.width = 8, fig.height = 4}
 palette(c("#4444cc", "#77aa77", "#009933",
           "#ff0000", "#dd8811", "#aa44bb", "#999900"))
@@ -599,6 +526,8 @@ HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
 The second knock-out screen by Sameith et al., 2015 was created to
 investigate growth based genetic interactions.
 
+Again we preprocess the data.
+
 ```{r}
 file <- paste("http://www.holstegelab.nl/",
 "publications/GSTF_geneticinteractions/",
@@ -629,93 +558,21 @@ dataBin[which(dataP >= sig | dataP == 0 | abs(dataM) < cutoff)] <- 0
 dataBin <- dataBin[-which(apply(dataBin, 1, max) == 0), ]
 
 colnames(dataBin) <- gsub("\\.\\.\\.", "\\.", colnames(dataBin))
-
-## big screen:
-
-doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
-
-doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
-
-singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
-
-singles <- unique(sort(singles))
-
-llmat <- logicmat <- matrix(0, length(singles), length(doubles))
-
-rownames(llmat) <- rownames(logicmat) <- singles
-
-colnames(llmat) <- colnames(logicmat) <- doubles
-
-globalgenes <- which(apply(dataBin, 1, max) == 1)
 ```
+
+We apply epiNEM to screen all triples from double and single knock-out combinations.
+
 ```{r, eval=FALSE}
-for (i in doubles[set]) {
-    print(i)
-    doubles.singles <- unlist(strsplit(i, "\\."))
-    egenes <- which(apply(dataBin[,
-              which(colnames(dataBin) %in% c(i, doubles.singles))], 1, max)
-              == 1)
-    for (j in singles) {
-        print(j)
-        if (j %in% doubles.singles) { next() }
+samscreen <- epiScreen(dataBin)
 
-        dataTmp <-
-            dataBin[, grep(paste(paste("^", c(i, j, doubles.singles), "$",
-            sep = ""), collapse = "|"), colnames(dataBin))]
-
-        if (path %in% "fixed_set") {
-            dataTmp <- dataTmp[egenes, ]
-        }
-        if (path %in% "global") {
-            dataTmp <- dataTmp[globalgenes, ]
-        }
-        if (path %in% "") {
-            dataTmp <- dataTmp[which(apply(dataTmp, 1, max) == 1), ]
-        }
-        
-        i1 <- which(singles %in% j)
-        i2 <- which(doubles %in% i)
-
-        if (!(is.null(dim(dataTmp)))) {
-            
-            if (any(dataTmp[, j] != 0)) {
-                
-                epires <- epiNEM(dataTmp, method = "exhaustive")
-                
-                tmp <- epires$logics
-                if ("OR" %in% tmp) {
-                    if (sum(epires$origModel[, j]) != 2) {
-                        tmp <- "NOEPI"
-                    } else {
-                        if (all(tmp %in% "OR")) {
-                            tmp <- "OR"
-                        } else {
-                            tmp <- tmp[which(!(tmp %in% "OR"))]
-                        }
-                    }
-                }
-                
-                logicmat[i1, i2] <- tmp
-                llmat[i1, i2] <- epires$score
-                
-            } else {
-
-                logicmat[i1, i2] <- "UNCON"
-                llmat[i1, i2] <- -Inf
-                
-            }
-            
-        } else {
-            
-            logicmat[i1, i2] <- "UNCON"
-            llmat[i1, i2] <- -Inf
-            
-        }
-        
-    }
-
-}
+doubles <- samscreen$doubles
+singles <- samscreen$singles
+logicmat <- samscreen$logicmat
+llmat <- samscreen$llmat
 ```
+
+We plot the significant results for all triples with log-likelihoods on the y-axis and ranked triples on the x-axis.
+
 ```{r, fig.width = 8, fig.height = 4}
 data(sameith)
 

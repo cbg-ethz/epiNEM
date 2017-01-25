@@ -1046,5 +1046,105 @@ HeatmapOP <-
                   contour = contour)
     }
 
+#' This function is used to analyse knock-out screens with multiple
+#' double and single knock-outs combined in one data set.
+#' @param data data matrix containing multiple single and double kock-downs in columns and effect reporters in the rows
+#' @param ... additional parameters, e.g. for the main epiNEM function
+#' @export
+#' @author Martin Pirkl
+#' @return list object with vectors of double knock-downs, single knock-downs and two matrices with doubles in the columns and singles in the rows. The first matrix denotes the respective logical gate for the triple and the second matrix the log-likelihood
+#' @examples
+#' data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
+#' colnames(data) <- c("A.B", "A.C", "B.C", "A", "B", "C", "D", "E", "G")
+#' rownames(data) <- paste("E", 1:100, sep = "_")
+#' res <- epiScreen(data)
+epiScreen <- function(data, ...) {
+
+    dataBin <- data
+    
+    doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
+
+    if (length(grep("vs", doubles)) > 0) {
+        doubles <- sort(doubles[-grep("vs", doubles)])
+    } else { doubles <- sort(doubles) }
+
+    doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
+
+    if (length(grep("\\.", colnames(dataBin))) > 0) {
+        singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
+    } else { singles <- sort(singles) }
+    
+    singles <- unique(sort(singles))
+
+    llmat <- logicmat <- matrix(0, length(singles), length(doubles))
+
+    rownames(llmat) <- rownames(logicmat) <- singles
+
+    colnames(llmat) <- colnames(logicmat) <- doubles
+
+    globalgenes <- which(apply(dataBin, 1, max) == 1)
+
+    for (i in doubles) {
+        if (which(doubles %in% i) == 8) { next() }
+        print(i)
+        doubles.singles <- unlist(strsplit(i, "\\."))
+        egenes <- which(apply(dataBin[, which(colnames(dataBin) %in%
+                                              c(i, doubles.singles))], 1, max) == 1)
+        for (j in singles) {
+            print(j)
+            if (j %in% doubles.singles) { next() }
+
+            dataTmp <- dataBin[, grep(paste(
+                paste("^", c(i, j, doubles.singles), "$", sep = ""),
+                collapse = "|"),
+                colnames(dataBin))]
+
+            dataTmp <- dataTmp[egenes, ]
+         
+            i1 <- which(singles %in% j)
+            i2 <- which(doubles %in% i)
+
+            if (!(is.null(dim(dataTmp)))) {
+                
+                if (any(dataTmp[, j] != 0)) {
+                    
+                    epires <- epiNEM(dataTmp, method = "exhaustive")
+                    
+                    tmp <- epires$logics
+                    if ("OR" %in% tmp) {
+                        if (sum(epires$origModel[, j]) != 2) {
+                            tmp <- "NOEPI"
+                        } else {
+                            if (all(tmp %in% "OR")) {
+                                tmp <- "OR"
+                            } else {
+                                tmp <- tmp[which(!(tmp %in% "OR"))]
+                            }
+                        }
+                    }
+                    
+                    logicmat[i1, i2] <- tmp
+                    llmat[i1, i2] <- epires$score
+                    
+                } else {
+
+                    logicmat[i1, i2] <- "UNCON"
+                    llmat[i1, i2] <- -Inf
+                    
+                }
+                
+            } else {
+                
+                logicmat[i1, i2] <- "UNCON"
+                llmat[i1, i2] <- -Inf
+                
+            }
+            
+        }
+        
+    }
+    return(list(doubles = doubles, singles = singles, logicmat = logicmat, llmat = llmat))
+
+}
 
 ###--- END OF HELPER FUNCTIONS ---###
