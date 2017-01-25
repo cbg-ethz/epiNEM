@@ -115,7 +115,7 @@ getStarters <- function(mutants, experiments){
 #' @param mutants vector of single knockouts
 #' @param experiments vector of all knockouts
 #' @importFrom BoolNet getPathToAttractor
-#' @importFrom stats runif
+#' @import stats
 #' @export
 #' @examples
 #' library(BoolNet)

@@ -2,12 +2,14 @@
 % Please edit documentation in R/epiN.R
 \name{epiNEM}
 \alias{epiNEM}
-\title{Epistatic NEMs - main function}
+\title{Epistatic NEMs - main function. This function contains the inference
+algorithm to learn logical networks from knock-down data including
+double knock-downs.}
 \usage{
 epiNEM(filename = "random", method = "greedy", nIterations = 10,
   nModels = 0, random = list(single = 4, double = 1, reporters = 100, FPrate
-  = 0.1, FNrate = 0.1, replicates = 1), plotsy = TRUE, ltype = "marginal",
-  para = c(0.13, 0.05))
+  = 0.1, FNrate = 0.1, replicates = 1), ltype = "marginal", para = c(0.13,
+  0.05))
 }
 \arguments{
 \item{filename}{A binary, tab-delimited matrix.
@@ -30,8 +32,6 @@ no. of single mutants, no. of
 double mutants, no. of reporterGenes,
 FP-rate, FN-rate, no. of replicates}
 
-\item{plotsy}{atm not used}
-
 \item{ltype}{likelihood either
 "marginal" or "maximum"}
 
@@ -39,10 +39,17 @@ FP-rate, FN-rate, no. of replicates}
 false negative rates}
 }
 \value{
-optimized logical network
+List object with an adjacency matrix denoting the network,
+the model of the silencing scheme (rows are knock-downs, columns
+are signalling genes), a string with the inferred logial gates,
+a column indices denoting position of logical gates, the log transformed
+likelihood and the effect reporter distribution (rows are the signalling
+genes including the null node).
 }
 \description{
-Epistatic NEMs - main function
+Epistatic NEMs - main function. This function contains the inference
+algorithm to learn logical networks from knock-down data including
+double knock-downs.
 }
 \examples{
 data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)

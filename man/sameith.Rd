@@ -4,10 +4,26 @@
 \name{sameith}
 \alias{sameith}
 \title{Example data: epiNEM results for
-the Sameith et al., 2015 knock-out screen}
+the Sameith et al., 2015 knock-out screen
+The result of the epiNEM analysis of the data from
+"http://www.holstegelab.nl/publications/
+sv/signaling_redundancy/downloads/DataS1.txt".
+The data consists of a list of matrices with the likelihoods (ll)
+for each analysed triple of signalling genes and the inferred logic
+(logic) for each triple. The signalling genes or modulators C are the
+rows and the signalling genes from the double knock-downs are in the columns.
+For details see the vignette.}
 \description{
 Example data: epiNEM results for
 the Sameith et al., 2015 knock-out screen
+The result of the epiNEM analysis of the data from
+"http://www.holstegelab.nl/publications/
+sv/signaling_redundancy/downloads/DataS1.txt".
+The data consists of a list of matrices with the likelihoods (ll)
+for each analysed triple of signalling genes and the inferred logic
+(logic) for each triple. The signalling genes or modulators C are the
+rows and the signalling genes from the double knock-downs are in the columns.
+For details see the vignette.
 }
 \examples{
 data(sameith)

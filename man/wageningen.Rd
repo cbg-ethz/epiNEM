@@ -4,10 +4,24 @@
 \name{wageningen}
 \alias{wageningen}
 \title{Example data: epiNEM results for
-the Wageningen et al., 2010 knock-out screen}
+the Wageningen et al., 2010 knock-out screen
+"http://www.holstegelab.nl/publications/GSTF_geneticinteractions/
+downloads/del_mutants_limma.txt"
+The data consists of a list of matrices with the likelihoods (ll)
+for each analysed triple of signalling genes and the inferred logic
+(logic) for each triple. The signalling genes or modulators C are the
+rows and the signalling genes from the double knock-downs are in the columns.
+For details see the vignette.}
 \description{
 Example data: epiNEM results for
 the Wageningen et al., 2010 knock-out screen
+"http://www.holstegelab.nl/publications/GSTF_geneticinteractions/
+downloads/del_mutants_limma.txt"
+The data consists of a list of matrices with the likelihoods (ll)
+for each analysed triple of signalling genes and the inferred logic
+(logic) for each triple. The signalling genes or modulators C are the
+rows and the signalling genes from the double knock-downs are in the columns.
+For details see the vignette.
 }
 \examples{
 data(wageningen)

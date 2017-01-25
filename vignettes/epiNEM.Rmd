@@ -3,7 +3,7 @@ title: "Epistatic Nested Effects Models
 - Inferring mixed epistatis from indirect measurements of knockout screens."
 author: "Madeline Diekmann & Martin Pirkl"
 date: "`r Sys.Date()`"
-output: rmarkdown::pdf_document
+output: BiocStyle::pdf_document
 vignette: >
     %\VignetteIndexEntry{epiNEM}
     %\VignetteEngine{knitr::rmarkdown}
@@ -31,27 +31,61 @@ to shorten the runtime of this vignette.
 ## Loading epiNEM
 
 ```{r}
-install.packages("devtools", repos = "https://cloud.r-project.org/")
+source("https://bioconductor.org/biocLite.R")
+
+biocLite("devtools")
 
 library(devtools)
 
-install_github("rstudio/rmarkdown")
+biocLite("rmarkdown")
 
 library(epiNEM)
 ```
 
+## Quick start
+
+You data should be in the form of binary effects stemming from
+knock-out data including single and double perturbations with
+effect reporters, e.g. genes, as rows and perturbations as columns.
+A one in row i and column j denotes an effect of reporter i for
+perturbation j. These effects are usually derived from comparing
+control/wild-type experiments with respective perturbation experiments
+(e.g. from edgeR or limma).
+The binary data is the main imput for the epiNEM function, which
+contains the inference algorithm to estimate the underlying network
+structure of the data. For up to four signalling genes (=different
+perturbation targets) exhautive search is available. For five or
+more a greedy search is implemented as an alternative.
+
+
+```{r}
+data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
+
+colnames(data) <- c("A", "A.B", "B", "C")
+
+rownames(data) <- paste("E", 1:100, sep = "_")
+
+print(head(data))
+
+res <- epiNEM(data, method = "exhaustive")
+
+plot(res)
+```
+
+The plot shows the inferred network with the signaling genes (bright red),
+the inferred logic (green) and attchment of effect reporters.
+
 ## Simulations
 
-We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM),
+We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM,
+[link](https://github.com/MartinFXP/B-NEM)),
 Aracne and the PC algorithm for 100 four node networks and respective data
 experiencing different levels of noise. The evaluation is done by accounting
 for the accuracy of discovered edges and in the case of B-NEM and epiNEM also
 the truth tables and logical gates.
 
 ```{r}
-install_github("MartinFXP/B-NEM")
-
-library(bnem, quietly = TRUE, verbose = FALSE)
+## install_github("MartinFXP/B-NEM"); library(bnem)
 
 library(nem)
 
@@ -66,13 +100,7 @@ noiselvls <- c(0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
 random <- list(FPrate = 0.1, FNrate = noiselvls,
                single = 4, double = 1, reporters = 100, replicates = 3)
 
-spec <- sens  <- logics <- array(0, dim = c(2, runs, length(noiselvls)))
-
-sens2 <- spec2 <- time <- array(0, dim = c(5, runs, length(noiselvls)))
-
-do <- c("n", "p", "a")
-
-do <- c("e", "b", do)
+do <- c("n", "p", "a", "e", "b")
 
 popSize <- 100
 
@@ -86,304 +114,32 @@ nIterations <- 3
 
 bnemsearch <- "genetic"
 
-parallel <- NULL
-
 logicgate <- matrix("", runs, length(noiselvls))
 
 edgenr <- matrix(0, runs, length(noiselvls))
 ```
+
+We simulate code based on a ground truth and infer a optimal network
+with all aforementioned methods solely based on the data.
+If you run this code, make sure to install the B-NEM package
+from github: [link](https://github.com/MartinFXP/B-NEM).
+
 ```{r, eval=FALSE}
-for (i in 1:runs) {
+simresults <- SimEpiNEM(runs, do, random, maxTime, forcelogic,
+                        epinemsearch, bnemsearch, nIterations)
 
-    print(paste("run ", i, sep = ""))
+sens <- simresults$sens
+spec <- simresults$spec
+sens2 <- simresults$sens2
+spec2 <- simresults$spec2
+logics <- simresults$logics
+time <- simresults$time
 
-    for (j in 1:length(noiselvls)) {
-
-        print(paste("noiselvl ", j, sep = ""))
-        
-        topology <- CreateTopology(random$single, random$double,
-                                   force = forcelogic)
-
-        topology <- unlist(unique(topology), recursive = FALSE)
-
-        extTopology <- ExtendTopology(topology$model, random$reporters)
-
-        sortedData <- GenerateData(topology$model, extTopology, 
-                                   random$FPrate, random$FNrate[j],
-                                   random$replicates)
-
-        logicgate[i, j] <- paste(topology$logics, collapse = "_")
-
-        edgenr[i, j] <- sum(topology$origModel == 1)
-
-        if ("e" %in% do) {
-            print("epiNEM")
-
-            start <- Sys.time()
-            TriplModel <- epiNEM(filename = sortedData,
-                      method = epinemsearch, nIterations = nIterations)
-            time[1, i, j] <- difftime(Sys.time(), start, units = "secs")
-            print(time[1, i, j])
-
-            tp <- sum(topology$model == 1 & TriplModel$model == 1)
-            tn <- sum(topology$model == 0 & TriplModel$model == 0)
-            fp <- sum(topology$model == 0 & TriplModel$model == 1)
-            fn <- sum(topology$model == 1 & TriplModel$model == 0)
-            sens[1, i, j] <- tp/(tp+fn)
-            spec[1, i, j] <- tn/(tn+fp)
-            tp <- sum(topology$origModel == 1 & TriplModel$origModel == 1)
-            tn <- sum(topology$origModel == 0 & TriplModel$origModel == 0)
-            fp <- sum(topology$origModel == 0 & TriplModel$origModel == 1)
-            fn <- sum(topology$origModel == 1 & TriplModel$origModel == 0)
-            sens2[1, i, j] <- tp/(tp+fn)
-            spec2[1, i, j] <- tn/(tn+fp)
-            tp <- 0
-            for (k in 1:length(topology$column)) {
-                for (l in 1:length(TriplModel$column)) {
-                    if (topology$column[k] == TriplModel$column[l]) {
-                        if (topology$logics[k] %in% TriplModel$logics[l]) {
-                            tp <- tp + 1
-                        }
-                    }
-                }
-            }
-            logics[1, i, j] <- tp/(length(topology$logics) +
-                                      length(TriplModel$logics) - tp)
-            print(sens[1, i, j])
-            print(spec[1, i, j])
-            print(sens2[1, i, j])
-            print(spec2[1, i, j])
-            print(logics[1, i, j])    
-
-        }
-
-        if ("b" %in% do) {
-            print("B-NEM")
-
-            gtn <- epiNEM2Bg(topology)
-
-            fc <- cbind(Ctrl_vs_S = -1, epiNEM2Bg(sortedData))*(-1)
-
-            bnemnoise <- sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
-            
-            fc[bnemnoise, 1] <- 0
-            
-            ers <- t(topology$model)*(-1)
-            colnames(ers) <- paste("S_vs_S_",
-                                 gsub("\\.", "_", colnames(ers)), sep = "")
-            ers <- cbind(Ctrl_vs_S = 1, ers)
-            ers <- ers[, order(colnames(ers))]
-
-            CNOlist <- dummyCNOlist(stimuli = "S",
-                               inhibitors = LETTERS[1:random$single],
-                               maxStim = 1, maxInhibit = 2,
-                               signals = LETTERS[1:random$single])
-
-            parents <- unique(unlist(strsplit(colnames(sortedData)[grep("\\.",
-                               colnames(sortedData))], "\\.")))
-
-            nodes <-
-            unique(colnames(sortedData)[-grep("\\.", colnames(sortedData))])
-
-            child <- nodes[-which(nodes %in% parents)]
-
-            sifMatrix <- NULL
-            for (k in LETTERS[1:random$single]) {
-               sifMatrix <- rbind(sifMatrix, c("S", "1", k))#, c("S", "-1", k))
-                for (l in LETTERS[1:random$single]) {
-                    if (k %in% l) { next() }
-                    if (k %in% parents) {
-                        sifMatrix <-
-                        rbind(sifMatrix, c(k, "1", l), c(k, "-1", l))
-                    } else {
-                        sifMatrix <- rbind(sifMatrix, c(k, "1", l))
-                    }
-                
-            randfile <- paste("pkn_", as.numeric(Sys.time()), sep = "")
-            write.table(sifMatrix, file = randfile, sep = "\t",
-                        row.names = FALSE, col.names = FALSE, quote = FALSE)
-            PKN <- readSIF(randfile)
-            unlink(randfile)
-
-            model <- preprocessing(CNOlist, PKN)
-
-            initBstring <- absorption(rep(1, length(model$reacID)), model)
-
-            if (maxTime) { maxTime2 <- time[1, i, j] } else { maxTime2 <- Inf }
-
-            start <- Sys.time()
-            bga <- bnem(search = bnemsearch,
-                        fc=fc,
-                        CNOlist=CNOlist,
-                        model=model,
-                        initBstring=initBstring,
-                        draw = FALSE,
-                        verbose = FALSE,
-                        popSize = popSize,
-                        maxTime = maxTime2,
-                        parallel = parallel
-                        )
-            time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
-            print(time[2, i, j])
-
-            ers2 <- computeFc(CNOlist,
-                              t(simulateStatesRecursive(CNOlist,
-                                                        model, bga$bString)))
-            ers2 <- ers2[, unique(colnames(fc))]
-            ers2 <- ers2[, order(colnames(ers2))]
-
-            tp <- sum(ers == -1 & ers2 == -1)
-            tn <- sum(ers == 0 & ers2 == 0)
-            fn <- sum(ers == -1 & ers2 == 0)
-            fp <- sum(ers == 0 & ers2 == -1)
-            sens[2, i, j] <- tp/(tp+fn)
-            spec[2, i, j] <- tn/(tn+fp)
-            gtn2 <- abs(dnf2adj(gtn))
-            if (length(grep("S", rownames(gtn2))) > 0) {
-                gtn2 <-
-                gtn2[-grep("S", rownames(gtn2)), -grep("S", colnames(gtn2))]
-            }
-            gtn2 <- gtn2[order(rownames(gtn2)), order(colnames(gtn2))]
-            res <- abs(dnf2adj(bga$graph))
-            if (length(grep("S", rownames(res))) > 0) {
-                res <- as.matrix(res[-grep("S", rownames(res)),
-                                                    -grep("S", colnames(res))])
-            }
-            if (dim(res)[1] == 1) {
-                colnames(res) <- rownames(res) <- gsub(".*=", "", bga$graph)
-            } else {
-                res <- res[order(rownames(res)), order(colnames(res))]
-            }
-            if (nrow(res) < nrow(gtn2)) {
-                res2 <-
-                rbind(cbind(res, matrix(0, nrow(res), nrow(gtn2) - nrow(res))),
-                      matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
-                colnames(res2)[(ncol(res)+1):ncol(res2)] <-
-                                     colnames(gtn2)[which(!(colnames(gtn2)
-                                     %in% colnames(res)))]
-                rownames(res2)[(nrow(res)+1):nrow(res2)] <-
-                                     rownames(gtn2)[which(!(rownames(gtn2)
-                                     %in% rownames(res)))]
-                res2 <- res2[order(rownames(res2)), order(colnames(res2))]
-                res <- res2
-            }
-            diag(gtn2) <- diag(res) <- 0
-            tp <- sum(gtn2 == 1 & res == 1)
-            tn <- sum(gtn2 == 0 & res == 0)
-            fn <- sum(gtn2 == 1 & res == 0)
-            fp <- sum(gtn2 == 0 & res == 1)
-            sens2[2, i, j] <- tp/(tp+fn)
-            spec2[2, i, j] <- tn/(tn+fp)
-            tp <- sum(bga$graph %in% gtn)
-            logics[2, i, j] <- tp/(length(gtn) + length(bga$graph) - tp)
-            print(sens[2, i, j])
-            print(spec[2, i, j])
-            print(sens2[2, i, j])
-            print(spec2[2, i, j])
-            print(logics[2, i, j])
-
-            print(bga$graph)
-            print(gtn)
-
-        }
-
-        if (any(c("n", "p", "a") %in% do)) {
-
-            reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
-            gtnadj <- topology$origModel
-            gtnadj <-
-            gtnadj[order(apply(gtnadj, 1, sum), decreasing = TRUE),
-                   order(apply(gtnadj, 2, sum), decreasing = FALSE)]
-            gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
-            gtnadj <- gtnadj[order(rownames(gtnadj)), order(colnames(gtnadj))]
-            eadj <- topology$origModel
-            eadj <- eadj[order(rownames(eadj)), order(colnames(eadj))]
-            reddata2 <- matrix(0, nrow(reddata)*random$replicates,
-                                         length(unique(colnames(reddata))))
-            for (k in 1:length(unique(colnames(reddata)))) {
-                reddata2[, k] <-
-                as.vector(reddata[, which(colnames(reddata) %in%
-                          unique(colnames(reddata))[k])])
-            }
-            colnames(reddata2) <- unique(colnames(reddata))
-
-        }
-
-        if ("n" %in% do) {
-            print("NEM")
-
-            start <- Sys.time()
-            if (epinemsearch %in% "greedy") {
-                nemres <- nem(reddata, inference = "nem.greedy")
-            } else {
-                nemres <- nem(reddata, inference = "search")
-            }
-            nadj <- transitive.reduction(graph2adj(nemres$graph))
-            time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
-            print(time[3, i, j])
-
-            tp <- sum(eadj  == 1 & nadj == 1)
-            tn <- sum(eadj == 0 & nadj == 0)
-            fp <- sum(eadj == 0 & nadj == 1)
-            fn <- sum(eadj == 1 & nadj == 0)
-            sens2[3, i, j] <- tp/(tp+fn)
-            spec2[3, i, j] <- tn/(tn+fp)
-            print(sens2[3, i, j])
-            print(spec2[3, i, j])
-
-        }
-
-        if ("p" %in% do) {
-            print("PCalg")
-
-            start <- Sys.time()
-            pc.fit <- pc(suffStat = list(C = cor(reddata2), n = nrow(reddata2)),
-                  indepTest = gaussCItest, ## indep.test: partial correlations
-                  alpha=0.05, labels = colnames(reddata2), verbose = FALSE)
-            pcadj <- graph2adj(pc.fit@graph)
-            time[4, i, j] <- difftime(Sys.time(), start, units = "secs")
-            print(time[4, i, j])
-
-            tp <- sum(gtnadj == 1 & pcadj == 1)
-            tn <- sum(gtnadj  == 0 & pcadj == 0)
-            fp <- sum(gtnadj == 0 & pcadj == 1)
-            fn <- sum(gtnadj == 1 & pcadj == 0)
-            sens2[4, i, j] <- tp/(tp+fn)
-            spec2[4, i, j] <- tn/(tn+fp)
-            print(sens2[4, i, j])
-            print(spec2[4, i, j])
-
-        }
-
-        if ("a" %in% do) {
-            print("Aracne")
-
-            start <- Sys.time()
-            ares <- build.mim(reddata2)
-            ares <- aracne(ares)
-            ares <- disc(ares, 0)
-            ares <- ares[order(rownames(ares)), order(colnames(ares))]
-            nas <- which(is.na(ares) == TRUE)
-            ares[nas] <- 0
-            diag(ares) <- 0
-            time[5, i, j] <- difftime(Sys.time(), start, units = "secs")
-            print(time[5, i, j])
-
-            tp <- sum(gtnadj == 1 & ares == 1)
-            tn <- sum(gtnadj == 0 & ares == 0)
-            fp <- sum(gtnadj == 0 & ares == 1)
-            fn <- sum(gtnadj == 1 & ares == 0)
-            sens2[5, i, j] <- tp/(tp+fn)
-            spec2[5, i, j] <- tn/(tn+fp)
-            print(sens2[5, i, j])
-            print(spec2[5, i, j])
-
-        }
-
-    }
-
-}
 ```
+
+We boxplot running time, accuracy for the inferred edges,
+logical gates and expected data (truth table) for all five methods.
+
 ```{r, fig.width = 7, fig.height = 7}
 data(sim)
 
@@ -486,37 +242,37 @@ according to the following legend, where the x-axis denotes the
 effect on the gene and the y-axis denotes the type of knock-out:
 
 ```{r, warning=FALSE, fig.width = 9, fig.height=5}
-a1 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
+a1 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "OR", col = "Greys", sub = "", colorkey = NULL)
-a2 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
+a2 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "AND", col = "Greys", sub = "", colorkey = NULL)
-a3 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
+a3 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "B masks effect of A", col = "Greys", sub = "",
           colorkey = NULL)
-a4 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
+a4 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "A masks effect of B", col = "Greys", sub = "",
           colorkey = NULL)
-a5 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
+a5 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "XOR", col = "Greys", sub = "", colorkey = NULL)
-a6 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
+a6 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-a7 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
+a7 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-a8 <- heatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
+a8 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
                  dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                  Colv = FALSE, Rowv = FALSE,
           main = "No epistasis (unconnected)", col = "Greys", sub = "",
@@ -827,7 +583,7 @@ labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
               "masking (NOT B)\n\n\n",
               "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
 
-heatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
+HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
           sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8),
           cexRow = 0, cexCol = 0.4, aspect = "fill",
           colorkey = list(space = "right",
@@ -1094,8 +850,6 @@ for (i in 1:ncol(distmat)) {
 
 distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
 
-library(bnem)
-
 y <- distmat
 
 distmat <- distmat[, order(apply(distmat, 2, function(x) {
@@ -1109,7 +863,7 @@ labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n",
                "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
 
-heatmapOP(distmat, Colv = FALSE, Rowv = FALSE,
+HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE,
           main = "logic gate distribution", sub = "",
           col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0,
           cexCol = 0.4, aspect = "fill",

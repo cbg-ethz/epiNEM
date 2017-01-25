@@ -1,7 +1,13 @@
 #' Example data: simulation results
-#' 
-#' Contains simulation results
-#' 
+#' Contains simulation results. How they were
+#' aquired is explained in the vignette.
+#' The data conists of a list of data matrices holding
+#' sensitivity and specificity
+#' (spec, sens) of network edges for the variious methods compared to
+#' the ground truth, sensitivity and specificity (sens2, spec2)
+#' of the expected data for epiNEM and Boolean NEMs and accuracy
+#' of the inferred logics for both. The different methods are in the
+#' rows and the columns denote the different independent simulation runs.
 #' @docType data
 #' @examples 
 #' data(sim)
@@ -10,7 +16,14 @@ NA
 
 #' Example data: epiNEM results for
 #' the Sameith et al., 2015 knock-out screen
-#' 
+#' The result of the epiNEM analysis of the data from
+#' "http://www.holstegelab.nl/publications/
+#' sv/signaling_redundancy/downloads/DataS1.txt".
+#' The data consists of a list of matrices with the likelihoods (ll)
+#' for each analysed triple of signalling genes and the inferred logic
+#' (logic) for each triple. The signalling genes or modulators C are the
+#' rows and the signalling genes from the double knock-downs are in the columns.
+#' For details see the vignette.
 #' @docType data
 #' @examples 
 #' data(sameith)
@@ -19,7 +32,13 @@ NA
 
 #' Example data: epiNEM results for
 #' the Wageningen et al., 2010 knock-out screen
-#' 
+#' "http://www.holstegelab.nl/publications/GSTF_geneticinteractions/
+#' downloads/del_mutants_limma.txt"
+#' The data consists of a list of matrices with the likelihoods (ll)
+#' for each analysed triple of signalling genes and the inferred logic
+#' (logic) for each triple. The signalling genes or modulators C are the
+#' rows and the signalling genes from the double knock-downs are in the columns.
+#' For details see the vignette.
 #' @docType data
 #' @examples 
 #' data(wageningen)
@@ -28,7 +47,10 @@ NA
 
 #' sig. of string interaction scores
 #' for Sameith et al., 2015 data
-#' 
+#' The data consists of a list including a vectors of pairs (for interactions)
+#' and a corresponding list of interaction scores derived form the
+#' string database.
+#' For details see the vignette.
 #' @docType data
 #' @examples 
 #' data(sameith_string)
@@ -37,7 +59,10 @@ NA
 
 #' sig. of string interaction scores
 #' for van Wageningen et al., 2010 data
-#' 
+#' The data consists of a list including a vectors of pairs (for interactions)
+#' and a corresponding list of interaction scores derived form the
+#' string database.
+#' For details see the vignette.
 #' @docType data
 #' @examples 
 #' data(wageningen_string)
@@ -45,7 +70,9 @@ NA
 NA
 
 ###--- MAIN SCRIPT ---###
-#' Epistatic NEMs - main function
+#' Epistatic NEMs - main function. This function contains the inference
+#' algorithm to learn logical networks from knock-down data including
+#' double knock-downs.
 #' @param filename A binary, tab-delimited matrix.
 #' Columns: single and double knockdowns.
 #' Rows: genes showing effect or not?
@@ -61,7 +88,6 @@ NA
 #' no. of single mutants, no. of
 #' double mutants, no. of reporterGenes,
 #' FP-rate, FN-rate, no. of replicates
-#' @param plotsy atm not used
 #' @param ltype likelihood either
 #' "marginal" or "maximum"
 #' @param para false positive and
@@ -70,11 +96,16 @@ NA
 #' @seealso nem
 #' @export
 #' @import
-#' igraph
+#' stats
 #' e1071
 #' nem
 #' utils
-#' @return optimized logical network
+#' @return List object with an adjacency matrix denoting the network,
+#' the model of the silencing scheme (rows are knock-downs, columns
+#' are signalling genes), a string with the inferred logial gates,
+#' a column indices denoting position of logical gates, the log transformed
+#' likelihood and the effect reporter distribution (rows are the signalling
+#' genes including the null node). 
 #' @examples
 #' data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
 #' colnames(data) <- c("A", "A.B", "B", "C")
@@ -91,7 +122,6 @@ epiNEM <- function(filename="random",
                                FPrate=0.1,
                                FNrate=0.1,
                                replicates=1),
-                   plotsy=TRUE,
                    ltype = "marginal",
                    para = c(0.13, 0.05)) {
     
@@ -245,7 +275,10 @@ ExtendTopology <- function(topology, nReporters) {
     return(extTopology)
 }
 
-#' Generate data from extended model
+#' Generate data from extended model. Given a model created from
+#' CreateTopology and ExtendTopology, this function creeates acorresponding
+#' artificial data matrix, which is used as a ground truth for simulation
+#' studies.
 #' @param model model of a topology
 #' from CreateTopology
 #' @param extTopology extended topology
@@ -264,7 +297,8 @@ ExtendTopology <- function(topology, nReporters) {
 #' ExtendTopology(topology$model, 100)
 #' sortedData <-
 #' GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
-#' @return data matrix
+#' @return data matrix with effect reporters as rows and knock-downs
+#' (including double kock-downs) as columns.
 GenerateData <- function(model, extTopology, FPrate, FNrate, replicates) {
     perfectData <- extTopology %*% t(model)
     perfectData <- perfectData[, rep(seq_len(ncol(perfectData)), replicates)]
@@ -282,5 +316,733 @@ IsBestModel <- function(thisModel, bestModel) {
     else if (any(thisModel != bestModel)) return(FALSE)
     return(TRUE)
 }
+
+#' Compares different network reconstruction algorithm on
+#' simulated data.
+#' @param runs number simulation runs
+#' @param do string vector of algorithms to
+#' compare: e (epiNEM), n (Nested Effects Models),
+#' b (B-NEM), p (PC algorithm), a (Aracne), e.g. c("e", "n", "p")
+#' @param random list of false poitive rate FPrate, false negative rates
+#' FNrate, number of single knock-downs single, number of double
+#' knock-downs double, number of effect reporters reporters and number
+#' of replicates replicates
+#' @param maxTime TRUE if the algorithms are bound to a maximum running
+#' time in respect to epiNEM
+#' @param forcelogic if TRUE the randomly sampled ground truth network
+#' includes a complex logic with probability 1
+#' @param epinemsearch greedy or exhaustive search for epiNEM
+#' @param bnemsearch genetic or greedy search for B-NEM
+#' @param ... additional parameters
+#' @author Martin Pirkl
+#' @return returns list of specificity and sensitivity of inferred edges
+#' (spec, sens) and inferred expected data (spec2, sens2) and accuracy
+#' of logics (logics) and running time (time)
+#' @export
+#' @import
+#' pcalg
+#' minet
+#' @examples
+#' res <- SimEpiNEM(runs = 1)
+SimEpiNEM <- function(runs = 10, do = c("n", "e"),
+                      random = list(FPrate = 0.1, FNrate = c(0.1, 0.5),
+                                    single = 3, double = 1, reporters = 10,
+                                    replicates = 2), maxTime = FALSE,
+                      forcelogic = TRUE, epinemsearch = "greedy",
+                      bnemsearch = "genetic", ...) {
+
+    noiselvls <- random$FNrate
+    
+    spec <- sens  <- logics <- array(0, dim = c(2, runs, length(noiselvls)))
+
+    sens2 <- spec2 <- time <- array(0, dim = c(5, runs, length(noiselvls)))
+
+    logicgate <- matrix("", runs, length(noiselvls))
+
+    edgenr <- matrix(0, runs, length(noiselvls))
+    
+    for (i in 1:runs) {
+
+        print(paste("run ", i, sep = ""))
+
+        for (j in 1:length(noiselvls)) {
+
+            print(paste("noiselvl ", j, sep = ""))
+            
+            topology <- CreateTopology(random$single, random$double,
+                                       force = forcelogic)
+
+            topology <- unlist(unique(topology), recursive = FALSE)
+
+            extTopology <- ExtendTopology(topology$model, random$reporters)
+
+            sortedData <- GenerateData(topology$model, extTopology, 
+                                       random$FPrate, random$FNrate[j],
+                                       random$replicates)
+
+            logicgate[i, j] <- paste(topology$logics, collapse = "_")
+
+            edgenr[i, j] <- sum(topology$origModel == 1)
+
+            if ("e" %in% do) {
+                print("epiNEM")
+
+                start <- Sys.time()
+                TriplModel <- epiNEM(filename = sortedData,
+                                     method = epinemsearch,
+                                     ...)
+                time[1, i, j] <- difftime(Sys.time(), start, units = "secs")
+                print(time[1, i, j])
+
+                tp <- sum(topology$model == 1 & TriplModel$model == 1)
+                tn <- sum(topology$model == 0 & TriplModel$model == 0)
+                fp <- sum(topology$model == 0 & TriplModel$model == 1)
+                fn <- sum(topology$model == 1 & TriplModel$model == 0)
+                sens[1, i, j] <- tp/(tp+fn)
+                spec[1, i, j] <- tn/(tn+fp)
+                tp <- sum(topology$origModel == 1 & TriplModel$origModel == 1)
+                tn <- sum(topology$origModel == 0 & TriplModel$origModel == 0)
+                fp <- sum(topology$origModel == 0 & TriplModel$origModel == 1)
+                fn <- sum(topology$origModel == 1 & TriplModel$origModel == 0)
+                sens2[1, i, j] <- tp/(tp+fn)
+                spec2[1, i, j] <- tn/(tn+fp)
+                tp <- 0
+                for (k in 1:length(topology$column)) {
+                    for (l in 1:length(TriplModel$column)) {
+                        if (topology$column[k] == TriplModel$column[l]) {
+                            if (topology$logics[k] %in% TriplModel$logics[l]) {
+                                tp <- tp + 1
+                            }
+                        }
+                    }
+                }
+                logics[1, i, j] <- tp/(length(topology$logics) +
+                                       length(TriplModel$logics) - tp)
+                print(sens[1, i, j])
+                print(spec[1, i, j])
+                print(sens2[1, i, j])
+                print(spec2[1, i, j])
+                print(logics[1, i, j])    
+
+            }
+
+            if ("b" %in% do) {
+                print("B-NEM")
+
+                gtn <- epiNEM2Bg(topology)
+
+                fc <- cbind(Ctrl_vs_S = -1, epiNEM2Bg(sortedData))*(-1)
+
+                bnemnoise <-
+                    sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
+                
+                fc[bnemnoise, 1] <- 0
+                
+                ers <- t(topology$model)*(-1)
+                colnames(ers) <-
+                    paste("S_vs_S_", gsub("\\.", "_", colnames(ers)), sep = "")
+                ers <- cbind(Ctrl_vs_S = 1, ers)
+                ers <- ers[, order(colnames(ers))]
+
+                CNOlist <- dummyCNOlist(stimuli = "S",
+                                        inhibitors = LETTERS[1:random$single],
+                                        maxStim = 1, maxInhibit = 2,
+                                        signals = LETTERS[1:random$single])
+
+                parents <-
+                    unique(unlist(
+                        strsplit(colnames(sortedData)[
+                            grep("\\.", colnames(sortedData))], "\\.")))
+
+                nodes <-
+                    unique(colnames(sortedData)[
+                        -grep("\\.", colnames(sortedData))])
+
+                child <- nodes[-which(nodes %in% parents)]
+
+                sifMatrix <- NULL
+                for (k in LETTERS[1:random$single]) {
+                    sifMatrix <- rbind(sifMatrix, c("S", "1", k))
+                    ##, c("S", "-1", k))
+                    for (l in LETTERS[1:random$single]) {
+                        if (k %in% l) { next() }
+                        if (k %in% parents) {
+                            sifMatrix <-
+                                rbind(sifMatrix, c(k, "1", l), c(k, "-1", l))
+                        } else {
+                            sifMatrix <- rbind(sifMatrix, c(k, "1", l))
+                        }
+                    }
+                }
+                randfile <- paste("pkn_", as.numeric(Sys.time()), sep = "")
+                write.table(sifMatrix, file = randfile, sep = "\t",
+                            row.names = FALSE, col.names = FALSE, quote = FALSE)
+                PKN <- readSIF(randfile)
+                unlink(randfile)
+                
+                model <- preprocessing(CNOlist, PKN)
+                
+                initBstring <- absorption(rep(1, length(model$reacID)), model)
+                
+                if (maxTime) {
+                    maxTime2 <- time[1, i, j]
+                } else { maxTime2 <- Inf }
+                
+                start <- Sys.time()
+                bga <- bnem(search = bnemsearch,
+                            fc=fc,
+                            CNOlist=CNOlist,
+                            model=model,
+                            initBstring=initBstring,
+                            draw = FALSE,
+                            verbose = FALSE,
+                            popSize = popSize,
+                            maxTime = maxTime2,
+                            parallel = parallel
+                            )
+                time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
+                print(time[2, i, j])
+                
+                ers2 <-
+                    computeFc(CNOlist,
+                              t(simulateStatesRecursive(CNOlist,
+                                                        model, bga$bString)))
+                ers2 <- ers2[, unique(colnames(fc))]
+                ers2 <- ers2[, order(colnames(ers2))]
+                
+                tp <- sum(ers == -1 & ers2 == -1)
+                tn <- sum(ers == 0 & ers2 == 0)
+                fn <- sum(ers == -1 & ers2 == 0)
+                fp <- sum(ers == 0 & ers2 == -1)
+                sens[2, i, j] <- tp/(tp+fn)
+                spec[2, i, j] <- tn/(tn+fp)
+                gtn2 <- abs(dnf2adj(gtn))
+                if (length(grep("S", rownames(gtn2))) > 0) {
+                    gtn2 <-
+                        gtn2[-grep("S", rownames(gtn2)),
+                             -grep("S", colnames(gtn2))]
+                }
+                gtn2 <- gtn2[order(rownames(gtn2)), order(colnames(gtn2))]
+                res <- abs(dnf2adj(bga$graph))
+                if (length(grep("S", rownames(res))) > 0) {
+                    res <- as.matrix(res[-grep("S", rownames(res)),
+                                         -grep("S", colnames(res))])
+                }
+                if (dim(res)[1] == 1) {
+                    colnames(res) <- rownames(res) <- gsub(".*=", "", bga$graph)
+                } else {
+                    res <- res[order(rownames(res)), order(colnames(res))]
+                }
+                if (nrow(res) < nrow(gtn2)) {
+                    res2 <-
+                        rbind(cbind(res,
+                                    matrix(0, nrow(res),
+                                           nrow(gtn2) - nrow(res))),
+                              matrix(0, nrow(gtn2) - nrow(res), ncol(gtn2)))
+                    colnames(res2)[(ncol(res)+1):ncol(res2)] <-
+                        colnames(gtn2)[which(!(colnames(gtn2)
+                            %in% colnames(res)))]
+                    rownames(res2)[(nrow(res)+1):nrow(res2)] <-
+                        rownames(gtn2)[which(!(rownames(gtn2)
+                            %in% rownames(res)))]
+                    res2 <- res2[order(rownames(res2)), order(colnames(res2))]
+                    res <- res2
+                }
+                diag(gtn2) <- diag(res) <- 0
+                tp <- sum(gtn2 == 1 & res == 1)
+                tn <- sum(gtn2 == 0 & res == 0)
+                fn <- sum(gtn2 == 1 & res == 0)
+                fp <- sum(gtn2 == 0 & res == 1)
+                sens2[2, i, j] <- tp/(tp+fn)
+                spec2[2, i, j] <- tn/(tn+fp)
+                tp <- sum(bga$graph %in% gtn)
+                logics[2, i, j] <- tp/(length(gtn) + length(bga$graph) - tp)
+                print(sens[2, i, j])
+                print(spec[2, i, j])
+                print(sens2[2, i, j])
+                print(spec2[2, i, j])
+                print(logics[2, i, j])
+
+                print(bga$graph)
+                print(gtn)
+
+            }
+
+            if (any(c("n", "p", "a") %in% do)) {
+
+                reddata <- sortedData[, -grep("\\.", colnames(sortedData))]
+                gtnadj <- topology$origModel
+                gtnadj <-
+                    gtnadj[order(apply(gtnadj, 1, sum), decreasing = TRUE),
+                           order(apply(gtnadj, 2, sum), decreasing = FALSE)]
+                gtnadj[lower.tri(gtnadj)] <- gtnadj[upper.tri(gtnadj)]
+                gtnadj <- gtnadj[order(rownames(gtnadj)),
+                                 order(colnames(gtnadj))]
+                eadj <- topology$origModel
+                eadj <- eadj[order(rownames(eadj)), order(colnames(eadj))]
+                reddata2 <- matrix(0, nrow(reddata)*random$replicates,
+                                   length(unique(colnames(reddata))))
+                for (k in 1:length(unique(colnames(reddata)))) {
+                    reddata2[, k] <-
+                        as.vector(reddata[,
+                                          which(colnames(reddata) %in%
+                                                unique(colnames(reddata))[k])])
+                }
+                colnames(reddata2) <- unique(colnames(reddata))
+
+            }
+
+            if ("n" %in% do) {
+                print("NEM")
+
+                start <- Sys.time()
+                if (epinemsearch %in% "greedy") {
+                    nemres <- nem(reddata, inference = "nem.greedy")
+                } else {
+                    nemres <- nem(reddata, inference = "search")
+                }
+                nadj <- transitive.reduction(nemres$graph)
+                time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
+                print(time[3, i, j])
+
+                tp <- sum(eadj  == 1 & nadj == 1)
+                tn <- sum(eadj == 0 & nadj == 0)
+                fp <- sum(eadj == 0 & nadj == 1)
+                fn <- sum(eadj == 1 & nadj == 0)
+                sens2[3, i, j] <- tp/(tp+fn)
+                spec2[3, i, j] <- tn/(tn+fp)
+                print(sens2[3, i, j])
+                print(spec2[3, i, j])
+
+            }
+
+            if ("p" %in% do) {
+                print("PCalg")
+
+                start <- Sys.time()
+                pc.fit <- pc(suffStat = list(C = cor(reddata2),
+                                             n = nrow(reddata2)),
+                             indepTest = gaussCItest,
+                             ## indep.test: partial correlations
+                             alpha=0.05, labels = colnames(reddata2),
+                             verbose = FALSE)
+                graph2adj <- function(gR) {
+                    adj.matrix <- matrix(0,
+                                         length(graph::nodes(gR)),
+                                         length(graph::nodes(gR))
+                                         )
+                    rownames(adj.matrix) <- graph::nodes(gR)
+                    colnames(adj.matrix) <- graph::nodes(gR)
+                    for (i in 1:length(nodes(gR))) {
+                        adj.matrix[graph::nodes(gR)[i],
+                                   adj(gR,graph::nodes(gR)[i])[[1]]] <- 1
+                    }
+                    
+                    return(adj.matrix)
+                }
+                pcadj <- graph2adj(pc.fit@graph)
+                time[4, i, j] <- difftime(Sys.time(), start, units = "secs")
+                print(time[4, i, j])
+
+                tp <- sum(gtnadj == 1 & pcadj == 1)
+                tn <- sum(gtnadj  == 0 & pcadj == 0)
+                fp <- sum(gtnadj == 0 & pcadj == 1)
+                fn <- sum(gtnadj == 1 & pcadj == 0)
+                sens2[4, i, j] <- tp/(tp+fn)
+                spec2[4, i, j] <- tn/(tn+fp)
+                print(sens2[4, i, j])
+                print(spec2[4, i, j])
+
+            }
+            
+            if ("a" %in% do) {
+                print("Aracne")
+
+                start <- Sys.time()
+                ares <- build.mim(reddata2)
+                ares <- aracne(ares)
+                ares[which(ares > 0)] <- 1
+                ares[which(ares < 0)] <- -1
+                ares <- ares[order(rownames(ares)), order(colnames(ares))]
+                nas <- which(is.na(ares) == TRUE)
+                ares[nas] <- 0
+                diag(ares) <- 0
+                time[5, i, j] <- difftime(Sys.time(), start, units = "secs")
+                print(time[5, i, j])
+
+                tp <- sum(gtnadj == 1 & ares == 1)
+                tn <- sum(gtnadj == 0 & ares == 0)
+                fp <- sum(gtnadj == 0 & ares == 1)
+                fn <- sum(gtnadj == 1 & ares == 0)
+                sens2[5, i, j] <- tp/(tp+fn)
+                spec2[5, i, j] <- tn/(tn+fp)
+                print(sens2[5, i, j])
+                print(spec2[5, i, j])
+
+            }
+
+        }
+
+    }
+
+    return(list(sens = sens, spec = spec, sens2 = sens2,
+                spec2 = spec2, logics = logics, time = time))
+
+}
+
+#' heatmap function based on the lattice package
+#' more information: ?xyplot
+#' @param x Matrix.
+#' @param col Color. See brewer.pal.info for all available
+#' color schemes.
+#' @param coln Number of colors.
+#' @param bordercol Border color.
+#' @param borderwidth Border width.
+#' @param breaks Defines the breaks in the color range. "sym"
+#' makes the breaks symmetric around 0.
+#' @param main Main title.
+#' @param sub Subtitle.
+#' @param dendrogram Draw dendrogram with "both", "col" or
+#' "row", or do not draw with "none".
+#' @param colorkey Draw colorkey list(space="left") or
+#' list(space="right").
+#' @param Colv Cluster columns (TRUE) or not (FALSE).
+#' @param Rowv Cluster rows (TRUE) or not (FALSE).
+#' @param xrot Rotate the column names by degree.
+#' @param yrot Rotate the row names by degree.
+#' @param shrink c(x,y) defines a range of size for the data
+#' boxes from low to high.
+#' @param cexCol Font size of column names.
+#' @param cexRow Font size of row names.
+#' @param cexMain Font size of main title.
+#' @param cexSub Font size of subtitle.
+#' @param colSideColors Defines a numeric vector to annotate
+#' columns with different colors.
+#' @param aspect "iso" for quadratic boxes or "fill" for
+#' streched boxes.
+#' @param contour TRUE adds a contour plot.
+#' @param useRaster TRUE to add raster visuals
+#' @param xlab Label for the x-axis.
+#' @param ylab Label for the y-axis.
+#' @param colSideColorsPos Place colSideColors at the "top" or "bottom".
+#' @param clust p, s, or k for correlation clustering
+#' @param clusterx Optional data matrix y with the same dimensions
+#' as x. x is columns or rows are sorted by the cluster information of y.
+#' @param \dots Optional arguments.
+#' @author Martin Pirkl & Oscar Perpinan
+#' at http://oscarperpinan.github.io/rastervis/
+#' @return lattice object/matrix
+#' @export
+#' @import
+#' lattice
+#' latticeExtra
+#' RColorBrewer
+#' grDevices
+#' @examples
+#' x <- matrix(rnorm(50), 10, 5)
+#' HeatmapOP(x, dendrogram = "both", aspect = "iso", xrot = 45)
+HeatmapOP <-
+    function(x, col = "RdYlGn", coln = 11, bordercol = "grey",
+             borderwidth = 0.1, breaks = "sym",
+             main = "heatmap by Oscar Perpinan",
+             sub = paste("http://oscarperpinan.github.io/",
+                         "rastervis/;",
+                         "http://stackoverflow.com/questions/15505607/",
+                         "diagonal-labels-orientation",
+                         "-on-x-axis-in-heatmaps", sep = ""),
+             dendrogram = "none", colorkey = list(space = "right"), Colv = TRUE,
+             Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1,1), cexCol = 1,
+             cexRow = 1, cexMain = 1, cexSub = 1,
+             colSideColors = NULL, aspect = "fill",
+             contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
+             colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
+        if (sum(is.na(x)) > 0) {
+            print("NAs detected; set to 0")
+            x[is.na(x)] <- 0
+        }
+
+        if (max(x) == min(x)) {
+            x <- matrix(rnorm(100), 10, 10)
+            main <- "max value equals min value"
+            sub <- "random matrix plotted"
+        }
+
+        dd.col <- NULL
+
+        if (dendrogram == "row" | dendrogram == "both" & !is.null(colorkey)) {
+            colorkey = list(space = "left")
+        }
+
+        if (is.null(breaks)) {
+            breaks <- seq(min(x),max(x),(max(x) - min(x))/45)
+        }
+        if ("sym" %in% breaks) {
+            breaks <- max(abs(x))
+            breaks2 <- breaks/45
+            breaks <- seq(-breaks,breaks,breaks2)
+        }
+        if (length(breaks) == 1) {
+            at <- seq(min(x), max(x), (max(x)-min(x))/breaks)
+        } else {
+            at <- breaks
+            x[x < breaks[1]] <- breaks[1]
+            x[x > breaks[length(breaks)]] <- breaks[length(breaks)]
+        }
+        
+        if (Colv) {
+            if (is.null(clust)) {
+                if (is.null(clusterx)) {
+                    dd.col <- as.dendrogram(hclust(dist(t(x))))
+                } else {
+                    dd.col <- as.dendrogram(hclust(dist(t(clusterx))))
+                }
+            } else {
+                if (is.null(clusterx)) {
+                    cor.tmp <- cor(x, method = clust)
+                } else {
+                    cor.tmp <- cor(clusterx, method = clust)
+                }
+                cor.tmp[which(is.na(cor.tmp) == TRUE)] <- 0
+                dd.col <- as.dendrogram(hclust(as.dist(1-abs(cor.tmp))))
+            }
+            col.ord <- order.dendrogram(dd.col)
+        } else {
+            if (dendrogram %in% "both") {
+                dendrogram <- "row"
+            }
+            if (dendrogram %in% "col") {
+                dendrogram <- "none"
+            }
+            col.ord <- 1:ncol(x)
+            legend = NULL
+        }
+
+        if (Rowv) {
+            if (is.null(clust)) {
+                if (is.null(clusterx)) {
+                    dd.row <- as.dendrogram(hclust(dist(x)))
+                } else {
+                    dd.row <- as.dendrogram(hclust(dist(clusterx)))
+                }
+            } else {
+                if (is.null(clusterx)) {
+                    cor.tmp <- cor(t(x), method = clust)
+                } else {
+                    cor.tmp <- cor(t(clusterx), method = clust)
+                }
+                cor.tmp[which(is.na(cor.tmp) == TRUE)] <- 0
+                dd.row <- as.dendrogram(hclust(as.dist(1-abs(cor.tmp))))
+            }
+            row.ord <- rev(order.dendrogram(dd.row))
+        } else {
+            if (dendrogram %in% "both") {
+                dendrogram <- "col"
+            }
+            if (dendrogram %in% "row") {
+                dendrogram <- "none"
+            }
+            row.ord <- 1:nrow(x)
+            legend = NULL
+        }
+
+        add <- list(rect = list(col = "transparent",
+                                fill = colSideColors[sort(col.ord)]))
+
+        myTheme <- custom.theme(region=RColorBrewer::brewer.pal(n=coln, col))
+        if (dendrogram != "none") {
+            if (dendrogram == "both") {
+                if (colSideColorsPos %in% "bottom") {
+                    if (!is.null(colSideColors)) {
+                        size <- 2
+                    } else {
+                        size <- 10
+                    }
+                    legend <- list(bottom =
+                                       list(fun = dendrogramGrob,
+                                            args =
+                                                list(x = dd.col, ord = col.ord,
+                                                     side = "top",
+                                                     size = size,
+                                                     add = add,
+                                                     type = "rectangle")),
+                                   right =
+                                       list(fun = dendrogramGrob,
+                                            args =
+                                                list(x = dd.row,
+                                                     side = "right",
+                                                     size = 10)))
+                }
+                if (colSideColorsPos %in% "top") {
+                    legend <- list(top =
+                                       list(fun = dendrogramGrob,
+                                            args =
+                                                list(x = dd.col, ord = col.ord,
+                                                     side = "top",
+                                                     size = 10,
+                                                     add = add,
+                                                     type = "rectangle")),
+                                   right =
+                                       list(fun = dendrogramGrob,
+                                            args =
+                                                list(x = dd.row,
+                                                     side = "right",
+                                                     size = 10)))
+                }
+            }
+            if (dendrogram == "row") {
+                if (!is.null(colSideColors)) {
+                    if (is.null(dd.col)) {
+                        col.ord <- 1:length(colSideColors)
+                    }
+                    if (is.null(clusterx)) {
+                        dd.col <- as.dendrogram(hclust(dist(t(x))*0))
+                    } else {
+                        dd.col <- as.dendrogram(hclust(dist(t(clusterx))*0))
+                    }
+                    if (colSideColorsPos %in% "bottom") {
+                        legend <-
+                            list(right =
+                                     list(fun = dendrogramGrob,
+                                          args =
+                                              list(x = dd.row,
+                                                   side = "right",
+                                                   size = 10,
+                                                   size.add= 0.5)),
+                                 bottom =
+                                     list(fun = dendrogramGrob,
+                                          args = list(x = dd.col, ord = col.ord,
+                                                      side = "top", size = 1,
+                                                      size.add= 1,
+                                                      add = add,
+                                                      type = "rectangle")))
+                    }
+                    if (colSideColorsPos %in% "top") {
+                        legend <-
+                            list(right =
+                                     list(fun = dendrogramGrob,
+                                          args =
+                                              list(x = dd.row,
+                                                   side = "right",
+                                                   size = 10, size.add= 0.5)),
+                                 top =
+                                     list(fun = dendrogramGrob,
+                                          args = list(x = dd.col, ord = col.ord,
+                                                      side = "top", size = 1,
+                                                      size.add= 1,
+                                                      add = add,
+                                                      type = "rectangle")))
+                    }
+                } else {
+                    legend <-
+                        list(right =
+                                 list(fun = dendrogramGrob,
+                                      args =
+                                          list(x = dd.row,
+                                               side = "right",
+                                               size = 10, size.add= 0.5)))
+                }
+            }
+            if (dendrogram == "col") {
+                if (colSideColorsPos %in% "bottom") {
+                    if (!is.null(colSideColors)) {
+                        size <- 2
+                    } else {
+                        size <- 10
+                    }
+                    legend <-
+                        list(bottom =
+                                 list(fun = dendrogramGrob,
+                                      args = list(x = dd.col, ord = col.ord, 
+                                                  side = "top", size = size,
+                                                  size.add= 0.5,
+                                                  add = add,
+                                                  type = "rectangle")))
+                }
+                if (colSideColorsPos %in% "top") {
+                    legend <-
+                        list(top =
+                                 list(fun = dendrogramGrob,
+                                      args = list(x = dd.col, ord = col.ord,
+                                                  side = "top", size = 10,
+                                                  size.add= 0.5,
+                                                  add = add,
+                                                  type = "rectangle")))
+                }
+            }
+        } else {
+            if (!is.null(colSideColors)) {
+                if (is.null(dd.col)) {
+                    col.ord <- 1:length(colSideColors)
+                }
+                if (is.null(clusterx)) {
+                    dd.col <- as.dendrogram(hclust(dist(t(x))*0))
+                } else {
+                    dd.col <- as.dendrogram(hclust(dist(t(clusterx))*0))
+                }
+                if (colSideColorsPos %in% "bottom") {
+                    legend <-
+                        list(bottom =
+                                 list(fun = dendrogramGrob,
+                                      args = list(x = dd.col, ord = col.ord,
+                                                  side = "top", size = 1,
+                                                  size.add= 1,
+                                                  add = add,
+                                                  type = "rectangle"))
+                             )
+                }
+                if (colSideColorsPos %in% "top") {
+                    legend <-
+                        list(top =
+                                 list(fun = dendrogramGrob,
+                                      args = list(x = dd.col, ord = col.ord,
+                                                  side = "top", size = 1,
+                                                  size.add= 1,
+                                                  add = add,
+                                                  type = "rectangle"))
+                             )
+                }
+            } else {
+                legend <- NULL
+            }
+        }
+        
+        d <- t(x[row.ord, col.ord])
+
+        d <- d[, ncol(d):1]
+
+        if (contour) {
+            region <- TRUE
+            col.regions <- terrain.colors(100)
+        }
+
+        ##  print(p, position=c(0,ypct-0.05,1,1), more=TRUE)
+        ##  print(p2, position=c(0,0,1,ypct+0.05))
+
+        if (is.null(rownames(x))) {
+            ytck <- list(cex = 0, rot = 0, at = NULL)
+        } else {
+            ytck <- list(cex = cexRow, rot = yrot)
+        }
+
+        if (is.null(colnames(x))) {
+            xtck <- list(cex = 0, rot = 0, at = NULL)
+        } else {
+            xtck <- list(cex = cexCol, rot = xrot)
+        }
+
+        levelplot(d,
+                  main = list(label = main, cex = cexMain), 
+                  sub = list(label = sub, cex = cexSub),
+                  aspect = aspect, xlab=xlab, ylab=ylab,
+                  scales = list(x = xtck, y = ytck, tck = c(1,0)),
+                  par.settings=myTheme,
+                  border=bordercol, border.lwd=borderwidth,
+                  shrink=shrink,
+                  legend = legend,
+                  at = at,
+                  colorkey = colorkey,
+                  contour = contour)
+    }
+
 
 ###--- END OF HELPER FUNCTIONS ---###
