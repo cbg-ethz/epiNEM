@@ -8,12 +8,16 @@ double and single knock-outs combined in one data set.}
 epiScreen(data, ...)
 }
 \arguments{
-\item{data}{data matrix containing multiple single and double kock-downs in columns and effect reporters in the rows}
+\item{data}{data matrix containing multiple single and double kock-downs
+in columns and effect reporters in the rows}
 
 \item{...}{additional parameters, e.g. for the main epiNEM function}
 }
 \value{
-list object with vectors of double knock-downs, single knock-downs and two matrices with doubles in the columns and singles in the rows. The first matrix denotes the respective logical gate for the triple and the second matrix the log-likelihood
+list object with vectors of double knock-downs, single knock-downs
+and two matrices with doubles in the columns and singles in the rows. The
+first matrix denotes the respective logical gate for the triple and the
+second matrix the log-likelihood
 }
 \description{
 This function is used to analyse knock-out screens with multiple

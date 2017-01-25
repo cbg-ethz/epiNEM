@@ -1048,11 +1048,15 @@ HeatmapOP <-
 
 #' This function is used to analyse knock-out screens with multiple
 #' double and single knock-outs combined in one data set.
-#' @param data data matrix containing multiple single and double kock-downs in columns and effect reporters in the rows
+#' @param data data matrix containing multiple single and double kock-downs
+#' in columns and effect reporters in the rows
 #' @param ... additional parameters, e.g. for the main epiNEM function
 #' @export
 #' @author Martin Pirkl
-#' @return list object with vectors of double knock-downs, single knock-downs and two matrices with doubles in the columns and singles in the rows. The first matrix denotes the respective logical gate for the triple and the second matrix the log-likelihood
+#' @return list object with vectors of double knock-downs, single knock-downs
+#' and two matrices with doubles in the columns and singles in the rows. The
+#' first matrix denotes the respective logical gate for the triple and the
+#' second matrix the log-likelihood
 #' @examples
 #' data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
 #' colnames(data) <- c("A.B", "A.C", "B.C", "A", "B", "C", "D", "E", "G")
@@ -1088,8 +1092,9 @@ epiScreen <- function(data, ...) {
         if (which(doubles %in% i) == 8) { next() }
         print(i)
         doubles.singles <- unlist(strsplit(i, "\\."))
-        egenes <- which(apply(dataBin[, which(colnames(dataBin) %in%
-                                              c(i, doubles.singles))], 1, max) == 1)
+        egenes <-
+            which(apply(dataBin[, which(colnames(dataBin) %in%
+                                        c(i, doubles.singles))], 1, max) == 1)
         for (j in singles) {
             print(j)
             if (j %in% doubles.singles) { next() }
@@ -1143,7 +1148,8 @@ epiScreen <- function(data, ...) {
         }
         
     }
-    return(list(doubles = doubles, singles = singles, logicmat = logicmat, llmat = llmat))
+    return(list(doubles = doubles, singles = singles,
+                logicmat = logicmat, llmat = llmat))
 
 }
 

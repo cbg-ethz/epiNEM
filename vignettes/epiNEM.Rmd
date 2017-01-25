@@ -338,9 +338,24 @@ dataBinWag <- dataBin
 colnames(dataBin) <- gsub(".del.vs..wt", "", colnames(dataBin))
 
 colnames(dataBin) <- gsub(".del", "", colnames(dataBin))
+
+doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
+
+if (length(grep("vs", doubles)) > 0) {
+    doubles <- sort(doubles[-grep("vs", doubles)])
+} else { doubles <- sort(doubles) }
+
+doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
+
+if (length(grep("\\.", colnames(dataBin))) > 0) {
+    singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
+} else { singles <- sort(singles) }
+
+singles <- unique(sort(singles))
 ```
 
-We apply epiNEM so all triples and infer logics and calculate the log-likelihood.
+We apply epiNEM so all triples and infer logics and calculate the
+log-likelihood.
 
 ```{r, eval=FALSE}
 wagscreen <- epiScreen(dataBin)
@@ -351,7 +366,8 @@ llmat <- wagscreen$llmat
 logicmat <- wagscreen$logicmat
 ```
 
-We plot the significant results for all triples with log-likelihoods on the y-axis and ranked triples on the x-axis.
+We plot the significant results for all triples with log-likelihoods
+on the y-axis and ranked triples on the x-axis.
 
 ```{r, fig.width = 8, fig.height = 4}
 palette(c("#4444cc", "#77aa77", "#009933",
@@ -558,9 +574,24 @@ dataBin[which(dataP >= sig | dataP == 0 | abs(dataM) < cutoff)] <- 0
 dataBin <- dataBin[-which(apply(dataBin, 1, max) == 0), ]
 
 colnames(dataBin) <- gsub("\\.\\.\\.", "\\.", colnames(dataBin))
+
+doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
+
+if (length(grep("vs", doubles)) > 0) {
+    doubles <- sort(doubles[-grep("vs", doubles)])
+} else { doubles <- sort(doubles) }
+
+doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
+
+if (length(grep("\\.", colnames(dataBin))) > 0) {
+    singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
+} else { singles <- sort(singles) }
+
+singles <- unique(sort(singles))
 ```
 
-We apply epiNEM to screen all triples from double and single knock-out combinations.
+We apply epiNEM to screen all triples from double and single
+knock-out combinations.
 
 ```{r, eval=FALSE}
 samscreen <- epiScreen(dataBin)
@@ -571,7 +602,8 @@ logicmat <- samscreen$logicmat
 llmat <- samscreen$llmat
 ```
 
-We plot the significant results for all triples with log-likelihoods on the y-axis and ranked triples on the x-axis.
+We plot the significant results for all triples with
+log-likelihoods on the y-axis and ranked triples on the x-axis.
 
 ```{r, fig.width = 8, fig.height = 4}
 data(sameith)
