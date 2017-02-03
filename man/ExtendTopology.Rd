@@ -23,10 +23,9 @@ topology <- CreateTopology(3, 1, force = TRUE)
 topology <- unlist(unique(topology), recursive = FALSE)
 extTopology <- ExtendTopology(topology$model, 100)
 }
-\author{
-Madeline Diekmann
-}
 \seealso{
 CreateTopology
 }
-
+\author{
+Madeline Diekmann
+}

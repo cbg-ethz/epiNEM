@@ -23,4 +23,3 @@ extend model with node representing logic gate
 model <- CreateRandomGraph(c("Ikk1", "Ikk2", "RelA"))
 model2 <- AddLogicGates("RelA", "OR", model)
 }
-

@@ -30,4 +30,3 @@ data <- matrix(sample(c(0,1), 3*10, replace = TRUE), 10, 3)
 rownames(Phi) <- colnames(Phi) <- colnames(data) <- c("Ikk1", "Ikk2", "RelA")
 score <- Mll(Phi, D1 <- data, D0 <- 1 - data)
 }
-

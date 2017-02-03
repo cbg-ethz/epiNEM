@@ -49,4 +49,3 @@ res <- SimEpiNEM(runs = 1)
 \author{
 Martin Pirkl
 }
-

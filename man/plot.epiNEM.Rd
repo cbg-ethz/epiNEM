@@ -21,4 +21,3 @@ Plots the winning pathway structure
 res <- epiNEM()
 plot(res)
 }
-

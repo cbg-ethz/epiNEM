@@ -60,10 +60,9 @@ rownames(data) <- paste("E", 1:100, sep = "_")
 res <- epiNEM(data, method = "exhaustive")
 plot(res)
 }
-\author{
-Madeline Diekmann
-}
 \seealso{
 nem
 }
-
+\author{
+Madeline Diekmann
+}

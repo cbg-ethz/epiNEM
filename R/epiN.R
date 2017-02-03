@@ -69,6 +69,28 @@ NA
 #' @name wageningen_string
 NA
 
+#' graph-based GO similarity scores, string GO annotations
+#' for Sameith et al., 2015 data
+#' The data consists of lists including epiNEM identified and
+#' general similarity scores and GO annotations for each triple.
+#' For details see the vignette.
+#' @docType data
+#' @examples 
+#' data(sameith_GO)
+#' @name sameith_GO
+NA
+
+#' graph-based GO similarity scores, string GO annotations
+#' for van Wageningen et al., 2015 data
+#' The data consists of lists including epiNEM identified and
+#' general similarity scores and GO annotations for each triple.
+#' For details see the vignette.
+#' @docType data
+#' @examples 
+#' data(wageningen_GO)
+#' @name wageningen_GO
+NA
+
 ###--- MAIN SCRIPT ---###
 #' Epistatic NEMs - main function. This function contains the inference
 #' algorithm to learn logical networks from knock-down data including
@@ -687,8 +709,12 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 
     }
 
-    return(list(sens = sens, spec = spec, sens2 = sens2,
-                spec2 = spec2, logics = logics, time = time))
+    result <- list(sens = sens, spec = spec, sens2 = sens2,
+                   spec2 = spec2, logics = logics, time = time)
+
+    class(result) <- "epiSim"
+
+    return(result)
 
 }
 
@@ -1105,7 +1131,7 @@ epiScreen <- function(data, ...) {
                 colnames(dataBin))]
 
             dataTmp <- dataTmp[egenes, ]
-         
+            
             i1 <- which(singles %in% j)
             i2 <- which(doubles %in% i)
 
@@ -1148,8 +1174,13 @@ epiScreen <- function(data, ...) {
         }
         
     }
-    return(list(doubles = doubles, singles = singles,
-                logicmat = logicmat, llmat = llmat))
+
+    results <- list(doubles = doubles, singles = singles,
+                    logic = logicmat, ll = llmat)
+
+    class(results) <- "epiScreen"
+    
+    return(results)
 
 }
 

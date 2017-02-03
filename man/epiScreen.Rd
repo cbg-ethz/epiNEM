@@ -32,4 +32,3 @@ res <- epiScreen(data)
 \author{
 Martin Pirkl
 }
-

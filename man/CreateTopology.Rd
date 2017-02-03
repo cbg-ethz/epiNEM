@@ -22,4 +22,3 @@ create topology for a randomly generated pathway topology
 \examples{
 model <- CreateTopology(3, 1)
 }
-

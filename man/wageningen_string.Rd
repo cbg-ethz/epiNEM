@@ -20,4 +20,3 @@ For details see the vignette.
 \examples{
 data(wageningen_string)
 }
-

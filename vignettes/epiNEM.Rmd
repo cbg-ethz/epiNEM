@@ -44,19 +44,18 @@ library(epiNEM)
 
 ## Quick start
 
-You data should be in the form of binary effects stemming from
+The data should be in the form of binary effects stemming from
 knock-out data including single and double perturbations with
 effect reporters, e.g. genes, as rows and perturbations as columns.
 A one in row i and column j denotes an effect of reporter i for
 perturbation j. These effects are usually derived from comparing
 control/wild-type experiments with respective perturbation experiments
-(e.g. from edgeR or limma).
+(e.g. differential expression with edgeR).
 The binary data is the main imput for the epiNEM function, which
 contains the inference algorithm to estimate the underlying network
 structure of the data. For up to four signalling genes (=different
 perturbation targets) exhautive search is available. For five or
 more a greedy search is implemented as an alternative.
-
 
 ```{r}
 data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
@@ -73,7 +72,23 @@ plot(res)
 ```
 
 The plot shows the inferred network with the signaling genes (bright red),
-the inferred logic (green) and attchment of effect reporters.
+the inferred logic (green) and attachment of the number of effect
+reporters (grey).
+
+Alternatively the input can be a larger matrix with single and double
+knock-downs. EpiNEM can perform a systematic analysis to identify most
+likely modulators for a signaling gene pair of a double knock-down.
+
+```{r}
+data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
+colnames(data) <- c("A.B", "A.C", "B.C", "A", "B", "C", "D", "E", "G")
+rownames(data) <- paste("E", 1:100, sep = "_")
+res <- epiScreen(data)
+plot(res) # plot(res, global = FALSE)
+```
+
+If the "global" parameter is set to FALSE, detailed results are plotted
+for each pair of a double knock-down.
 
 ## Simulations
 
@@ -98,7 +113,7 @@ runs <- 100
 noiselvls <- c(0.01, 0.025, 0.05, 0.1, 0.2, 0.3, 0.4, 0.5)
 
 random <- list(FPrate = 0.1, FNrate = noiselvls,
-               single = 4, double = 1, reporters = 100, replicates = 3)
+single = 4, double = 1, reporters = 100, replicates = 3)
 
 do <- c("n", "p", "a", "e", "b")
 
@@ -119,116 +134,35 @@ logicgate <- matrix("", runs, length(noiselvls))
 edgenr <- matrix(0, runs, length(noiselvls))
 ```
 
-We simulate code based on a ground truth and infer a optimal network
+We simulate code based on a ground truth and infer an optimal network
 with all aforementioned methods solely based on the data.
-If you run this code, make sure to install the B-NEM package
-from github: [link](https://github.com/MartinFXP/B-NEM).
+The B-NEM package is necessary to run the full simulation:
+[link](https://github.com/MartinFXP/B-NEM).
 
 ```{r, eval=FALSE}
 simresults <- SimEpiNEM(runs, do, random, maxTime, forcelogic,
-                        epinemsearch, bnemsearch, nIterations)
+epinemsearch, bnemsearch, nIterations)
 
-sens <- simresults$sens
-spec <- simresults$spec
-sens2 <- simresults$sens2
-spec2 <- simresults$spec2
-logics <- simresults$logics
-time <- simresults$time
-
+sim <- simresults
 ```
 
 We boxplot running time, accuracy for the inferred edges,
-logical gates and expected data (truth table) for all five methods.
+logical gates and expected data (truth table) for all five respectively
+two methods.
 
 ```{r, fig.width = 7, fig.height = 7}
 data(sim)
 
-sens <- sim$sens
-spec <- sim$spec
-sens2 <- sim$sens2
-spec2 <- sim$spec2
-logics <- sim$logics
-time <- sim$time
-
-colvec <- c(rep("orange", length(noiselvls)),
-            rep("blue", length(noiselvls)),
-            rep("darkgreen", length(noiselvls)),
-            rep("brown", length(noiselvls)),
-            rep("darkgrey", length(noiselvls)))
-
-acc <- (sens + spec)/2
-
-acc2 <- (sens2 + spec2)/2
-
-m <- rbind(c(1,1), c(2,2), c(3,4))
-
-layout(m)
-
-timeframe <- as.data.frame(
-    cbind(data.frame(epiNEM = time[1,,]),
-          data.frame(BNEM = time[2,,]), data.frame(NEM = time[3,,]),
-          data.frame(Cor = time[4,,]), data.frame(MI = time[5,,])))
-
-colnames(timeframe) <- rep(noiselvls, 5)
-
-boxplot(timeframe, col = colvec, main = "running time", ylab = "seconds")
-
-abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
-
-axis(1, c(3, 11, 19, 28, 36)+1,
-     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = FALSE, pos = -25)
-
-accframe2 <- as.data.frame(
-    cbind(data.frame(epiNEM = acc2[1,,]),
-          data.frame(BNEM = acc2[2,,]), data.frame(NEM = acc2[3,,]),
-          data.frame(Cor = acc2[4,,]), data.frame(MI = acc2[5,,])))
-
-colnames(accframe2) <- rep(noiselvls, 5)
-
-boxplot(accframe2, col = colvec,
-                   main = "accuracy of the inferred edges", ylim = c(0,1))
-
-abline(v=(1:(length(do)-1)*length(noiselvls) + 0.5), col = "black", lty = 6)
-
-axis(1, c(3, 11, 19, 28, 36)+1,
-     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = FALSE, pos = -0.2)
-
-## logical nems:
-
-colvec2 <- c(rep("orange", length(noiselvls)), rep("blue", length(noiselvls)))
-
-logicsframe <- as.data.frame(cbind(data.frame(epiNEM = logics[1,,]),
-                                   data.frame(BNEM = logics[2,,])))
-
-colnames(logicsframe) <- rep(noiselvls, 2)
-
-boxplot(logicsframe, col = colvec2,
-        main = "accuracy of the inferred logic gate",
-        ylim = c(0,1))
-
-abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
-
-axis(1, c(3, 11, 19, 28, 36)+1,
-     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = FALSE, pos = -0.2)
-
-accframe <- as.data.frame(cbind(data.frame(epiNEM = acc[1,,]),
-                                data.frame(BNEM = acc[2,,])))
-
-colnames(accframe) <- rep(noiselvls, 2)
-
-boxplot(accframe, col = colvec2,
-        main = "accuracy of the inferred expected data",
-        ylim = c(0,1))
-
-abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
-
-axis(1, c(3, 11, 19, 28, 36)+1,
-     c("epiNEM", "B-NEM", "NEM", "PC Algorithm", "ARACNE"),
-     tick = FALSE, pos = -0.2)
+plot(sim)
 ```
+
+THe plot shows that as expected B-NEM is the slowest followed by epiNEM,
+while NEM, ARACNE and the P algorithm are much faster. However, the last
+three can not derive any logics in the network structure. epiNEM and
+B-NEM show almost equally high accuracy of inferred edges and truth tables
+(expected data). However, epiNEM reaches a much higher accuracy for inferred
+logic gates, which is due to the much higher degree of equivalent network
+strucutres in the case of B-NEM.
 
 ## Yeast knockout screens
 
@@ -238,45 +172,45 @@ double and single knockout mutants. We use epiNEM on each double
 mutant combined with each single mutant.
 
 The results (logics) of the knockout screens have been annotated
-according to the following legend, where the x-axis denotes the
-effect on the gene and the y-axis denotes the type of knock-out:
+according to the following legend of effects (black), where the
+x-axis denotes the gene and the y-axis denotes the type of knock-out:
 
 ```{r, warning=FALSE, fig.width = 9, fig.height=5}
 a1 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "OR", col = "Greys", sub = "", colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "OR", col = "Greys", sub = "", colorkey = NULL)
 a2 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "AND", col = "Greys", sub = "", colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "AND", col = "Greys", sub = "", colorkey = NULL)
 a3 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "B masks effect of A", col = "Greys", sub = "",
-          colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "B masks effect of A", col = "Greys", sub = "",
+colorkey = NULL)
 a4 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "A masks effect of B", col = "Greys", sub = "",
-          colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "A masks effect of B", col = "Greys", sub = "",
+colorkey = NULL)
 a5 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "XOR", col = "Greys", sub = "", colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "XOR", col = "Greys", sub = "", colorkey = NULL)
 a6 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 a7 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
 a8 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
-                 dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                 Colv = FALSE, Rowv = FALSE,
-          main = "No epistasis (unconnected)", col = "Greys", sub = "",
-          colorkey = NULL)
+dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+Colv = FALSE, Rowv = FALSE,
+main = "No epistasis (unconnected)", col = "Greys", sub = "",
+colorkey = NULL)
 print(a5, position = c(0,0, .25, .5), more = TRUE)
 print(a6, position = c(.25,0, .5, .5), more = TRUE)
 print(a7, position = c(.5,0, .75, .5), more = TRUE)
@@ -292,20 +226,21 @@ print(a4, position = c(.75,.5, 1, 1))
 The first knock-out screen is from van Wageningen et al., 2010 and
 was created to investigate relationships between phosphorylation based pathways.
 
-Each figure visualizes the top scoring single knock-out or modulators
+The first figure shows the global distribution of the top scoring
+logics we identified.
+
+Each of the following figures visualizes the top scoring single
+knock-out or modulator
 for a specific double knock-out pair. The x-axis corresponds to the
 ranks of the single knock-outs and the y-axsis to the likelihood for
 each triple (double plus single knock-outs).
-
-The final figure shows the global distribution of the top scoring
-logics we identified.
 
 We load and preprocess the data set.
 
 ```{r}
 file <- paste("http://www.holstegelab.nl/",
-              "publications/sv/signaling_redundancy/downloads/DataS1.txt",
-              sep = "")
+"publications/sv/signaling_redundancy/downloads/DataS1.txt",
+sep = "")
 
 data <- read.delim(file)
 
@@ -342,13 +277,13 @@ colnames(dataBin) <- gsub(".del", "", colnames(dataBin))
 doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
 
 if (length(grep("vs", doubles)) > 0) {
-    doubles <- sort(doubles[-grep("vs", doubles)])
+doubles <- sort(doubles[-grep("vs", doubles)])
 } else { doubles <- sort(doubles) }
 
 doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
 
 if (length(grep("\\.", colnames(dataBin))) > 0) {
-    singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
+singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
 } else { singles <- sort(singles) }
 
 singles <- unique(sort(singles))
@@ -359,182 +294,33 @@ log-likelihood.
 
 ```{r, eval=FALSE}
 wagscreen <- epiScreen(dataBin)
-
-doubles <- wagscreen$doubles,
-singles <- wagscreen$singles
-llmat <- wagscreen$llmat
-logicmat <- wagscreen$logicmat
 ```
 
-We plot the significant results for all triples with log-likelihoods
-on the y-axis and ranked triples on the x-axis.
+The following plot shows the global distribution of the inferred logical gates
+for all pairs. The single modulators are on the y-axis and the double
+knock-out pairs are on the x-axis.
 
 ```{r, fig.width = 8, fig.height = 4}
 palette(c("#4444cc", "#77aa77", "#009933",
-          "#ff0000", "#dd8811", "#aa44bb", "#999900"))
+"#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
 data(wageningen)
 
-llmat0 <- wageningen$ll
+doubles <- wageningen$doubles
 
-logicmat0 <- wageningen$logic
+dataWag <- wageningen$dataWag
 
-for (i in 1:length(doubles)) {
-    
-    if (i %in% 8) { next() }
+wagscreen <- wageningen
 
-    logicvec <- logicmat0[, i]
+plot(wagscreen)
+```
 
-    llvec <- llmat0[, i]
+We also plot the significant results for every explicit triple with
+log-likelihoods on the y-axis and ranked triples on the x-axis. The
+"ind" parameter, if set, selects a subset.
 
-    logicvec <- logicvec[order(llvec, decreasing = TRUE)]
-
-    llvec <- llvec[order(llvec, decreasing = TRUE)]
-
-    parents <- unlist(strsplit(doubles[i], "\\."))
-
-    pchvec <- numeric(length(llvec))
-
-    pchvec[which(logicvec %in% "AND")] <- 1
-    pchvec[which(logicvec %in% "OR")] <- 2
-    pchvec[which(logicvec %in% "XOR")] <- 3
-    pchvec[grep(paste("^", parents[1], sep = ""), logicvec)] <- 4
-    pchvec[grep(paste("^", parents[2], sep = ""), logicvec)] <- 5
-    pchvec[which(logicvec %in% "NOEPI")] <- 6
-    pchvec[which(logicvec %in% c("NOINFO", "NOINF"))] <- 7
-    
-    logicvec <- logicvec[-which(logicvec %in% "0")]
-    pchvec <- pchvec[-which(pchvec == 0)]
-    llvec <- llvec[-which(llvec == 0)]
-
-    colvec <- pchvec
-    
-    if (all(is.infinite(llvec) == TRUE)) {
-
-        llvec[1:length(llvec)] <- -1000
-
-        margin <- 100
-
-        donames <- 30
-
-    } else {
-        
-        llvec[which(is.infinite(llvec) == TRUE)] <- NA
-        
-        ## llvec[which(is.infinite(llvec) == TRUE)] <- min(llvec) - 100
-        
-        margin <- abs(max(llvec[1:30], na.rm = TRUE) -
-                  min(llvec[1:30], na.rm = TRUE))
-
-        offset <- 0.075
-
-        if (margin == 0) { margin <- 10; offset <- 0.0375 }
-
-        donames <- 30 - sum(is.na(llvec[1:30]) == TRUE)
-
-        if (any(is.na(llvec[1:30]) == TRUE)) { margin2 <- margin*2
-        } else { margin2 <- margin }
-        
-        llvec[which(is.na(llvec) == TRUE)] <- min(llvec, na.rm = TRUE) - margin
-        
-        margin <- margin2
-
-    }
-
-    if (all(llvec[-(1:30)] - min(llvec[-(1:30)]) == 0)) {
-
-        p2max <- max(llvec[-(1:30)]) + margin
-
-    } else {
-
-        p2max <- max(llvec[-(1:30)])
-        
-    }
-    
-    mark <- ""
-    thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
-    legendx <- length(llvec[1:thetop])
-    p2max <- max(llvec[1:thetop])
-    if (p2max == min(llvec[1:thetop])) {
-        p2max <- p2max+margin*0.2
-    }
-    legendtext <- c("AND", "OR", "XOR",
-                    paste(parents[1]," masks ", parents[2], sep = ""),
-                    paste(parents[2], " masks ", parents[1], sep = ""),
-                    "no epistasis")
-    if (thetop == 0) { next() }
-    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop],
-                ylab = "likelihood", xlab = "ranked single knockouts",
-                ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2),
-                xlim = c(1, thetop+(thetop/100)),
-                main = paste(unlist(strsplit(doubles[i], "\\.")),
-                collapse = " and "))
-    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
-                labels = names(llvec)[1:thetop], cex = 0.6, srt = 45, pos = 3,
-                offset = 0)
-    mtext = mtext(mark, side = 3, line = 1, outer = FALSE, cex = 4, adj = 0)
-    legend = legend(legendx, p2max,
-                    legend = legendtext,
-                    col = 1:6, pch = 1:6, xjust = 1, yjust = 1, cex = 0.7)
-    
-}
-
-distmat <- wageningen$logic
-
-distmat[which(distmat %in% "AND")] <- 1
-distmat[which(distmat %in% "OR")] <- 2
-distmat[which(distmat %in% "XOR")] <- 3
-distmat[which(distmat %in% "NOEPI")] <- 6
-distmat[which(distmat %in% c("NOINFO", "NOINF"))] <- 7
-
-for (i in 1:ncol(distmat)) {
-
-    genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
-    
-    distmat[which(distmat[, i] %in%
-                  paste(genes[1], " masks the effect of ", genes[2],
-                  sep = "")), i] <- 4
-
-    
-    distmat[which(distmat[, i] %in%
-                  paste(genes[2], " masks the effect of ", genes[1],
-                  sep = "")), i] <- 5
-
-}
-
-distmat <- apply(distmat, c(1,2), as.numeric)
-
-for (i in 1:ncol(distmat)) {
-    distmat[, i] <- rev(sort(distmat[, i]))
-}
-
-distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
-
-distmat <-
-    distmat[, -which(apply(distmat, 2, max) == 0 | apply(distmat, 2, min) == 7)]
-
-y <- distmat
-
-distmat <-
-    distmat[, order(apply(distmat, 2, function(x) { return(sum(x == 1)) }))]
-
-y[which(y == 5)] <- 4
-
-rownames(distmat) <- NULL
-
-labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
-              "masking (NOT B)\n\n\n",
-              "masking (NOT A)\n\n\n", "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
-
-HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE, main = "logic gate distribution",
-          sub = "", col = "Paired", breaks = seq(0.5,7.5, length.out = 8),
-          cexRow = 0, cexCol = 0.4, aspect = "fill",
-          colorkey = list(space = "right",
-                          labels = rev(labeltext), width = 1,
-                          at = seq(1.5,7.5, length.out = 8)),
-          xlab = "double knock-outs",
-          ylab = "modulators\n(different order for each pair)",
-          xrot = 45, bordercol = "transparent")
+```{r}
+plot(wagscreen, global = FALSE, ind = 3)
 ```
 
 ### Sameith et al., 2015
@@ -578,13 +364,13 @@ colnames(dataBin) <- gsub("\\.\\.\\.", "\\.", colnames(dataBin))
 doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
 
 if (length(grep("vs", doubles)) > 0) {
-    doubles <- sort(doubles[-grep("vs", doubles)])
+doubles <- sort(doubles[-grep("vs", doubles)])
 } else { doubles <- sort(doubles) }
 
 doubles.genes <- unique(unlist(strsplit(doubles, "\\.")))
 
 if (length(grep("\\.", colnames(dataBin))) > 0) {
-    singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
+singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
 } else { singles <- sort(singles) }
 
 singles <- unique(sort(singles))
@@ -595,181 +381,34 @@ knock-out combinations.
 
 ```{r, eval=FALSE}
 samscreen <- epiScreen(dataBin)
-
-doubles <- samscreen$doubles
-singles <- samscreen$singles
-logicmat <- samscreen$logicmat
-llmat <- samscreen$llmat
 ```
 
-We plot the significant results for all triples with
-log-likelihoods on the y-axis and ranked triples on the x-axis.
+Again, we plot the global distribution of logics followed by
+the explicit results for every triple.
 
 ```{r, fig.width = 8, fig.height = 4}
 data(sameith)
 
-llmat0 <- sameith$ll
+doubles <- sameith$doubles
 
-logicmat0 <- sameith$logic
+dataSam <- sameith$dataSam
 
-for (i in 1:length(doubles)) {
-  
-  logicvec <- logicmat0[, i]
+samscreen <- sameith
 
-  llvec <- llmat0[, i]
+plot(samscreen)
 
-  logicvec <- logicvec[order(llvec, decreasing = TRUE)]
-
-  llvec <- llvec[order(llvec, decreasing = TRUE)]
-
-  parents <- unlist(strsplit(doubles[i], "\\."))
-
-  pchvec <- numeric(length(llvec))
-
-    pchvec[which(logicvec %in% "AND")] <- 1
-    pchvec[which(logicvec %in% "OR")] <- 2
-    pchvec[which(logicvec %in% "XOR")] <- 3
-    pchvec[grep(paste("^", parents[1], sep = ""), logicvec)] <- 4
-    pchvec[grep(paste("^", parents[2], sep = ""), logicvec)] <- 5
-    pchvec[which(logicvec %in% "NOEPI")] <- 6
-    pchvec[which(logicvec %in% c("NOINFO", "NOINF"))] <- 7
-
-    logicvec <- logicvec[-which(logicvec %in% "0")]
-    pchvec <- pchvec[-which(pchvec == 0)]
-    llvec <- llvec[-which(llvec == 0)]
-
-    colvec <- pchvec
-
-    if (all(is.infinite(llvec) == TRUE)) {
-
-        llvec[1:length(llvec)] <- -1000
-
-        margin <- 100
-
-        donames <- 30
-
-    } else {
-        
-        llvec[which(is.infinite(llvec) == TRUE)] <- NA
-        
-        margin <- abs(max(llvec[1:30], na.rm = TRUE) - min(llvec[1:30],
-                      na.rm = TRUE))
-
-        if (margin == 0) { margin <- 10 }
-
-        donames <- 30 - sum(is.na(llvec[1:30]) == TRUE)
-
-        if (any(is.na(llvec[1:30]) == TRUE)) { margin2 <- margin*2
-        } else { margin2 <- margin }
-        
-        llvec[which(is.na(llvec) == TRUE)] <- min(llvec, na.rm = TRUE) - margin
-        
-        margin <- margin2
-
-    }
-
-    if (all(llvec[-(1:30)] - min(llvec[-(1:30)]) == 0)) {
-
-        p2max <- max(llvec[-(1:30)]) + margin
-
-    } else {
-
-        p2max <- max(llvec[-(1:30)])
-        
-    }
-    
-    labeltext <- c("AND", "OR", "XOR", paste(parents[1], " masks ",
-                   parents[2], sep = ""),
-                   paste(parents[2], " masks ", parents[1], sep = ""),
-                   "no epistasis")
-
-    mark <- ""
-    pointx <- 10000
-    thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
-    legendx <- length(llvec[1:thetop])
-    p2max <- max(llvec[1:thetop])
-    if (p2max == min(llvec[1:thetop])) {
-        p2max <- p2max+margin*0.2
-    }
-    if (thetop == 0) { next() }
-    plot = plot(llvec[1:thetop], pch = pchvec[1:thetop], col = colvec[1:thetop],
-                ylab = "likelihood", xlab = "ranked single knockouts",
-                ylim = c(min(llvec[1:thetop]), max(llvec[1:thetop])+margin*0.2),
-                xlim = c(1, thetop+(thetop/100)),
-                main = paste(tolower(unlist(strsplit(doubles[i], "\\."))),
-                             collapse = " and "))
-    text = text((1:thetop)+(thetop/100), llvec[1:thetop]+(margin*offset),
-                labels = tolower(names(llvec)[1:thetop]), cex = 0.6, srt = 45,
-                pos = 3,
-                offset = 0)
-    mtext = mtext(mark, side = 3, line = 1, outer = FALSE, cex = 4, adj = 0)
-    legend = legend(legendx, p2max,
-                    legend = labeltext, col = 1:6, pch = 1:6, xjust = 1,
-                    yjust = 1,
-                    cex = 0.7)  
-    
-}
-
-distmat <- sameith$logic
-
-distmat[which(distmat %in% "AND")] <- 1
-distmat[which(distmat %in% "OR")] <- 2
-distmat[which(distmat %in% "XOR")] <- 3
-distmat[which(distmat %in% "NOEPI")] <- 6
-distmat[which(distmat %in% c("NOINFO", "NOINF"))] <- 7
-
-for (i in 1:ncol(distmat)) {
-
-    genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
-    
-    distmat[which(distmat[, i] %in% paste(genes[1], " masks the effect of ",
-                                          genes[2], sep = "")), i] <- 4
-
-    
-    distmat[which(distmat[, i] %in% paste(genes[2], " masks the effect of ",
-                                          genes[1], sep = "")), i] <- 5
-
-}
-
-distmat <- apply(distmat, c(1,2), as.numeric)
-
-for (i in 1:ncol(distmat)) {
-    distmat[, i] <- rev(sort(distmat[, i]))
-}
-
-distmat <- distmat[-which(apply(distmat, 1, sum) == 0), ]
-
-y <- distmat
-
-distmat <- distmat[, order(apply(distmat, 2, function(x) {
-                           return(sum(x == 1)) }))]
-
-y[which(y == 5)] <- 4
-
-rownames(distmat) <- NULL
-
-labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
-               "masking (NOT B)\n\n\n", "masking (NOT A)\n\n\n",
-               "XOR\n\n\n", "OR\n\n\n", "AND\n\n\n")
-
-HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE,
-          main = "logic gate distribution", sub = "",
-          col = "Paired", breaks = seq(0.5,7.5, length.out = 8), cexRow = 0,
-          cexCol = 0.4, aspect = "fill",
-          colorkey = list(space = "right", labels = rev(labeltext), width = 1,
-                          at = seq(1.5,7.5, length.out = 8)),
-          xlab = "double knock-outs",
-          ylab = "modulators\n(different order for each pair)",
-          xrot = 45, bordercol = "transparent")
+plot(samscreen, global = FALSE, ind = c(2,4))
 ```
 
 We plot the densities of the string-db interaction scores of our
-identified modulators and a random draw to visualize the significance
+identified modulators and a random draw for any pair included in
+the data sets to visualize the significance
 of the interaction identified by epiNEM.
 
-```{r, fig.width = 8, fig.height = 4}
-par(mfrow=c(1,2))
+We load the STRING library and download data base information
+for the yeast organism.
 
+```{r, fig.width = 8, fig.height = 4}
 source("https://bioconductor.org/biocLite.R")
 
 biocLite("STRINGdb")
@@ -779,7 +418,7 @@ library(STRINGdb)
 get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
 
 string_db <- STRINGdb$new( version="10", species=4932, score_threshold=0,
-                          input_directory="~/")
+input_directory="~/")
 
 llmat <- wageningen$ll
 
@@ -789,35 +428,43 @@ string.scores <- list()
 
 string.names <- character()
 ```
+We retrieve unique data base name and score information for the
+genes included in the data sets.
+
 ```{r, eval=FALSE}
 for (i in 1:ncol(llmat)) {
 
-    if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
-        top30 <- llmat[, i]
-        top30[which(top30 == 0)] <- -Inf
-        top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30,decreasing = TRUE)[1:min(30, sum(!(llmat[, i]
-            %in% c(0,-Inf))))]]
+if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
+top30 <- llmat[, i]
+top30[which(top30 == 0)] <- -Inf
+top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+top30 <- top30[order(top30,decreasing = TRUE)[1:min(30, sum(!(llmat[, i]
+%in% c(0,-Inf))))]]
 
-        doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
-        for (j in names(top30)) {
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-            string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[1], j)),
-                                                  collapse = "_"))
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-            string.scores <- c(string.scores, tmp$combined_score)
-            string.names <- c(string.names, paste(sort(c(doubles[2], j)),
-                                                  collapse = "_"))
-        }
-        
-    } else {
-        next()
-    }
+for (j in names(top30)) {
+tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+string.scores <- c(string.scores, tmp$combined_score)
+string.names <- c(string.names, paste(sort(c(doubles[1], j)),
+collapse = "_"))
+tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+string.scores <- c(string.scores, tmp$combined_score)
+string.names <- c(string.names, paste(sort(c(doubles[2], j)),
+collapse = "_"))
+}
+
+} else {
+next()
+}
 
 }
 ```
+We plot the densities of the distributions of the random triplet
+scores (blue) and the scores of the triplets by epiNEM (pink). Additional
+we calculate, if the difference between the two score distributions is
+significant (Mann-Whitney test).
+
 ```{r, fig.width = 8, fig.height = 5}
 data(wageningen_string)
 
@@ -825,28 +472,28 @@ string.scores <- wageningen_string$string.scores
 string.names <- wageningen_string$string.names
 
 tmp <- string_db$get_interactions(
-       string_db$mp(unique(unlist(strsplit(colnames(dataBinWag), "\\.")))))
+string_db$mp(unique(unlist(strsplit(colnames(dataWag), "\\.")))))
 
 stsc <- unlist(string.scores)
 
 denspval <- wilcox.test(stsc, unlist(tmp$combined_score),
-            alternative = "greater")$p.value
+alternative = "greater")$p.value
 
 for (i in 100:1) {
 
-    if (denspval < 10^(-i)) {
+if (denspval < 10^(-i)) {
 
-        denspval <- paste("< ", 10^(-i), sep = "")
+denspval <- paste("< ", 10^(-i), sep = "")
 
-    } 
+} 
 
 }
 
 plot(density(stsc), col = "#00000000",
-     ylim = c(0, max(c(max(density(stsc)$y),
-     max(density(unlist(tmp$combined_score))$y)))),
-     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
-     cex.main = 1.5)
+ylim = c(0, max(c(max(density(stsc)$y),
+max(density(unlist(tmp$combined_score))$y)))),
+main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
 
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
@@ -863,29 +510,29 @@ string.names2 <- character()
 ```{r, eval=FALSE}
 for (i in 1:ncol(llmat)) {
 
-    if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
-        top30 <- llmat[, i]
-        top30[which(top30 == 0)] <- -Inf
-        top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
-        top30 <- top30[order(top30, decreasing = TRUE)[1:min(30,
-        sum(!(llmat[, i] %in% c(0,-Inf))))]]
+if (sum(!(llmat[, i] %in% c(0,-Inf))) > 0) { 
+top30 <- llmat[, i]
+top30[which(top30 == 0)] <- -Inf
+top30 <- top30[which(!(llmat[, i] %in% c(0,-Inf)))]
+top30 <- top30[order(top30, decreasing = TRUE)[1:min(30,
+sum(!(llmat[, i] %in% c(0,-Inf))))]]
 
-        doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
+doubles <- unlist(strsplit(colnames(llmat)[i], "\\."))
 
-        for (j in names(top30)) {
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
-            string.scores2 <- c(string.scores2, tmp$combined_score)
-            string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)),
-            collapse = "_"))
-            tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
-            string.scores2 <- c(string.scores2, tmp$combined_score)
-            string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)),
-            collapse = "_"))
-        }
-        
-    } else {
-        next()
-    }
+for (j in names(top30)) {
+tmp <- string_db$get_interactions(string_db$mp(c(doubles[1], j)))
+string.scores2 <- c(string.scores2, tmp$combined_score)
+string.names2 <- c(string.names2, paste(sort(c(doubles[1], j)),
+collapse = "_"))
+tmp <- string_db$get_interactions(string_db$mp(c(doubles[2], j)))
+string.scores2 <- c(string.scores2, tmp$combined_score)
+string.names2 <- c(string.names2, paste(sort(c(doubles[2], j)),
+collapse = "_"))
+}
+
+} else {
+next()
+}
 
 }
 ```
@@ -896,32 +543,316 @@ string.scores2 <- sameith_string$string.scores2
 string.names2 <- sameith_string$string.names2
 
 tmp <- string_db$get_interactions(
-       string_db$mp(unique(unlist(strsplit(colnames(dataBin), "\\.")))))
+string_db$mp(unique(unlist(strsplit(colnames(dataSam), "\\.")))))
 
 stsc <- unlist(string.scores2)
 
 denspval <- wilcox.test(stsc, unlist(tmp$combined_score),
-            alternative = "greater")$p.value
+alternative = "greater")$p.value
 
 for (i in 100:1) {
 
-    if (denspval < 10^(-i)) {
+if (denspval < 10^(-i)) {
 
-        denspval <- paste("< ", 10^(-i), sep = "")
+denspval <- paste("< ", 10^(-i), sep = "")
 
-    } 
+} 
 
 }
 
 plot(density(stsc), col = "#00000000",
-     ylim = c(0, max(c(max(density(stsc)$y),
-     max(density(unlist(tmp$combined_score))$y)))),
-     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
-     cex.main = 1.5)
+ylim = c(0, max(c(max(density(stsc)$y),
+max(density(unlist(tmp$combined_score))$y)))),
+main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
 
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
 polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
+```
+
+In addition to STRINGdb interaction scores, we have a look at enrichmed
+GO terms. For this analysis we again use the STRINGdb package.
+
+We generate a matrix visualizing the GO terms for all pairs for the van
+Wageningen and the Sameith data sets.
+
+```{r, eval=FALSE}
+## van Wageningen:
+
+string_db$set_background(
+string_db$mp(unique(c(unlist(strsplit(colnames(wageningen$ll), "\\.")),
+rownames(wageningen$ll)))))
+
+golist <- list()
+
+for (i in 1:ncol(wageningen$ll)) {
+golist[[i]] <- string_db$get_enrichment(string_db$mp(c(unlist(strsplit(
+colnames(wageningen$ll)[i], "\\.")),
+rownames(wageningen$ll)[which(!(wageningen$logic[, i] %in% c("NOINFO", "NOEPI")))])),
+category = "Process", methodMT = "fdr", iea = TRUE)   
+}
+```
+```{r, fig.width = 8, fig.height = 7}
+data(wageningen_GO)
+
+golist <- wageningen_GO$golist
+
+goterms <- character()
+
+for (i in 1:length(golist)) {
+
+if (i %in% c(5,8)) { next() }
+
+goterms <- c(goterms,
+golist[[i]]$term_id[which(golist[[i]]$pvalue_fdr < 1)]) 
+
+}
+
+gomat <- matrix(0, length(unique(goterms)), ncol(wageningen$ll))
+
+rownames(gomat) <- sort(unique(goterms))
+colnames(gomat) <- colnames(wageningen$ll)
+
+## there is a strong cutoff for fdr >= 0.05 !?!
+
+for (i in 1:ncol(wageningen$ll)) {
+
+if (i %in% c(5,8)) { next() }
+
+gotmp <- golist[[i]]
+gotmp <- gotmp[order(gotmp$term_id), ]
+
+gomat[which(rownames(gomat) %in% golist[[i]]$term_id), i] <-
+golist[[i]][which(golist[[i]]$term_id %in% rownames(gomat)), 4]
+
+}
+
+rownames(gomat) <- NULL
+
+gomat[which(gomat == 0)] <- 1
+
+gomat <- gomat[, -grep("fus3", colnames(gomat))]
+
+HeatmapOP(gomat, breaks = seq(0,10^-1*0.6, length = 100),
+bordercol = "transparent",
+main = "False discovery rates of GO terms over all double knock-out pairs",
+sub = "fdr cutoff at 0.05",
+xrot = 45, col = "Blues")
+```
+```{r, eval=FALSE}
+## Sameith:
+
+string_db$set_background(string_db$mp(unique(c(unlist(
+strsplit(colnames(sameith$ll), "\\.")), rownames(sameith$ll)))))
+
+golist2 <- list()
+
+for (i in 1:ncol(sameith$ll)) {
+golist2[[i]] <- string_db$get_enrichment(string_db$mp(c(unlist(strsplit(
+colnames(sameith$ll)[i], "\\.")),
+rownames(sameith$ll)[which(!(sameith$logic[, i] %in% c("NOINFO", "NOEPI")))])),
+category = "Process", methodMT = "fdr", iea = TRUE)
+}
+```
+```{r, fig.width = 8, fig.height = 7}
+data(sameith_GO)
+
+golist2 <- sameith_GO$golist
+
+goterms <- character()
+
+for (i in 1:length(golist2)) {
+
+goterms <-
+c(goterms, golist2[[i]]$term_id[which(golist2[[i]]$pvalue_fdr < 0.1)])
+
+}
+
+gomat <- matrix(0, length(unique(goterms)), ncol(sameith$ll))
+
+rownames(gomat) <- sort(unique(goterms))
+colnames(gomat) <- colnames(sameith$ll)
+
+for (i in 1:ncol(sameith$ll)) {
+
+gotmp <- golist2[[i]]
+gotmp <- gotmp[order(gotmp$term_id), ]
+
+gomat[which(rownames(gomat) %in% golist2[[i]]$term_id), i] <-
+golist2[[i]][which(golist2[[i]]$term_id %in% rownames(gomat)), 4]
+
+}
+
+rownames(gomat) <- NULL
+
+gomat[which(gomat == 0)] <- 1
+
+HeatmapOP(gomat, breaks = seq(0,10^-1*0.6, length = 100),
+bordercol = "transparent",
+main = "False discovery rates of GO terms over all double knock-out pairs",
+sub = "fdr cutoff at 0.05",
+xrot = 45, col = "Blues", cexCol = 0.5)
+
+## HeatmapOP(cor(gomat), breaks = seq(0, 1, length=100), dendrogram = "col")
+```
+
+The final analysis is similar to the STRINGdb interaction scores. However,
+instead of these we use Graph-based GO term similarity scores.
+
+```{r}
+library(GOSemSim)
+library(AnnotationHub)
+library(org.Sc.sgd.db)
+
+ystGO <- godata("org.Sc.sgd.db", ont = "BP",
+keytype = keytypes(org.Sc.sgd.db)[11])
+```
+```{r, eval=FALSE}
+GOepi <- numeric()
+
+for (i in 1:ncol(wageningen$ll)) {
+
+pair <- toupper(unlist(strsplit(colnames(wageningen$ll)[i], "\\.")))
+
+for (j in which(!is.infinite(wageningen$ll[, i]) == TRUE &
+wageningen$ll[, i] != 0)) {
+
+tmp <- geneSim(pair[1], toupper(rownames(wageningen$ll)[j]),
+semData = ystGO)
+
+if (!is.na(tmp[1])) {
+
+GOepi <- c(GOepi, tmp$geneSim)
+
+}
+
+}
+
+}
+
+GOall <- numeric()
+
+for (i in toupper(unique(c(rownames(wageningen$ll),
+toupper(unlist(strsplit(colnames(wageningen$ll), "\\."))))))) {
+
+for (j in toupper(unique(c(rownames(wageningen$ll),
+toupper(unlist(strsplit(colnames(wageningen$ll), "\\."))))))) {
+
+if (i %in% j) { next() }
+
+tmp <- geneSim(i, j, semData = ystGO)
+
+if (!is.na(tmp[1])) {
+
+GOall <- c(GOall, tmp$geneSim)
+
+}
+
+}
+
+}
+```
+```{r}
+data(wageningen_GO)
+
+GOepi <- wageningen_GO$epi
+GOall <- wageningen_GO$all
+
+denspval <- wilcox.test(GOepi, GOall, alternative = "greater")$p.value
+
+for (i in 100:1) {
+
+if (denspval < 10^(-i)) {
+
+denspval <- paste("< ", 10^(-i), sep = "")
+
+}
+
+}
+
+plot(density(GOepi), col = "#00000000",
+ylim = c(0, max(c(max(density(GOepi)$y),
+max(density(unlist(GOall))$y)))),
+main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+cex.main = 1.5)
+polygon(density(GOepi), col = "#ff000066")
+
+lines(density(unlist(GOall)), col = "#00000000")
+polygon(density(unlist(GOall)), col = "#00ffff66")
+```
+```{r, eval=FALSE}
+GOepi2 <- numeric()
+
+for (i in 1:ncol(sameith$ll)) {
+
+pair <- toupper(unlist(strsplit(colnames(sameith$ll)[i], "\\.")))
+
+for (j in which(!is.infinite(sameith$ll[, i]) == TRUE &
+sameith$ll[, i] != 0)) {
+
+tmp <- geneSim(pair[1], toupper(rownames(sameith$ll)[j]),
+semData = ystGO)
+
+if (!is.na(tmp[1])) {
+
+GOepi2 <- c(GOepi2, tmp$geneSim)
+
+}
+
+}
+
+}
+
+GOall2 <- numeric()
+
+for (i in toupper(unique(c(rownames(sameith$ll),
+toupper(unlist(strsplit(colnames(sameith$ll), "\\."))))))) {
+
+for (j in toupper(unique(c(rownames(sameith$ll),
+toupper(unlist(strsplit(colnames(sameith$ll), "\\."))))))) {
+
+if (i %in% j) { next() }
+
+tmp <- geneSim(i, j, semData = ystGO)
+
+if (!is.na(tmp[1])) {
+
+GOall2 <- c(GOall2, tmp$geneSim)
+
+}
+
+}
+
+}
+```
+```{r}
+data(sameith_GO)
+
+GOepi2 <- sameith_GO$epi
+GOall2 <- sameith_GO$all
+
+denspval <- wilcox.test(GOepi2, GOall2, alternative = "greater")$p.value
+
+for (i in 100:1) {
+
+if (denspval < 10^(-i)) {
+
+denspval <- paste("< ", 10^(-i), sep = "")
+
+} 
+
+}
+
+plot(density(GOepi2), col = "#00000000",
+ylim = c(0, max(c(max(density(GOepi2)$y),
+max(density(unlist(GOall2))$y)))),
+main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+cex.main = 1.5)
+polygon(density(GOepi2), col = "#ff000066")
+
+lines(density(unlist(GOall2)), col = "#00000000")
+polygon(density(unlist(GOall2)), col = "#00ffff66")
 ```
 
 ```{r}
@@ -933,6 +864,10 @@ sessionInfo()
 Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel,
 Holger Fröhlich, Florian Markowetz. Inferring Modulators of Genetic
 Interactions with Epistatic Nested Effects Models. submitted.
+
+Robinson MD, McCarthy DJ, Smyth GK. edgeR: a Bioconductor package for
+differential expression analysis of digital gene expression data.
+Bioinformatics. 2010;26(1):139-140. doi:10.1093/bioinformatics/btp616.
 
 Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, {Dalla Favera} R,
 et~al. ARACNE: an algorithm for the reconstruction of gene regulatory networks
@@ -958,3 +893,7 @@ A high-resolution gene expression atlas of epistasis between gene-specific
 transcription factors exposes potential mechanisms for genetic interactions.
 BMC biology. 2015 Dec;13:112.
 
+Guangchuang Yu, Fei Li, Yide Qin, Xiaochen Bo, Yibo Wu, Shengqi Wang;
+GOSemSim: an R package for measuring semantic similarity among GO terms
+and gene products. Bioinformatics 2010; 26 (7): 976-978.
+doi: 10.1093/bioinformatics/btq064

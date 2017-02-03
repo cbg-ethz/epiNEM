@@ -41,10 +41,9 @@ ExtendTopology(topology$model, 100)
 sortedData <-
 GenerateData(topology$model, extTopology, 0.05, 0.13, 3)
 }
-\author{
-Madeline Diekmann
-}
 \seealso{
 CreateTopology
 }
-
+\author{
+Madeline Diekmann
+}

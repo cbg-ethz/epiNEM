@@ -27,4 +27,3 @@ data(cellcycle)
 extModel <- CreateExtendedAdjacency(cellcycle,
 c(cellcycle$genes, "CycD.Rb"), cellcycle$genes)
 }
-

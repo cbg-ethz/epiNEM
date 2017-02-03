@@ -98,4 +98,3 @@ HeatmapOP(x, dendrogram = "both", aspect = "iso", xrot = 45)
 Martin Pirkl & Oscar Perpinan
 at http://oscarperpinan.github.io/rastervis/
 }
-

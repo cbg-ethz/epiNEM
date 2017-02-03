@@ -28,4 +28,3 @@ rows and the columns denote the different independent simulation runs.
 \examples{
 data(sim)
 }
-
