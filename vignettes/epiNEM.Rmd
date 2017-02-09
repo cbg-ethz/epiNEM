@@ -51,13 +51,13 @@ A one in row i and column j denotes an effect of reporter i for
 perturbation j. These effects are usually derived from comparing
 control/wild-type experiments with respective perturbation experiments
 (e.g. differential expression with edgeR).
-The binary data is the main imput for the epiNEM function, which
+The binary data is the main input for the epiNEM function, which
 contains the inference algorithm to estimate the underlying network
 structure of the data. For up to four signalling genes (=different
-perturbation targets) exhautive search is available. For five or
+perturbation targets) exhaustive search is available. For five or
 more a greedy search is implemented as an alternative.
 
-```{r}
+```{r, fig.width = 5, fig.height = 5}
 data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
 
 colnames(data) <- c("A", "A.B", "B", "C")
@@ -79,16 +79,17 @@ Alternatively the input can be a larger matrix with single and double
 knock-downs. EpiNEM can perform a systematic analysis to identify most
 likely modulators for a signaling gene pair of a double knock-down.
 
-```{r}
+```{r, fig.width = 5, fig.height = 5}
 data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
 colnames(data) <- c("A.B", "A.C", "B.C", "A", "B", "C", "D", "E", "G")
 rownames(data) <- paste("E", 1:100, sep = "_")
 res <- epiScreen(data)
-plot(res) # plot(res, global = FALSE)
+plot(res)
+plot(res, global = FALSE, ind = 1)
 ```
 
 If the "global" parameter is set to FALSE, detailed results are plotted
-for each pair of a double knock-down.
+for each or a specific ("ind" parameter) pair of a double knock-down.
 
 ## Simulations
 
@@ -156,13 +157,13 @@ data(sim)
 plot(sim)
 ```
 
-THe plot shows that as expected B-NEM is the slowest followed by epiNEM,
-while NEM, ARACNE and the P algorithm are much faster. However, the last
+The plot shows that as expected B-NEM is the slowest followed by epiNEM,
+while NEM, ARACNE and the PC algorithm are much faster. However, the last
 three can not derive any logics in the network structure. epiNEM and
 B-NEM show almost equally high accuracy of inferred edges and truth tables
 (expected data). However, epiNEM reaches a much higher accuracy for inferred
 logic gates, which is due to the much higher degree of equivalent network
-strucutres in the case of B-NEM.
+structures in the case of B-NEM.
 
 ## Yeast knockout screens
 
@@ -289,7 +290,7 @@ singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
 singles <- unique(sort(singles))
 ```
 
-We apply epiNEM so all triples and infer logics and calculate the
+We apply epiNEM to all triples and infer logics and calculate the
 log-likelihood.
 
 ```{r, eval=FALSE}
@@ -311,6 +312,14 @@ doubles <- wageningen$doubles
 dataWag <- wageningen$dataWag
 
 wagscreen <- wageningen
+
+wagscreen$doubles <- wagscreen$doubles[-grep("fus3|ptp2.ptc2", wagscreen$doubles)]
+
+wagscreen$dataWag <- wagscreen$dataWag[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$dataWag))]
+
+wagscreen$ll <- wagscreen$ll[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$ll))]
+
+wagscreen$logic <- wagscreen$logic[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$logic))]
 
 plot(wagscreen)
 ```
@@ -460,10 +469,10 @@ next()
 
 }
 ```
-We plot the densities of the distributions of the random triplet
-scores (blue) and the scores of the triplets by epiNEM (pink). Additional
-we calculate, if the difference between the two score distributions is
-significant (Mann-Whitney test).
+We plot the densities of the distributions of the random pair
+scores (blue) and the scores of a pair from the triplets by epiNEM (pink).
+Additionally we calculate, if the difference between the two score
+distributions is significant (Mann-Whitney test).
 
 ```{r, fig.width = 8, fig.height = 5}
 data(wageningen_string)
@@ -571,7 +580,7 @@ lines(density(unlist(tmp$combined_score)), col = "#00000000")
 polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
 ```
 
-In addition to STRINGdb interaction scores, we have a look at enrichmed
+In addition to STRINGdb interaction scores, we have a look at enriched
 GO terms. For this analysis we again use the STRINGdb package.
 
 We generate a matrix visualizing the GO terms for all pairs for the van
@@ -580,17 +589,20 @@ Wageningen and the Sameith data sets.
 ```{r, eval=FALSE}
 ## van Wageningen:
 
+## STRINGdb$help("get_enrichment")
+
 string_db$set_background(
-string_db$mp(unique(c(unlist(strsplit(colnames(wageningen$ll), "\\.")),
-rownames(wageningen$ll)))))
+string_db$mp(unique(c(unlist(strsplit(colnames(wagscreen$ll), "\\.")),
+rownames(wagscreen$ll)))))
 
 golist <- list()
 
-for (i in 1:ncol(wageningen$ll)) {
-golist[[i]] <- string_db$get_enrichment(string_db$mp(c(unlist(strsplit(
-colnames(wageningen$ll)[i], "\\.")),
-rownames(wageningen$ll)[which(!(wageningen$logic[, i] %in% c("NOINFO", "NOEPI")))])),
-category = "Process", methodMT = "fdr", iea = TRUE)   
+for (i in 1:ncol(wagscreen$ll)) {
+golist[[i]] <- string_db$get_enrichment(string_db$mp(unique(c(unlist(strsplit(
+colnames(wagscreen$ll)[i], "\\.")),
+rownames(wagscreen$ll)[which(!(wagscreen$logic[, i] %in%
+c("NOINFO", "NOEPI")))]))),
+category = "Function", methodMT = "fdr", iea = TRUE)
 }
 ```
 ```{r, fig.width = 8, fig.height = 7}
@@ -605,40 +617,41 @@ for (i in 1:length(golist)) {
 if (i %in% c(5,8)) { next() }
 
 goterms <- c(goterms,
-golist[[i]]$term_id[which(golist[[i]]$pvalue_fdr < 1)]) 
+golist[[i]]$term_description[which(golist[[i]]$pvalue_fdr < 1)]) 
 
 }
 
-gomat <- matrix(0, length(unique(goterms)), ncol(wageningen$ll))
+gomat <- matrix(NA, length(unique(goterms)), ncol(wagscreen$ll))
 
 rownames(gomat) <- sort(unique(goterms))
-colnames(gomat) <- colnames(wageningen$ll)
+colnames(gomat) <- colnames(wagscreen$ll)
 
-## there is a strong cutoff for fdr >= 0.05 !?!
+## there is a strong cutoff for fdr >= 0.05 !?! realy??? no!
 
-for (i in 1:ncol(wageningen$ll)) {
-
-if (i %in% c(5,8)) { next() }
+for (i in 1:ncol(wagscreen$ll)) {
 
 gotmp <- golist[[i]]
-gotmp <- gotmp[order(gotmp$term_id), ]
+gotmp <- gotmp[order(gotmp$term_description), ]
 
-gomat[which(rownames(gomat) %in% golist[[i]]$term_id), i] <-
-golist[[i]][which(golist[[i]]$term_id %in% rownames(gomat)), 4]
+gomat[which(rownames(gomat) %in% golist[[i]]$term_description), i] <-
+golist[[i]][which(golist[[i]]$term_description %in% rownames(gomat)), 4]
 
 }
 
+if (nrow(gomat) > 20) {
 rownames(gomat) <- NULL
+}
 
-gomat[which(gomat == 0)] <- 1
+gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
 
-gomat <- gomat[, -grep("fus3", colnames(gomat))]
+gomat <- gomat[, -grep("fus3|ptp2.ptc2", colnames(gomat))]
 
-HeatmapOP(gomat, breaks = seq(0,10^-1*0.6, length = 100),
+HeatmapOP(gomat, breaks = seq(-max(gomat),max(gomat), length = 100),
 bordercol = "transparent",
-main = "False discovery rates of GO terms over all double knock-out pairs",
-sub = "fdr cutoff at 0.05",
-xrot = 45, col = "Blues")
+main = "", sub = "",
+xrot = 45, col = "RdYlBu")
+
+dev.print("Figure11a.pdf", width = 8, height = 5, device = pdf)
 ```
 ```{r, eval=FALSE}
 ## Sameith:
@@ -649,9 +662,9 @@ strsplit(colnames(sameith$ll), "\\.")), rownames(sameith$ll)))))
 golist2 <- list()
 
 for (i in 1:ncol(sameith$ll)) {
-golist2[[i]] <- string_db$get_enrichment(string_db$mp(c(unlist(strsplit(
+golist2[[i]] <- string_db$get_enrichment(string_db$mp(unique(c(unlist(strsplit(
 colnames(sameith$ll)[i], "\\.")),
-rownames(sameith$ll)[which(!(sameith$logic[, i] %in% c("NOINFO", "NOEPI")))])),
+rownames(sameith$ll)[which(!(sameith$logic[, i] %in% c("NOINFO", "NOEPI")))]))),
 category = "Process", methodMT = "fdr", iea = TRUE)
 }
 ```
@@ -665,11 +678,11 @@ goterms <- character()
 for (i in 1:length(golist2)) {
 
 goterms <-
-c(goterms, golist2[[i]]$term_id[which(golist2[[i]]$pvalue_fdr < 0.1)])
+c(goterms, golist2[[i]]$term_description[which(golist2[[i]]$pvalue_fdr < 0.1)])
 
 }
 
-gomat <- matrix(0, length(unique(goterms)), ncol(sameith$ll))
+gomat <- matrix(NA, length(unique(goterms)), ncol(sameith$ll))
 
 rownames(gomat) <- sort(unique(goterms))
 colnames(gomat) <- colnames(sameith$ll)
@@ -677,23 +690,40 @@ colnames(gomat) <- colnames(sameith$ll)
 for (i in 1:ncol(sameith$ll)) {
 
 gotmp <- golist2[[i]]
-gotmp <- gotmp[order(gotmp$term_id), ]
+gotmp <- gotmp[order(gotmp$term_description), ]
 
-gomat[which(rownames(gomat) %in% golist2[[i]]$term_id), i] <-
-golist2[[i]][which(golist2[[i]]$term_id %in% rownames(gomat)), 4]
+gomat[which(rownames(gomat) %in% golist2[[i]]$term_description), i] <-
+golist2[[i]][which(golist2[[i]]$term_description %in% rownames(gomat)), 4]
 
 }
 
+base <- rnorm(1000)
+
+runs <- 1000
+
+pvals <- numeric(runs)
+
+for (i in 1:runs) {
+
+pvals[i] <- wilcox.test(base, sample(base, 100), alternative = "greater")$p.value
+
+}
+hist(pvals, breaks = 50)
+
+if (nrow(gomat) > 20) {
 rownames(gomat) <- NULL
+}
 
-gomat[which(gomat == 0)] <- 1
+gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
 
-HeatmapOP(gomat, breaks = seq(0,10^-1*0.6, length = 100),
+colnames(gomat) <- tolower(colnames(gomat))
+
+HeatmapOP(gomat, breaks = seq(-max(gomat), max(gomat), length = 100),
 bordercol = "transparent",
-main = "False discovery rates of GO terms over all double knock-out pairs",
-sub = "fdr cutoff at 0.05",
-xrot = 45, col = "Blues", cexCol = 0.5)
+main = "", sub = "",
+xrot = 45, cexCol = 0.5, col = "RdYlBu")
 
+dev.print("Figure10b.pdf", width = 12, height = 10, device = pdf)
 ## HeatmapOP(cor(gomat), breaks = seq(0, 1, length=100), dendrogram = "col")
 ```
 
@@ -706,51 +736,45 @@ library(AnnotationHub)
 library(org.Sc.sgd.db)
 
 ystGO <- godata("org.Sc.sgd.db", ont = "BP",
-keytype = keytypes(org.Sc.sgd.db)[11])
+                keytype = keytypes(org.Sc.sgd.db)[11])
+
 ```
 ```{r, eval=FALSE}
 GOepi <- numeric()
 
-for (i in 1:ncol(wageningen$ll)) {
-
-pair <- toupper(unlist(strsplit(colnames(wageningen$ll)[i], "\\.")))
-
-for (j in which(!is.infinite(wageningen$ll[, i]) == TRUE &
-wageningen$ll[, i] != 0)) {
-
-tmp <- geneSim(pair[1], toupper(rownames(wageningen$ll)[j]),
-semData = ystGO)
-
-if (!is.na(tmp[1])) {
-
-GOepi <- c(GOepi, tmp$geneSim)
-
-}
-
-}
-
+for (i in 1:ncol(wagscreen$ll)) {
+    if (i %in% grep("fus3|ptp2.ptc2", colnames(wagscreen$ll))) { next() }
+    pair <- toupper(unlist(strsplit(colnames(wagscreen$ll)[i], "\\.")))
+    for (j in which(!is.infinite(wagscreen$ll[, i]) == TRUE &
+                    wagscreen$ll[, i] != 0)) {
+        tmp <- geneSim(pair[1], toupper(rownames(wagscreen$ll)[j]),
+                       semData = ystGO, drop = NULL)
+        if (!is.na(tmp[1])) {
+            GOepi <- c(GOepi, tmp$geneSim)
+        }
+        tmp <- geneSim(pair[2], toupper(rownames(wagscreen$ll)[j]),
+                       semData = ystGO, drop = NULL)
+        if (!is.na(tmp[1])) {
+            GOepi <- c(GOepi, tmp$geneSim)
+        }
+    }
 }
 
 GOall <- numeric()
 
-for (i in toupper(unique(c(rownames(wageningen$ll),
-toupper(unlist(strsplit(colnames(wageningen$ll), "\\."))))))) {
+allgenes <- toupper(unique(c(rownames(wagscreen$ll),
+                             unlist(strsplit(colnames(wagscreen$ll), "\\.")))))
 
-for (j in toupper(unique(c(rownames(wageningen$ll),
-toupper(unlist(strsplit(colnames(wageningen$ll), "\\."))))))) {
-
-if (i %in% j) { next() }
-
-tmp <- geneSim(i, j, semData = ystGO)
-
-if (!is.na(tmp[1])) {
-
-GOall <- c(GOall, tmp$geneSim)
-
-}
-
-}
-
+for (i in 1:(length(allgenes) - 1)) {
+    g1 <- allgenes[i]
+    for (j in (i+1):length(allgenes)) {
+        g2 <- allgenes[j]
+        tmp <- geneSim(g1, g2, semData = ystGO, drop = NULL)
+        if (!is.na(tmp[1])) {
+            if (i == j) { print(i); print(j) }
+            GOall <- c(GOall, tmp$geneSim)
+        }
+    }
 }
 ```
 ```{r}
@@ -784,46 +808,38 @@ polygon(density(unlist(GOall)), col = "#00ffff66")
 ```{r, eval=FALSE}
 GOepi2 <- numeric()
 
-for (i in 1:ncol(sameith$ll)) {
-
-pair <- toupper(unlist(strsplit(colnames(sameith$ll)[i], "\\.")))
-
-for (j in which(!is.infinite(sameith$ll[, i]) == TRUE &
-sameith$ll[, i] != 0)) {
-
-tmp <- geneSim(pair[1], toupper(rownames(sameith$ll)[j]),
-semData = ystGO)
-
-if (!is.na(tmp[1])) {
-
-GOepi2 <- c(GOepi2, tmp$geneSim)
-
-}
-
-}
-
+for (i in 1:ncol(samscreen$ll)) {
+    pair <- toupper(unlist(strsplit(colnames(samscreen$ll)[i], "\\.")))
+    for (j in which(!is.infinite(samscreen$ll[, i]) == TRUE &
+                    samscreen$ll[, i] != 0)) {
+        tmp <- geneSim(pair[1], toupper(rownames(samscreen$ll)[j]),
+                       semData = ystGO, drop = NULL)
+        if (!is.na(tmp[1])) {
+            GOepi2 <- c(GOepi2, tmp$geneSim)
+        }
+        tmp <- geneSim(pair[2], toupper(rownames(samscreen$ll)[j]),
+                       semData = ystGO, drop = NULL)
+        if (!is.na(tmp[1])) {
+            GOepi2 <- c(GOepi2, tmp$geneSim)
+        }
+    }
 }
 
 GOall2 <- numeric()
 
-for (i in toupper(unique(c(rownames(sameith$ll),
-toupper(unlist(strsplit(colnames(sameith$ll), "\\."))))))) {
+allgenes <- toupper(unique(c(rownames(samscreen$ll),
+                             unlist(strsplit(colnames(samscreen$ll), "\\.")))))
 
-for (j in toupper(unique(c(rownames(sameith$ll),
-toupper(unlist(strsplit(colnames(sameith$ll), "\\."))))))) {
-
-if (i %in% j) { next() }
-
-tmp <- geneSim(i, j, semData = ystGO)
-
-if (!is.na(tmp[1])) {
-
-GOall2 <- c(GOall2, tmp$geneSim)
-
-}
-
-}
-
+for (i in 1:(length(allgenes) - 1)) {
+    g1 <- allgenes[i]
+    for (j in (i+1):length(allgenes)) {
+        g2 <- allgenes[j]
+        tmp <- geneSim(g1, g2, semData = ystGO, drop = NULL)
+        if (!is.na(tmp[1])) {
+            if (i == j) { print(i); print(j) }
+            GOall2 <- c(GOall2, tmp$geneSim)
+        }
+    }
 }
 ```
 ```{r}

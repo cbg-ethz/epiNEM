@@ -109,6 +109,8 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
 
         distmat <- x$logic
 
+        distmat[which(distmat == 0)] <- 7
+
         distmat[which(distmat %in% "AND")] <- 1
         distmat[which(distmat %in% "OR")] <- 2
         distmat[which(distmat %in% "XOR")] <- 3
