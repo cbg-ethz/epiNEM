@@ -261,8 +261,10 @@ epiNEM <- function(filename="random",
         } else {
             names(results$score) <- "mLL"
         }
+        savescore <- score[,which.max(mll)]$posterior
         posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
         results$EGeneset <- posterior
+        results$PostScore <- savescore
 
     }
 
@@ -1115,7 +1117,6 @@ epiScreen <- function(data, ...) {
     globalgenes <- which(apply(dataBin, 1, max) == 1)
 
     for (i in doubles) {
-        if (which(doubles %in% i) == 8) { next() }
         print(i)
         doubles.singles <- unlist(strsplit(i, "\\."))
         egenes <-
@@ -1182,6 +1183,62 @@ epiScreen <- function(data, ...) {
     
     return(results)
 
+}
+
+
+#' Plots logical gate data annotation.
+#' @export
+#' @author Martin Pirkl
+#' @return plot of heatmats showing the silencing scheme (expected data)
+#' @examples
+#' epiAnno()
+epiAnno <- function() {
+    oldw <- getOption("warn")
+    options(warn=-1)
+    a1 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "OR", col = "Greys", sub = "", colorkey = NULL)
+    a2 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "AND", col = "Greys", sub = "", colorkey = NULL)
+    a3 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "B masks effect of A", col = "Greys", sub = "",
+                    colorkey = NULL)
+    a4 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "A masks effect of B", col = "Greys", sub = "",
+                    colorkey = NULL)
+    a5 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "XOR", col = "Greys", sub = "", colorkey = NULL)
+    a6 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+    a7 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+    a8 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
+                           dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
+                    Colv = FALSE, Rowv = FALSE,
+                    main = "No epistasis (unconnected)", col = "Greys", sub = "",
+                    colorkey = NULL)
+    print(a5, position = c(0,0, .25, .5), more = TRUE)
+    print(a6, position = c(.25,0, .5, .5), more = TRUE)
+    print(a7, position = c(.5,0, .75, .5), more = TRUE)
+    print(a8, position = c(.75,0, 1, .5), more = TRUE)
+    print(a1, position = c(0,.5, .25, 1), more = TRUE)
+    print(a2, position = c(.25,.5, .5, 1), more = TRUE)
+    print(a3, position = c(.5,.5, .75, 1), more = TRUE)
+    print(a4, position = c(.75,.5, 1, 1))
+    options(warn=oldw)
 }
 
 ###--- END OF HELPER FUNCTIONS ---###

@@ -61,15 +61,10 @@ more a greedy search is implemented as an alternative.
 
 ```{r, fig.width = 5, fig.height = 5}
 data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
-
 colnames(data) <- c("A", "A.B", "B", "C")
-
 rownames(data) <- paste("E", 1:100, sep = "_")
-
 print(head(data))
-
 res <- epiNEM(data, method = "exhaustive")
-
 plot(res)
 ```
 
@@ -81,7 +76,7 @@ Alternatively the input can be a larger matrix with single and double
 knock-downs. EpiNEM can perform a systematic analysis to identify most
 likely modulators for a signaling gene pair of a double knock-down.
 
-```{r, fig.width = 5, fig.height = 5}
+```{r, fig.width = 10, fig.height = 10}
 data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
 colnames(data) <- c("A.B", "A.C", "B.C", "A", "B", "C", "D", "E", "G")
 rownames(data) <- paste("E", 1:100, sep = "_")
@@ -92,6 +87,14 @@ plot(res, global = FALSE, ind = 1)
 
 If the "global" parameter is set to FALSE, detailed results are plotted
 for each or a specific ("ind" parameter) pair of a double knock-down.
+
+The results (logics) of the knockout screens have been annotated
+according to the following legend of effects (black), where the
+x-axis denotes the gene and the y-axis denotes the type of knock-out:
+
+```{r, warning=FALSE, fig.width = 9, fig.height=5}
+epiAnno()
+```
 
 ## Simulations
 
@@ -167,56 +170,6 @@ In this section we analyse previously published yeast knockout
 screens. The screens consist of gene expression data derived from
 double and single knockout mutants. We use epiNEM on each double
 mutant combined with each single mutant.
-
-The results (logics) of the knockout screens have been annotated
-according to the following legend of effects (black), where the
-x-axis denotes the gene and the y-axis denotes the type of knock-out:
-
-```{r, warning=FALSE, fig.width = 9, fig.height=5}
-a1 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, 1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "OR", col = "Greys", sub = "", colorkey = NULL)
-a2 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, 1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "AND", col = "Greys", sub = "", colorkey = NULL)
-a3 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, -1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "B masks effect of A", col = "Greys", sub = "",
-                colorkey = NULL)
-a4 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, -1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "A masks effect of B", col = "Greys", sub = "",
-                colorkey = NULL)
-a5 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, 1, -1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "XOR", col = "Greys", sub = "", colorkey = NULL)
-a6 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-a7 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
-a8 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
-                       dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
-                Colv = FALSE, Rowv = FALSE,
-                main = "No epistasis (unconnected)", col = "Greys", sub = "",
-                colorkey = NULL)
-print(a5, position = c(0,0, .25, .5), more = TRUE)
-print(a6, position = c(.25,0, .5, .5), more = TRUE)
-print(a7, position = c(.5,0, .75, .5), more = TRUE)
-print(a8, position = c(.75,0, 1, .5), more = TRUE)
-print(a1, position = c(0,.5, .25, 1), more = TRUE)
-print(a2, position = c(.25,.5, .5, 1), more = TRUE)
-print(a3, position = c(.5,.5, .75, 1), more = TRUE)
-print(a4, position = c(.75,.5, 1, 1))
-```
 
 ### Wageningen et al., 2010
 
@@ -311,13 +264,16 @@ wagscreen <- wageningen
 
 ## clean up the results:
 
-wagscreen$doubles <- wagscreen$doubles[-grep("fus3|ptp2.ptc2", wagscreen$doubles)]
+wagscreen$doubles <- wagscreen$doubles[-grep("fus3|ptp2.ptc2",
+                                             wagscreen$doubles)]
 
-wagscreen$dataWag <- wagscreen$dataWag[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$dataWag))]
+wagscreen$dataWag <- wagscreen$dataWag[, -grep("fus3|ptp2.ptc2",
+                                               colnames(wagscreen$dataWag))]
 
 wagscreen$ll <- wagscreen$ll[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$ll))]
 
-wagscreen$logic <- wagscreen$logic[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$logic))]
+wagscreen$logic <- wagscreen$logic[, -grep("fus3|ptp2.ptc2",
+                                           colnames(wagscreen$logic))]
 
 plot(wagscreen)
 ```
@@ -582,8 +538,8 @@ In addition to STRINGdb interaction scores, we have a look at enriched
 GO terms for each set of identified modulators. For this analysis we
    again use the STRINGdb package.
 
-We generate a matrix visualizing the KEGG pathway enrichment for all pairs for the van
-Wageningen and the Sameith data sets.
+We generate a matrix visualizing the KEGG pathway enrichment for all
+pairs for the van Wageningen and the Sameith data sets.
 
 ```{r, eval=FALSE}
 ## van Wageningen:
@@ -616,8 +572,8 @@ for (i in 1:length(golist)) {
     if (i %in% c(5,8)) { next() }
 
     goterms <- c(goterms,
-                 golist[[i]]$term_description
-                 [which(golist[[i]]$pvalue_fdr < 1)])
+                 golist[[i]]$term_description[which(golist[[i]]$pvalue_fdr
+                                                    < 1)])
 
 }
 
@@ -693,8 +649,8 @@ for (i in 1:ncol(sameith$ll)) {
     gotmp <- gotmp[order(gotmp$term_description), ]
 
     gomat[which(rownames(gomat) %in% golist2[[i]]$term_description), i] <-
-        golist2[[i]]
-    [which(golist2[[i]]$term_description %in% rownames(gomat)), 4]
+        golist2[[i]][which(golist2[[i]]$term_description %in%
+                           rownames(gomat)), 4]
 
 }
 
