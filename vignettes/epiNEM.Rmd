@@ -391,7 +391,7 @@ string.scores <- list()
 
 string.names <- character()
 ```
-	
+
 We retrieve unique data base name and score information for the
 genes included in the data sets.
 
@@ -422,7 +422,7 @@ for (i in 1:ncol(llmat)) {
     }
 }
 ```
-	
+
 We plot the densities of the distributions of the random pair
 scores (blue) and the scores of a pair from the triplets by epiNEM (pink).
 Additionally we calculate, if the difference between the two score
@@ -682,7 +682,7 @@ library(org.Sc.sgd.db)
 ystGO <- godata("org.Sc.sgd.db", ont = "BP",
                 keytype = keytypes(org.Sc.sgd.db)[11], computeIC = FALSE)
 
-```	
+```
 ```{r, eval=FALSE}
 GOepi <- numeric()
 
@@ -742,7 +742,7 @@ polygon(density(GOepi), col = "#ff000066")
 
 lines(density(unlist(GOall)), col = "#00000000")
 polygon(density(unlist(GOall)), col = "#00ffff66")
-```	
+```
 ```{r, eval=FALSE}
 GOepi2 <- numeric()
 
@@ -806,7 +806,7 @@ polygon(density(unlist(GOall2)), col = "#00ffff66")
 
 
 
-	
+
 ```{r}
 sessionInfo()
 ```

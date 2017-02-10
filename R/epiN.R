@@ -198,79 +198,79 @@ epiNEM <- function(filename="random",
     else if (method == "exhaustive" & length(singleKOs) == 5) {
         cat("\nThis is going to take a while...\n")
     }
+    if (length(doubleKOs) == 0) {
+        print("No double perturbations available --> computing NEM")
+        if (method == "exhaustive") { inference <- "search" }
+        if (method == "greedy") { inference <- "nem.greedy" }
+        options <-
+            set.default.parameters(setdiff(unique(colnames(sortedData)),
+                                           "time"))
+        options$para <- para
+        return(nem::nem(sortedData, inference = inference, control=options))
+    } else {
+        if (method == "greedy") {
+            print(paste("Progress (of ", nIterations, " iterations):", sep = ''))
+            iterations <- sapply(1:nIterations, GreedyHillClimber,
+                                 experiments, D1, D0, mutants, init)
 
-    if (method == "greedy") {
-        print(paste("Progress (of ", nIterations, " iterations):", sep = ''))
-        iterations <- sapply(1:nIterations, GreedyHillClimber,
-                             experiments, D1, D0, mutants, init)
+            index <- which.max(iterations["maxLlh",])
+            reconstruct <- includeLogic(iterations[,index]$model,
+                                        experiments, mutants)
+            reconstruct <- unlist(reconstruct, recursive=FALSE)
+            score <- sapply(reconstruct, Mll, D1, D0, ltype, para)
+            mll <- unlist(score["mLL",])
+            index <- which.max(mll)
+            posterior <- score[,index]$posterior
 
-        index <- which.max(iterations["maxLlh",])
-        reconstruct <- includeLogic(iterations[,index]$model,
-                                    experiments, mutants)
-        reconstruct <- unlist(reconstruct, recursive=FALSE)
-        score <- sapply(reconstruct, Mll, D1, D0, ltype, para)
-        mll <- unlist(score["mLL",])
-        index <- which.max(mll)
-        posterior <- score[,index]$posterior
-
-        results <- unlist(reconstruct[index], recursive=FALSE)
-        results$score <- mll[index]
-        if (ltype %in% "maximum") {
-            names(results$score) <- "max"
-        } else {
-            names(results$score) <- "mLL"
+            results <- unlist(reconstruct[index], recursive=FALSE)
+            results$score <- mll[index]
+            if (ltype %in% "maximum") {
+                names(results$score) <- "max"
+            } else {
+                names(results$score) <- "mLL"
+            }
+            results$EGeneset <- AttachEGenes(posterior, experiments)
+            results$PostScore <- score[,which.max(mll)]$posterior
+            cat("\n")
         }
-        results$EGeneset <- AttachEGenes(posterior, experiments)
-        cat("\n")
+
+        else if (method == "exhaustive") {
+            basicModels    <- EnumerateModels(length(singleKOs), singleKOs)
+            extendedModels <- lapply(basicModels, includeLogic,
+                                     experiments, unique(mutants))
+            extendedModels <- unlist(unlist(extendedModels, recursive=FALSE),
+                                     recursive = FALSE)
+            uniqueModels   <- unique(lapply(extendedModels, function(e)
+                identity((e["model"]))))
+            uniqueModels <- uniqueModels#[1:length(uniqueModels)-1]
+
+            score <- sapply(uniqueModels, Mll, D1, D0, ltype, para)
+            mll  <- unlist(score["mLL",])
+
+            bestModel <- uniqueModels[[which.max(mll)]]$model
+            allModels <- lapply(1:length(extendedModels), function(i)
+                identity(extendedModels[[i]]$model))
+            isBest    <- lapply(allModels, IsBestModel, bestModel)
+            results   <- extendedModels[isBest == TRUE]
+            results <- lapply(results, utils::modifyList,
+                              list(score=mll[which.max(mll)]))
+            results <- results[[1]]
+            if (ltype %in% "maximum") {
+                names(results$score) <- "max"
+            } else {
+                names(results$score) <- "mLL"
+            }
+            savescore <- score[,which.max(mll)]$posterior
+            posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
+            results$EGeneset <- posterior
+            results$PostScore <- savescore
+
+        }
+
+        class(results) <- "epiNEM"
+        
+        return(results)
     }
-
-    else if (method == "exhaustive") {
-        basicModels    <- EnumerateModels(length(singleKOs), singleKOs)
-        extendedModels <- lapply(basicModels, includeLogic,
-                                 experiments, unique(mutants))
-        extendedModels <- unlist(unlist(extendedModels, recursive=FALSE),
-                                 recursive = FALSE)
-        uniqueModels   <- unique(lapply(extendedModels, function(e)
-            identity((e["model"]))))
-        uniqueModels <- uniqueModels#[1:length(uniqueModels)-1]
-
-        if (length(doubleKOs) == 0) {
-            print("No double perturbations available --> computing NEM")
-            if (method == "exhaustive") { inference <- "search" }
-            if (method == "greedy") { inference <- "nem.greedy" }
-            options <-
-                set.default.parameters(setdiff(unique(colnames(sortedData)),
-                                               "time"))
-            options$para <- para
-            return(nem::nem(sortedData, inference = inference, control=options))
-        }
-
-        score <- sapply(uniqueModels, Mll, D1, D0, ltype, para)
-        mll  <- unlist(score["mLL",])
-
-        bestModel <- uniqueModels[[which.max(mll)]]$model
-        allModels <- lapply(1:length(extendedModels), function(i)
-            identity(extendedModels[[i]]$model))
-        isBest    <- lapply(allModels, IsBestModel, bestModel)
-        results   <- extendedModels[isBest == TRUE]
-        results <- lapply(results, utils::modifyList,
-                          list(score=mll[which.max(mll)]))
-        results <- results[[1]]
-        if (ltype %in% "maximum") {
-            names(results$score) <- "max"
-        } else {
-            names(results$score) <- "mLL"
-        }
-        savescore <- score[,which.max(mll)]$posterior
-        posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
-        results$EGeneset <- posterior
-        results$PostScore <- savescore
-
-    }
-
-    class(results) <- "epiNEM"
-    
-    return(results)
 }
 
 ###--- HELPER FUNCTIONS ---###
@@ -1220,16 +1220,18 @@ epiAnno <- function() {
     a6 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, 1, 1), 3, 3,
                            dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                     Colv = FALSE, Rowv = FALSE,
-                    main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+                    main = "No epistasis", col = "Greys", sub = "",
+                    colorkey = NULL)
     a7 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, 1, -1, 1), 3, 3,
                            dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                     Colv = FALSE, Rowv = FALSE,
-                    main = "No epistasis", col = "Greys", sub = "", colorkey = NULL)
+                    main = "No epistasis", col = "Greys", sub = "",
+                    colorkey = NULL)
     a8 <- HeatmapOP(matrix(c(1,-1,1,-1,1,1, -1, -1, -1), 3, 3,
                            dimnames = list(c("A", "B", "A.B"), LETTERS[1:3])),
                     Colv = FALSE, Rowv = FALSE,
-                    main = "No epistasis (unconnected)", col = "Greys", sub = "",
-                    colorkey = NULL)
+                    main = "No epistasis (unconnected)", col = "Greys",
+                    sub = "", colorkey = NULL)
     print(a5, position = c(0,0, .25, .5), more = TRUE)
     print(a6, position = c(.25,0, .5, .5), more = TRUE)
     print(a7, position = c(.5,0, .75, .5), more = TRUE)
