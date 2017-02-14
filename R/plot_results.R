@@ -103,7 +103,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
 
     doubles <- x$doubles
 
-    if (is.null(ind)) { ind <- length(doubles) }
+    if (is.null(ind)) { ind <- 1:length(doubles) }
 
     if (global) {
 
@@ -115,7 +115,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
         distmat[which(distmat %in% "OR")] <- 2
         distmat[which(distmat %in% "XOR")] <- 3
         distmat[which(distmat %in% "NOEPI")] <- 6
-        distmat[which(distmat %in% c("NOINFO", "NOINF"))] <- 7
+        distmat[which(distmat %in% c("UNCON", "NOINFO", "NOINF"))] <- 7
 
         for (i in 1:ncol(distmat)) {
 
@@ -146,9 +146,10 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
             }))]
 
         y[which(y == 5)] <- 4
-
-        rownames(distmat) <- NULL
-
+        if (nrow(y) > 20) {
+            rownames(distmat) <- NULL
+        }
+        
         labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                        "masking (NOT B)\n\n\n",
                        "masking (NOT A)\n\n\n", "XOR\n\n\n",
@@ -202,7 +203,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
 
             colvec <- pchvec
             
-            thetop <- sum(!(logicvec %in% c("NOINFO", "NOINF")))
+            thetop <- sum(!(logicvec %in% c("UNCON", "NOINFO", "NOINF")))
             
             if (all(is.infinite(llvec) == TRUE)) {
 

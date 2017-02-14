@@ -194,9 +194,17 @@ file <- paste("http://www.holstegelab.nl/",
 
 data <- read.delim(file)
 
-dataM <- data[-(1:2), (1+(1:(324/2))*2)]
+dataM <- data[-(1), (1+(1:(324/2))*2)]
 
-dataP <- data[-(1:2), (2+(1:(324/2))*2)]
+dataP <- data[-(1), (2+(1:(324/2))*2)]
+
+data[, 2] <- as.character(data[, 2])
+
+rndup <- which(duplicated(data[, 2]) == TRUE)
+
+data[rndup, 2] <- paste(data[rndup, 2], "_dup", sep = "")
+
+rownames(dataM) <- rownames(dataP) <- data[2:nrow(data), 2]
 
 dataM <- dataM[-1, ]
 
@@ -243,7 +251,9 @@ We apply epiNEM to all triples and infer logics and calculate the
 log-likelihood.
 
 ```{r, eval=FALSE}
-wagscreen <- epiScreen(dataBin)
+wagscreen <- epiScreen(dataBin[, -grep("fus3\\.|ptp2.ptc2", colnames(dataBin))])
+
+wagscreen$dataWag <- dataBin[, -grep("fus3.|ptp2.ptc2", colnames(dataBin))]
 ```
 
 The following plot shows the global distribution of the inferred logical gates
@@ -264,21 +274,24 @@ wagscreen <- wageningen
 
 ## clean up the results:
 
-wagscreen$doubles <- wagscreen$doubles[-grep("fus3|ptp2.ptc2",
-                                             wagscreen$doubles)]
-
-wagscreen$dataWag <- wagscreen$dataWag[, -grep("fus3|ptp2.ptc2",
-                                               colnames(wagscreen$dataWag))]
-
-wagscreen$ll <- wagscreen$ll[, -grep("fus3|ptp2.ptc2", colnames(wagscreen$ll))]
-
-wagscreen$logic <- wagscreen$logic[, -grep("fus3|ptp2.ptc2",
-                                           colnames(wagscreen$logic))]
+if (length(grep("fus3|ptp2.ptc2", wagscreen$doubles)) > 0) {
+    wagscreen$doubles <- wagscreen$doubles[-grep("fus3|ptp2.ptc2",
+                                                 wagscreen$doubles)]
+    
+    wagscreen$dataWag <- wagscreen$dataWag[, -grep("fus3|ptp2.ptc2",
+                                                   colnames(wagscreen$dataWag))]
+    
+    wagscreen$ll <- wagscreen$ll[, -grep("fus3|ptp2.ptc2",
+                                         colnames(wagscreen$ll))]
+    
+    wagscreen$logic <- wagscreen$logic[, -grep("fus3|ptp2.ptc2",
+                                               colnames(wagscreen$logic))]
+}
 
 plot(wagscreen)
 ```
 
-We also plot the significant results for every explicit triple with
+We can also plot the significant results for every explicit triple with
 log-likelihoods on the y-axis and ranked triples on the x-axis. The
 "ind" parameter, if set, selects a subset.
 
@@ -309,6 +322,8 @@ dataM <- apply(dataM, c(1,2), as.numeric)
 dataP <- data[-1, which(data[1, ] %in% "p.value")]
 
 dataP <- apply(dataP, c(1,2), as.numeric)
+
+rownames(dataM) <- rownames(dataP) <- data[2:nrow(data), 1]
 
 dataBin <- dataM
 
@@ -344,6 +359,8 @@ knock-out combinations.
 
 ```{r, eval=FALSE}
 samscreen <- epiScreen(dataBin)
+
+samscreen$dataSam <- dataBin
 ```
 
 Again, we plot the global distribution of logics followed by
@@ -670,9 +687,10 @@ HeatmapOP(gomat, breaks = seq(-max(gomat), max(gomat), length = 100),
 ## HeatmapOP(cor(gomat), breaks = seq(0, 1, length=100), dendrogram = "col")
 ```
 
-The final analysis is similar to the STRINGdb interaction scores. However,
+The next analysis is similar to the STRINGdb interaction scores. However,
 instead of these we use Graph-based GO term similarity scores. Additionally,
-we do not compare 
+we do not compare a pair of genes, but we compare the GO similarity between
+the pair of the double knock-out and the third modulator.
 
 ```{r}
 library(GOSemSim)
@@ -804,8 +822,105 @@ lines(density(unlist(GOall2)), col = "#00000000")
 polygon(density(unlist(GOall2)), col = "#00ffff66")
 ```
 
+In the final analysis, we investigate the GO enrichment of the modulators E-gene
+targets. These E-gene are identified by epiNEM to be directly regulated by the
+modulator and not the parent genes.
 
+```{r, eval=FALSE}
+string_db$set_background(string_db$mp(rownames(wagscreen$dataWag)))
 
+egenego <- list()
+
+gos <- character()
+
+for (i in 1:length(wagscreen$targets)) {
+    egenego[[i]] <- list()
+    if (length(wagscreen$targets[[i]]) == 0) { next() }
+    for (j in 1:length(wagscreen$targets[[i]])) {
+        egenego[[i]][[j]] <- string_db$get_enrichment(string_db$mp(wagscreen$targets[[i]][[j]]),
+                                 category = "KEGG", methodMT = "fdr", iea = TRUE)
+        if (dim(egenego[[i]][[j]])[1] > 0) {
+            gos <- c(gos, egenego[[i]][[j]]$term_description)
+        }
+    }
+}
+```
+```{r}
+gos <- unique(gos)
+
+gomat <- array(NA, c(length(gos), nrow(wagscreen$ll), ncol(wagscreen$ll)))
+
+rownames(gomat) <- sort(gos)
+
+colnames(gomat) <- rownames(wagscreen$ll)
+
+dimnames(gomat)[[3]] <- colnames(wagscreen$ll)
+
+for (i in 1:length(wagscreen$targets)) {
+    for (j in 1:length(wagscreen$targets[[i]])) {
+        if (dim(egenego[[i]][[j]])[1] > 0) {
+            gomat[which(rownames(gomat) %in% egenego[[i]][[j]]$term_description), which(dimnames(gomat)[[2]] %in% names(wagscreen$targets[[i]])[j]), i] <- egenego[[i]][[j]]$pvalue_fdr[order(egenego[[i]][[j]]$term_description)]
+        }
+    }
+}
+
+gomat <- apply(gomat, c(1,2), mean, na.rm = TRUE)
+
+gomat <- gomat[rev(order(apply(gomat, 1, function(x) return(sum(is.na(x) == FALSE))))), ]
+
+gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
+
+HeatmapOP(gomat, xrot = 45, Colv = F, Rowv = F)
+```
+
+We do the same analysis with the Sameith et al., results.
+   
+```{r, eval=FALSE}
+string_db$set_background(string_db$mp(rownames(samscreen$dataWag)))
+
+egenego2 <- list()
+
+gos2 <- character()
+
+for (i in 1:length(samscreen$targets)) {
+    egenego2[[i]] <- list()
+    if (length(samscreen$targets[[i]]) == 0) { next() }
+    for (j in 1:length(samscreen$targets[[i]])) {
+        egenego2[[i]][[j]] <- string_db$get_enrichment(string_db$mp(samscreen$targets[[i]][[j]]),
+                                 category = "KEGG", methodMT = "fdr", iea = TRUE)
+        if (dim(egenego2[[i]][[j]])[1] > 0) {
+            gos2 <- c(gos2, egenego2[[i]][[j]]$term_description)
+        }
+    }
+}
+```	
+```{r}
+gos2 <- unique(gos2)
+
+gomat <- array(NA, c(length(gos2), nrow(samscreen$ll), ncol(samscreen$ll)))
+
+rownames(gomat) <- sort(gos2)
+
+colnames(gomat) <- rownames(samscreen$ll)
+
+dimnames(gomat)[[3]] <- colnames(samscreen$ll)
+
+for (i in 1:length(samscreen$targets)) {
+    for (j in 1:length(samscreen$targets[[i]])) {
+        if (dim(egenego[[i]][[j]])[1] > 0) {
+            gomat[which(rownames(gomat) %in% egenego[[i]][[j]]$term_description), which(dimnames(gomat)[[2]] %in% names(samscreen$targets[[i]])[j]), i] <- egenego[[i]][[j]]$pvalue_fdr[order(egenego[[i]][[j]]$term_description)]
+        }
+    }
+}
+
+gomat <- apply(gomat, c(1,2), mean, na.rm = TRUE)
+
+gomat <- gomat[rev(order(apply(gomat, 1, function(x) return(sum(is.na(x) == FALSE))))), ]
+
+gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
+
+HeatmapOP(gomat, xrot = 45, Colv = F, Rowv = F)
+```
 
 ```{r}
 sessionInfo()

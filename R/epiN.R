@@ -1116,7 +1116,10 @@ epiScreen <- function(data, ...) {
 
     globalgenes <- which(apply(dataBin, 1, max) == 1)
 
+    targets <- list()
+
     for (i in doubles) {
+        targets[[i]] <- list()
         print(i)
         doubles.singles <- unlist(strsplit(i, "\\."))
         egenes <-
@@ -1141,6 +1144,8 @@ epiScreen <- function(data, ...) {
                 if (any(dataTmp[, j] != 0)) {
                     
                     epires <- epiNEM(dataTmp, method = "exhaustive")
+
+                    targets[[i]][[j]] <- rownames(dataTmp)[which(apply(epires$PostScore, 1, which.max) == which(colnames(epires$PostScore) %in% j))]
                     
                     tmp <- epires$logics
                     if ("OR" %in% tmp) {
@@ -1177,14 +1182,13 @@ epiScreen <- function(data, ...) {
     }
 
     results <- list(doubles = doubles, singles = singles,
-                    logic = logicmat, ll = llmat)
+                    logic = logicmat, ll = llmat, targets = targets)
 
     class(results) <- "epiScreen"
     
     return(results)
 
 }
-
 
 #' Plots logical gate data annotation.
 #' @export

@@ -219,13 +219,14 @@ includeLogic <- function(adj, experiments, mutants){
         ## using logics provided by logic vector
         ## ready for using BoolNet
         randomnames <- sort(runif(nrow(logicmatrix)))
+        networks <- list()
         for (modelno in 1:nrow(logicmatrix)) {
             lo <- 0
-            if (!dir.exists("temp")) {
-                dir.create("temp")
-            }
+            ## if (!dir.exists("temp")) {
+            ##     dir.create("temp")
+            ## }
             ## change that in the future:
-            path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
+            ## path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
             network <- character()
             countline <- 1
             network[countline] <- "targets, factors"
@@ -320,7 +321,7 @@ includeLogic <- function(adj, experiments, mutants){
                 countline <- countline + 1
                 network[countline] <- tmp
             }
-            write(network, file = path)
+            networks[[modelno]] <- network # write(network, file = path)
         }
         test <- lapply(1:nrow(logicmatrix),
                        function(x) getExtendedAdjacency(x,
@@ -329,9 +330,31 @@ includeLogic <- function(adj, experiments, mutants){
                                                         adj,
                                                         mutants,
                                                         experiments,
-                                                        sort(randomnames)))
+                                                        networks)) # sort(randomnames)))
         return(test)
     }
+}
+
+#' @noRd
+net2bool <- function(network) {
+    parseBooleanFunction <- get("parseBooleanFunction", en = asNamespace("BoolNet"))
+    booln <- list()
+    logics <- network[-1]
+    booln$genes <- gsub(",.*", "", logics)
+    booln$fixed <- rep(-1, length(booln$genes))
+    names(booln$fixed) <- booln$genes
+    booln$interactions <- list()
+    for (i in 1:length(booln$genes)) {
+        tmp <- unlist(strsplit(gsub("\\(|\\)|\\&|!|\\|", "", gsub(".*,", "", logics[i])), " "))
+        if (sum(tmp %in% "") > 0) { tmp <- tmp[-which(tmp %in% "")] }
+        tmp <- unique(tmp)
+        booln$interactions[[booln$genes[[i]]]] <- list()
+        booln$interactions[[booln$genes[[i]]]][["input"]] <- which(booln$genes %in% tmp)
+        booln$interactions[[booln$genes[[i]]]][["expression"]] <- gsub(".*, ", "", logics[i])
+        booln$interactions[[booln$genes[[i]]]][["func"]] <- .Call("getTruthTable_R", parseBooleanFunction(booln$interactions[[booln$genes[[i]]]][["expression"]], booln$genes), as.integer(3), PACKAGE="BoolNet")[[2]]
+    }
+    class(booln) <- "BooleanNetwork"
+    return(booln)
 }
 
 ## to do: sehr unschoen!!!
@@ -340,12 +363,12 @@ includeLogic <- function(adj, experiments, mutants){
 #' @noRd
 getExtendedAdjacency <-function(modelno, logicmatrix,
                                 column, adj, mutants,
-                                experiments, randomnames) {
-    randomnames <- sort(randomnames)
-    path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
-    network <- loadNetwork(path)
+                                experiments, networks) { # randomnames) {
+    ## randomnames <- sort(randomnames)
+    ## path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
+    network <- net2bool(networks[[modelno]]) # loadNetwork(path)
     extadj2 <- CreateExtendedAdjacency(network, unique(mutants), experiments)
-    unlink(path)
+    ## unlink(path)
     return(list(list(origModel=adj, model=extadj2,
                      logics=logicmatrix[modelno,], column=column)))
 }
