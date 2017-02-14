@@ -18,6 +18,9 @@ plot of the logical network
 Plots the winning pathway structure
 }
 \examples{
-res <- epiNEM()
+data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
+colnames(data) <- c("A", "A.B", "B", "C")
+rownames(data) <- paste("E", 1:100, sep = "_")
+res <- epiNEM(data, method = "exhaustive")
 plot(res)
 }

@@ -6,15 +6,13 @@
 more information: ?xyplot}
 \usage{
 HeatmapOP(x, col = "RdYlGn", coln = 11, bordercol = "grey",
-  borderwidth = 0.1, breaks = "sym", main = "heatmap by Oscar Perpinan",
-  sub = paste("http://oscarperpinan.github.io/", "rastervis/;",
-  "http://stackoverflow.com/questions/15505607/", "diagonal-labels-orientation",
-  "-on-x-axis-in-heatmaps", sep = ""), dendrogram = "none",
-  colorkey = list(space = "right"), Colv = TRUE, Rowv = TRUE, xrot = 90,
-  yrot = 0, shrink = c(1, 1), cexCol = 1, cexRow = 1, cexMain = 1,
-  cexSub = 1, colSideColors = NULL, aspect = "fill", contour = FALSE,
-  useRaster = FALSE, xlab = NULL, ylab = NULL, colSideColorsPos = "top",
-  clust = NULL, clusterx = NULL, ...)
+  borderwidth = 0.1, breaks = "sym", main = "", sub = "",
+  dendrogram = "none", colorkey = list(space = "right"), Colv = TRUE,
+  Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1, 1), cexCol = 1,
+  cexRow = 1, cexMain = 1, cexSub = 1, colSideColors = NULL,
+  aspect = "fill", contour = FALSE, useRaster = FALSE, xlab = NULL,
+  ylab = NULL, colSideColorsPos = "top", clust = NULL, clusterx = NULL,
+  ...)
 }
 \arguments{
 \item{x}{Matrix.}

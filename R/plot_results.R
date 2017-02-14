@@ -34,7 +34,10 @@ AddLogicGates <- function(child, logic, model) {
 #' @method plot epiNEM
 #' @importFrom igraph graph.adjacency plot.igraph layout.fruchterman.reingold
 #' @examples
-#' res <- epiNEM()
+#' data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
+#' colnames(data) <- c("A", "A.B", "B", "C")
+#' rownames(data) <- paste("E", 1:100, sep = "_")
+#' res <- epiNEM(data, method = "exhaustive")
 #' plot(res)
 #' @return plot of the logical network
 plot.epiNEM <- function(x, ...) {

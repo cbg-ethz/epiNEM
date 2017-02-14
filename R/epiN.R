@@ -26,8 +26,8 @@ NA
 #' For details see the vignette.
 #' @docType data
 #' @examples 
-#' data(sameith)
-#' @name sameith
+#' data(samscreen)
+#' @name samscreen
 NA
 
 #' Example data: epiNEM results for
@@ -41,8 +41,8 @@ NA
 #' For details see the vignette.
 #' @docType data
 #' @examples 
-#' data(wageningen)
-#' @name wageningen
+#' data(wagscreen)
+#' @name wagscreen
 NA
 
 #' sig. of string interaction scores
@@ -193,9 +193,7 @@ epiNEM <- function(filename="random",
         cat("\nSorry, too many nodes for exhaustive search,\n")
         cat("doing greedy hill climbing instead.\n")
         method = "greedy"
-    }
-
-    else if (method == "exhaustive" & length(singleKOs) == 5) {
+    } else if (method == "exhaustive" & length(singleKOs) == 5) {
         cat("\nThis is going to take a while...\n")
     }
     if (length(doubleKOs) == 0) {
@@ -209,7 +207,8 @@ epiNEM <- function(filename="random",
         return(nem::nem(sortedData, inference = inference, control=options))
     } else {
         if (method == "greedy") {
-            print(paste("Progress (of ", nIterations, " iterations):", sep = ''))
+            print(paste("Progress (of ", nIterations, " iterations):",
+                        sep = ''))
             iterations <- sapply(1:nIterations, GreedyHillClimber,
                                  experiments, D1, D0, mutants, init)
 
@@ -232,9 +231,7 @@ epiNEM <- function(filename="random",
             results$EGeneset <- AttachEGenes(posterior, experiments)
             results$PostScore <- score[,which.max(mll)]$posterior
             cat("\n")
-        }
-
-        else if (method == "exhaustive") {
+        } else if (method == "exhaustive") {
             basicModels    <- EnumerateModels(length(singleKOs), singleKOs)
             extendedModels <- lapply(basicModels, includeLogic,
                                      experiments, unique(mutants))
@@ -261,7 +258,8 @@ epiNEM <- function(filename="random",
                 names(results$score) <- "mLL"
             }
             savescore <- score[,which.max(mll)]$posterior
-            posterior <- AttachEGenes(score[,which.max(mll)]$posterior, experiments)
+            posterior <- AttachEGenes(score[,which.max(mll)]$posterior,
+                                      experiments)
             results$EGeneset <- posterior
             results$PostScore <- savescore
 
@@ -774,12 +772,8 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 HeatmapOP <-
     function(x, col = "RdYlGn", coln = 11, bordercol = "grey",
              borderwidth = 0.1, breaks = "sym",
-             main = "heatmap by Oscar Perpinan",
-             sub = paste("http://oscarperpinan.github.io/",
-                         "rastervis/;",
-                         "http://stackoverflow.com/questions/15505607/",
-                         "diagonal-labels-orientation",
-                         "-on-x-axis-in-heatmaps", sep = ""),
+             main = "",
+             sub = "",
              dendrogram = "none", colorkey = list(space = "right"), Colv = TRUE,
              Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1,1), cexCol = 1,
              cexRow = 1, cexMain = 1, cexSub = 1,
@@ -1145,7 +1139,11 @@ epiScreen <- function(data, ...) {
                     
                     epires <- epiNEM(dataTmp, method = "exhaustive")
 
-                    targets[[i]][[j]] <- rownames(dataTmp)[which(apply(epires$PostScore, 1, which.max) == which(colnames(epires$PostScore) %in% j))]
+                    targets[[i]][[j]] <-
+                        rownames(dataTmp)[which(apply(epires$PostScore, 1,
+                                                      which.max) ==
+                                                which(colnames(epires$PostScore)
+                                                      %in% j))]
                     
                     tmp <- epires$logics
                     if ("OR" %in% tmp) {

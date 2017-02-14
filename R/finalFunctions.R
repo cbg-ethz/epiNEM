@@ -222,11 +222,6 @@ includeLogic <- function(adj, experiments, mutants){
         networks <- list()
         for (modelno in 1:nrow(logicmatrix)) {
             lo <- 0
-            ## if (!dir.exists("temp")) {
-            ##     dir.create("temp")
-            ## }
-            ## change that in the future:
-            ## path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
             network <- character()
             countline <- 1
             network[countline] <- "targets, factors"
@@ -330,14 +325,15 @@ includeLogic <- function(adj, experiments, mutants){
                                                         adj,
                                                         mutants,
                                                         experiments,
-                                                        networks)) # sort(randomnames)))
+                                                        networks))
         return(test)
     }
 }
 
 #' @noRd
 net2bool <- function(network) {
-    parseBooleanFunction <- get("parseBooleanFunction", en = asNamespace("BoolNet"))
+    parseBooleanFunction <- get("parseBooleanFunction",
+                                envir = asNamespace("BoolNet"))
     booln <- list()
     logics <- network[-1]
     booln$genes <- gsub(",.*", "", logics)
@@ -345,13 +341,21 @@ net2bool <- function(network) {
     names(booln$fixed) <- booln$genes
     booln$interactions <- list()
     for (i in 1:length(booln$genes)) {
-        tmp <- unlist(strsplit(gsub("\\(|\\)|\\&|!|\\|", "", gsub(".*,", "", logics[i])), " "))
+        tmp <- unlist(strsplit(gsub("\\(|\\)|\\&|!|\\|",
+                                    "", gsub(".*,", "", logics[i])), " "))
         if (sum(tmp %in% "") > 0) { tmp <- tmp[-which(tmp %in% "")] }
         tmp <- unique(tmp)
         booln$interactions[[booln$genes[[i]]]] <- list()
-        booln$interactions[[booln$genes[[i]]]][["input"]] <- which(booln$genes %in% tmp)
-        booln$interactions[[booln$genes[[i]]]][["expression"]] <- gsub(".*, ", "", logics[i])
-        booln$interactions[[booln$genes[[i]]]][["func"]] <- .Call("getTruthTable_R", parseBooleanFunction(booln$interactions[[booln$genes[[i]]]][["expression"]], booln$genes), as.integer(3), PACKAGE="BoolNet")[[2]]
+        booln$interactions[[booln$genes[[i]]]][["input"]] <-
+            which(booln$genes %in% tmp)
+        booln$interactions[[booln$genes[[i]]]][["expression"]] <-
+            gsub(".*, ", "", logics[i])
+        booln$interactions[[booln$genes[[i]]]][["func"]] <-
+            .Call("getTruthTable_R",
+                  parseBooleanFunction(
+                      booln$interactions
+                      [[booln$genes[[i]]]][["expression"]],
+                      booln$genes), as.integer(3), PACKAGE="BoolNet")[[2]]
     }
     class(booln) <- "BooleanNetwork"
     return(booln)

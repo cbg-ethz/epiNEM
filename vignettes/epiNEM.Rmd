@@ -264,13 +264,11 @@ knock-out pairs are on the x-axis.
 palette(c("#4444cc", "#77aa77", "#009933",
 "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
-data(wageningen)
+data(wagscreen)
 
-doubles <- wageningen$doubles
+doubles <- wagscreen$doubles
 
-dataWag <- wageningen$dataWag
-
-wagscreen <- wageningen
+dataWag <- wagscreen$dataWag
 
 ## clean up the results:
 
@@ -367,13 +365,11 @@ Again, we plot the global distribution of logics followed by
 the explicit results for every triple.
 
 ```{r, fig.width = 8, fig.height = 4}
-data(sameith)
+data(samscreen)
 
-doubles <- sameith$doubles
+doubles <- samscreen$doubles
 
-dataSam <- sameith$dataSam
-
-samscreen <- sameith
+dataSam <- samscreen$dataSam
 
 plot(samscreen)
 
@@ -400,9 +396,9 @@ get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
 string_db <- STRINGdb$new( version="10", species=4932, score_threshold=0,
                           input_directory="~/")
 
-llmat <- wageningen$ll
+llmat <- wagscreen$ll
 
-logicmat <- wageningen$logic
+logicmat <- wagscreen$logic
 
 string.scores <- list()
 
@@ -479,9 +475,9 @@ polygon(density(stsc), col = "#ff000066")
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
 polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
 
-llmat <- sameith$ll
+llmat <- samscreen$ll
 
-logicmat <- sameith$logic
+logicmat <- samscreen$logic
 
 string.scores2 <- list()
 
@@ -628,15 +624,15 @@ HeatmapOP(gomat, breaks = seq(-max(gomat),max(gomat), length = 100),
 ## Sameith:
 
 string_db$set_background(string_db$mp(unique(c(unlist(
-    strsplit(colnames(sameith$ll), "\\.")), rownames(sameith$ll)))))
+    strsplit(colnames(samscreen$ll), "\\.")), rownames(samscreen$ll)))))
 
 golist2 <- list()
 
-for (i in 1:ncol(sameith$ll)) {
+for (i in 1:ncol(samscreen$ll)) {
     golist2[[i]] <- string_db$get_enrichment(string_db$mp(
-        unique(c(unlist(strsplit(colnames(sameith$ll)[i], "\\.")),
-                 rownames(sameith$ll)
-                 [which(!(sameith$logic[, i] %in% c("NOINFO", "NOEPI")))]))),
+        unique(c(unlist(strsplit(colnames(samscreen$ll)[i], "\\.")),
+                 rownames(samscreen$ll)
+                 [which(!(samscreen$logic[, i] %in% c("NOINFO", "NOEPI")))]))),
         category = "KEGG", methodMT = "fdr", iea = TRUE)
 }
 ```
@@ -655,12 +651,12 @@ for (i in 1:length(golist2)) {
 
 }
 
-gomat <- matrix(NA, length(unique(goterms)), ncol(sameith$ll))
+gomat <- matrix(NA, length(unique(goterms)), ncol(samscreen$ll))
 
 rownames(gomat) <- sort(unique(goterms))
-colnames(gomat) <- colnames(sameith$ll)
+colnames(gomat) <- colnames(samscreen$ll)
 
-for (i in 1:ncol(sameith$ll)) {
+for (i in 1:ncol(samscreen$ll)) {
 
     gotmp <- golist2[[i]]
     gotmp <- gotmp[order(gotmp$term_description), ]
@@ -837,8 +833,9 @@ for (i in 1:length(wagscreen$targets)) {
     egenego[[i]] <- list()
     if (length(wagscreen$targets[[i]]) == 0) { next() }
     for (j in 1:length(wagscreen$targets[[i]])) {
-        egenego[[i]][[j]] <- string_db$get_enrichment(string_db$mp(wagscreen$targets[[i]][[j]]),
-                                 category = "KEGG", methodMT = "fdr", iea = TRUE)
+        egenego[[i]][[j]] <- string_db$get_enrichment(
+            string_db$mp(wagscreen$targets[[i]][[j]]),
+            category = "KEGG", methodMT = "fdr", iea = TRUE)
         if (dim(egenego[[i]][[j]])[1] > 0) {
             gos <- c(gos, egenego[[i]][[j]]$term_description)
         }
@@ -846,7 +843,9 @@ for (i in 1:length(wagscreen$targets)) {
 }
 ```
 ```{r}
-gos <- unique(gos)
+gos <- unique(wageningen_GO$gos)
+
+egenego <- wageningen_GO$egenego
 
 gomat <- array(NA, c(length(gos), nrow(wagscreen$ll), ncol(wagscreen$ll)))
 
@@ -857,20 +856,33 @@ colnames(gomat) <- rownames(wagscreen$ll)
 dimnames(gomat)[[3]] <- colnames(wagscreen$ll)
 
 for (i in 1:length(wagscreen$targets)) {
+    if (length(wagscreen$targets[[i]]) == 0) { next() }
     for (j in 1:length(wagscreen$targets[[i]])) {
         if (dim(egenego[[i]][[j]])[1] > 0) {
-            gomat[which(rownames(gomat) %in% egenego[[i]][[j]]$term_description), which(dimnames(gomat)[[2]] %in% names(wagscreen$targets[[i]])[j]), i] <- egenego[[i]][[j]]$pvalue_fdr[order(egenego[[i]][[j]]$term_description)]
+            gomat[which(rownames(gomat) %in%
+                        egenego[[i]][[j]]$term_description),
+                  which(dimnames(gomat)[[2]] %in%
+                        names(wagscreen$targets[[i]])[j]), i] <-
+                egenego[[i]][[j]]$pvalue_fdr[
+                                     order(egenego[[i]][[j]]$term_description)]
         }
     }
 }
 
 gomat <- apply(gomat, c(1,2), mean, na.rm = TRUE)
 
-gomat <- gomat[rev(order(apply(gomat, 1, function(x) return(sum(is.na(x) == FALSE))))), ]
+gomat <- gomat[order(apply(gomat, 1, function(x)
+    return(sum(is.na(x) == FALSE)))), ]
+
+gomat <- gomat[, rev(order(apply(gomat, 2, function(x)
+    return(sum(is.na(x) == FALSE)))))]
 
 gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
 
-HeatmapOP(gomat, xrot = 45, Colv = F, Rowv = F)
+gomat <- gomat[, -which(apply(gomat, 2, max) < 0)]
+
+HeatmapOP(gomat, xrot = 45, Colv = FALSE, Rowv = FALSE,
+          col = "RdYlBu", main = "", sub = "")
 ```
 
 We do the same analysis with the Sameith et al., results.
@@ -886,16 +898,19 @@ for (i in 1:length(samscreen$targets)) {
     egenego2[[i]] <- list()
     if (length(samscreen$targets[[i]]) == 0) { next() }
     for (j in 1:length(samscreen$targets[[i]])) {
-        egenego2[[i]][[j]] <- string_db$get_enrichment(string_db$mp(samscreen$targets[[i]][[j]]),
-                                 category = "KEGG", methodMT = "fdr", iea = TRUE)
+        egenego2[[i]][[j]] <- string_db$get_enrichment(
+            string_db$mp(samscreen$targets[[i]][[j]]),
+            category = "KEGG", methodMT = "fdr", iea = TRUE)
         if (dim(egenego2[[i]][[j]])[1] > 0) {
             gos2 <- c(gos2, egenego2[[i]][[j]]$term_description)
         }
     }
 }
-```	
+```
 ```{r}
-gos2 <- unique(gos2)
+gos2 <- unique(sameith_GO$gos)
+
+egenego2 <- sameith_GO$egenego
 
 gomat <- array(NA, c(length(gos2), nrow(samscreen$ll), ncol(samscreen$ll)))
 
@@ -906,20 +921,34 @@ colnames(gomat) <- rownames(samscreen$ll)
 dimnames(gomat)[[3]] <- colnames(samscreen$ll)
 
 for (i in 1:length(samscreen$targets)) {
+    if (length(samscreen$targets[[i]]) == 0) { next() }
     for (j in 1:length(samscreen$targets[[i]])) {
-        if (dim(egenego[[i]][[j]])[1] > 0) {
-            gomat[which(rownames(gomat) %in% egenego[[i]][[j]]$term_description), which(dimnames(gomat)[[2]] %in% names(samscreen$targets[[i]])[j]), i] <- egenego[[i]][[j]]$pvalue_fdr[order(egenego[[i]][[j]]$term_description)]
+        if (dim(egenego2[[i]][[j]])[1] > 0) {
+            gomat[which(rownames(gomat) %in%
+                        egenego2[[i]][[j]]$term_description),
+                  which(dimnames(gomat)[[2]] %in%
+                        names(samscreen$targets[[i]])[j]), i] <-
+                egenego2[[i]][[j]]$pvalue_fdr[
+                                      order(
+                                          egenego2[[i]][[j]]$term_description)]
         }
     }
 }
 
 gomat <- apply(gomat, c(1,2), mean, na.rm = TRUE)
 
-gomat <- gomat[rev(order(apply(gomat, 1, function(x) return(sum(is.na(x) == FALSE))))), ]
+gomat <- gomat[order(apply(gomat, 1, function(x)
+    return(sum(is.na(x) == FALSE)))), ]
+
+gomat <- gomat[, rev(order(apply(gomat, 2, function(x)
+    return(sum(is.na(x) == FALSE)))))]
 
 gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
 
-HeatmapOP(gomat, xrot = 45, Colv = F, Rowv = F)
+gomat <- gomat[, -which(apply(gomat, 2, max) < 0)]
+
+HeatmapOP(gomat, xrot = 45, Colv = FALSE, Rowv = FALSE,
+          col = "RdYlBu", main = "", sub = "")
 ```
 
 ```{r}
@@ -964,3 +993,4 @@ Guangchuang Yu, Fei Li, Yide Qin, Xiaochen Bo, Yibo Wu, Shengqi Wang;
 GOSemSim: an R package for measuring semantic similarity among GO terms
 and gene products. Bioinformatics 2010; 26 (7): 976-978.
 doi: 10.1093/bioinformatics/btq064
+
