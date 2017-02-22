@@ -9,7 +9,7 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
-## Introduction
+# Introduction
 
 The method in this package is an extension of the classic Nested Effects
 Models provided in the package \emph{nem}. Nested Effects Models is a pathway
@@ -28,23 +28,47 @@ Please see the references for a more detailed description of NEMs and epiNEMs.
 Simulation and application results are imported from pre-calculated data sets
 to shorten the runtime of this vignette.
 
-## Loading epiNEM
+# Loading epiNEM
 
+```{r, global_options, include=FALSE}
+knitr::opts_chunk$set(message=FALSE)
+fig.cap1 <- "Toy example result for a double mutant (A,B) and one modulator
+(C)."
+fig.cap2 <- "Distribution of inferred logics for each double knock-out."
+fig.cap3 <- "Ranked modulators for one double knock-out."
+fig.cap4 <- "Perfect binary effects matrix for each logic."
+fig.cap5 <- ""
+fig.cap6 <- "Global results for the van Wageningen data set. See the help page
+of plot.epiScreen() and HeatmapOP() for additional parameters."
+fig.cap7 <- "Results for one double knock-out of the van Wageningen data set.
+See ?plot.epiScreen for further parameters."
+fig.cap8 <- "Global result for the Sameith data set."
+fig.cap9 <- "Example for one knock-out of the Sameith data set."
+fig.cap10 <- "Density of the string-db interaction scores (van Wageningen).
+Background (turqoise) and inferred by epiNEM (pink)."
+fig.cap11 <- "Density of the string-dbinteraction scores (Sameith). Baackground
+(turqoise) and inferred by epiNEM (pink)."
+fig.cap12 <- "Density plot for graph-based GO similarity score
+(van Wageningen)."
+fig.cap13 <- "Density plot for graph-based GO similarity score (Sameith)."
+fig.cap14 <- "Enrichment of van Wageningen modulators by KEGG pathways.
+Colors refer to fals discovery rates. NAs are colored in grey."
+fig.cap15 <- "Enrichment of Sameith modulators by KEGG pathways. Colors
+refer to fals discovery rates. NAs are colored in grey."
+fig.cap16 <- "Effect reporter KEGG pathway enrichment (van Wageningen).
+Colors refer to fals discovery rates. NAs are colored in grey."
+fig.cap17 <- "Effect reporter KEGG pathway enrichment (Sameith). Colors
+refer to fals discovery rates. NAs are colored in grey."
+```
 ```{r}
-source("https://bioconductor.org/biocLite.R")
-
-biocLite("devtools")
-
 library(devtools)
-
-biocLite("rmarkdown")
 
 library(rmarkdown)
 
 library(epiNEM)
 ```
 
-## Quick start
+# Quick start
 
 The data should be in the form of binary effects stemming from
 knock-out data including single and double perturbations with
@@ -59,12 +83,14 @@ structure of the data. For up to four signalling genes (=different
 perturbation targets) exhaustive search is available. For five or
 more a greedy search is implemented as an alternative.
 
-```{r, fig.width = 5, fig.height = 5}
+```{r}
 data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
 colnames(data) <- c("A", "A.B", "B", "C")
 rownames(data) <- paste("E", 1:100, sep = "_")
 print(head(data))
 res <- epiNEM(data, method = "exhaustive")
+```
+```{r, fig.width = 7, fig.height = 7, fig.cap=fig.cap1}
 plot(res)
 ```
 
@@ -76,12 +102,16 @@ Alternatively the input can be a larger matrix with single and double
 knock-downs. EpiNEM can perform a systematic analysis to identify most
 likely modulators for a signaling gene pair of a double knock-down.
 
-```{r, fig.width = 10, fig.height = 10}
+```{r}
 data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
 colnames(data) <- c("A.B", "A.C", "B.C", "A", "B", "C", "D", "E", "G")
 rownames(data) <- paste("E", 1:100, sep = "_")
 res <- epiScreen(data)
+```
+```{r, fig.width = 4, fig.height = 4, fig.cap = fig.cap2}
 plot(res)
+```
+```{r, fig.width = 5, fig.height = 5, fig.cap = fig.cap3}
 plot(res, global = FALSE, ind = 1)
 ```
 
@@ -92,11 +122,11 @@ The results (logics) of the knockout screens have been annotated
 according to the following legend of effects (black), where the
 x-axis denotes the gene and the y-axis denotes the type of knock-out:
 
-```{r, warning=FALSE, fig.width = 9, fig.height=5}
+```{r, warning=FALSE, fig.width = 9, fig.height=5, fig.cap = fig.cap4}
 epiAnno()
 ```
 
-## Simulations
+# Simulations
 
 We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM,
 [link](https://github.com/MartinFXP/B-NEM)),
@@ -150,9 +180,10 @@ We boxplot running time, accuracy for the inferred edges,
 logical gates and expected data (truth table) for all five respectively
 two methods.
 
-```{r, fig.width = 7, fig.height = 7}
+```{r}
 data(sim)
-
+```
+```{r, fig.width = 7, fig.height = 7, fig.cap = "Simulation results."}
 plot(sim)
 ```
 
@@ -164,14 +195,14 @@ B-NEM show almost equally high accuracy of inferred edges and truth tables
 logic gates, which is due to the much higher degree of equivalent network
 structures in the case of B-NEM.
 
-## Yeast knockout screens
+# Yeast knockout screens
 
 In this section we analyse previously published yeast knockout
 screens. The screens consist of gene expression data derived from
 double and single knockout mutants. We use epiNEM on each double
 mutant combined with each single mutant.
 
-### Wageningen et al., 2010
+## Identification of significant modulators for pairs of double knock-outs
 
 The first knock-out screen is from van Wageningen et al., 2010 and
 was created to investigate relationships between phosphorylation based pathways.
@@ -260,7 +291,7 @@ The following plot shows the global distribution of the inferred logical gates
 for all pairs. The single modulators are on the y-axis and the double
 knock-out pairs are on the x-axis.
 
-```{r, fig.width = 8, fig.height = 4}
+```{r, fig.width = 8, fig.height = 4, fig.cap = fig.cap6}
 palette(c("#4444cc", "#77aa77", "#009933",
 "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
@@ -286,23 +317,22 @@ if (length(grep("fus3|ptp2.ptc2", wagscreen$doubles)) > 0) {
                                                colnames(wagscreen$logic))]
 }
 
-plot(wagscreen)
+plot(wagscreen, xrot = 45, borderwidth = 0)
 ```
 
 We can also plot the significant results for every explicit triple with
 log-likelihoods on the y-axis and ranked triples on the x-axis. The
 "ind" parameter, if set, selects a subset.
 
-```{r}
-plot(wagscreen, global = FALSE, ind = 3)
+```{r, fig.width = 8, fig.height = 4, fig.cap = fig.cap7}
+plot(wagscreen, global = FALSE, ind = 3, cexGene = 0.7, cexLegend = 0.9,
+     off = 0.2)
 ```
-
-### Sameith et al., 2015
 
 The second knock-out screen by Sameith et al., 2015 was created to
 investigate growth based genetic interactions.
 
-Again we preprocess the data.
+We preprocess the data.
 
 ```{r}
 file <- paste("http://www.holstegelab.nl/",
@@ -364,17 +394,23 @@ samscreen$dataSam <- dataBin
 Again, we plot the global distribution of logics followed by
 the explicit results for every triple.
 
-```{r, fig.width = 8, fig.height = 4}
+```{r, fig.width = 10, fig.height = 6, fig.cap = fig.cap8}
 data(samscreen)
 
 doubles <- samscreen$doubles
 
 dataSam <- samscreen$dataSam
 
-plot(samscreen)
-
-plot(samscreen, global = FALSE, ind = c(2,4))
+plot(samscreen, xrot = 45, cexRow = 0.5, borderwidth = 0)
 ```
+```{r, fig.width = 8, fig.height = 4, fig.cap = fig.cap9}
+plot(samscreen, global = FALSE, ind = 23, cexGene = 0.7, cexLegend = 0.9,
+     off = 0.2)
+```
+
+## Validation of identified interactions
+
+### String-db interactions
 
 We plot the densities of the string-db interaction scores of our
 identified modulators and a random draw for any pair included in
@@ -385,10 +421,6 @@ We load the STRING library and download data base information
 for the yeast organism.
 
 ```{r, fig.width = 8, fig.height = 4}
-source("https://bioconductor.org/biocLite.R")
-
-biocLite("STRINGdb")
-
 library(STRINGdb)
 
 get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
@@ -436,12 +468,12 @@ for (i in 1:ncol(llmat)) {
 }
 ```
 
-We plot the densities of the distributions of the random pair
-scores (blue) and the scores of a pair from the triplets by epiNEM (pink).
+We plot the densities of the distributions of the background distribution (blue)
+and the scores of a pair from the triplets by epiNEM (pink).
 Additionally we calculate, if the difference between the two score
 distributions is significant (Mann-Whitney test).
 
-```{r, fig.width = 8, fig.height = 5}
+```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap10}
 data(wageningen_string)
 
 string.scores <- wageningen_string$string.scores
@@ -468,9 +500,15 @@ for (i in 100:1) {
 plot(density(stsc), col = "#00000000",
      ylim = c(0, max(c(max(density(stsc)$y),
                        max(density(unlist(tmp$combined_score))$y)))),
-     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+     main = paste("van Wageningen String-db interaction scores", sep = ""),
+     xlab = "",
      cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
+
+legend("topright", legend=paste("p-value", denspval, " "), cex = 1.5)
+
+mtext = mtext("A", side = 3, line = 1, outer = FALSE, cex = 3, adj = 0,
+              at = par("usr")[1] - (par("usr")[2]-par("usr")[1])*0.1)
 
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
 polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
@@ -512,7 +550,7 @@ for (i in 1:ncol(llmat)) {
 
 }
 ```
-```{r, fig.width = 8, fig.height = 5}
+```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap11}
 data(sameith_string)
 
 string.scores2 <- sameith_string$string.scores2
@@ -539,13 +577,171 @@ for (i in 100:1) {
 plot(density(stsc), col = "#00000000",
      ylim = c(0, max(c(max(density(stsc)$y),
                        max(density(unlist(tmp$combined_score))$y)))),
-     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
+     main = paste("Sameith String-db interaction scores", sp = ""),
+     xlab = "",
      cex.main = 1.5)
 polygon(density(stsc), col = "#ff000066")
+
+legend("topright", legend=paste("p-value", denspval, " "), cex = 1.5)
+
+mtext = mtext("B", side = 3, line = 1, outer = FALSE, cex = 3, adj = 0,
+              at = par("usr")[1] - (par("usr")[2]-par("usr")[1])*0.1)
 
 lines(density(unlist(tmp$combined_score)), col = "#00000000")
 polygon(density(unlist(tmp$combined_score)), col = "#00ffff66")
 ```
+
+### Graph based GO similarity scores
+
+The next analysis is similar to the STRINGdb interaction scores. However,
+instead of these we use Graph-based GO term similarity scores. Additionally,
+we do not compare a pair of genes, but we compare the GO similarity between
+the pair of the double knock-out and the third modulator.
+
+```{r}
+library(GOSemSim)
+library(AnnotationHub)
+library(org.Sc.sgd.db)
+
+ystGO <- godata("org.Sc.sgd.db", ont = "BP",
+                keytype = keytypes(org.Sc.sgd.db)[11], computeIC = FALSE)
+```
+```{r, eval=FALSE}
+GOepi <- numeric()
+
+for (i in 1:ncol(wagscreen$ll)) {
+    if (i %in% grep("fus3|ptp2.ptc2", colnames(wagscreen$ll))) { next() }
+    pair <- toupper(unlist(strsplit(colnames(wagscreen$ll)[i], "\\.")))
+    for (j in which(!is.infinite(wagscreen$ll[, i]) == TRUE &
+                    wagscreen$ll[, i] != 0)) {
+        tmp <- clusterSim(pair, toupper(rownames(wagscreen$ll)[j]),
+                       semData = ystGO, combine = "max")
+        if (!is.na(tmp[1])) {
+            GOepi <- c(GOepi, tmp)
+        }
+    }
+}
+
+GOall <- numeric()
+
+for (i in colnames(wagscreen$ll)) {
+    pair <- toupper(unlist(strsplit(i, "\\.")))
+    for (j in rownames(wagscreen$ll)) {
+        tmp <- clusterSim(pair, toupper(j), semData = ystGO, combine = "max")
+        if (!is.na(tmp[1])) {
+            GOall <- c(GOall, tmp)
+        }
+    }
+}
+```
+```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap12}
+data(wageningen_GO)
+
+GOepi <- wageningen_GO$epi
+GOall <- wageningen_GO$all
+
+denspval <- wilcox.test(GOepi, GOall, alternative = "greater")$p.value
+
+for (i in 100:1) {
+    if (i <= 2) {
+        for (j in 1:9) {
+            if (denspval < j*10^(-i)) {
+                denspval <- paste("< ", j*10^(-i), sep = "")
+            }
+        }
+    } else {
+        if (denspval < 10^(-i)) {
+            denspval <- paste("< ", 10^(-i), sep = "")
+        }
+    }
+}
+
+plot(density(GOepi), col = "#00000000",
+     ylim = c(0, max(c(max(density(GOepi)$y),
+                       max(density(unlist(GOall))$y)))),
+     main = "van Wageningen Go similarity scores",
+     xlab = "",
+     cex.main = 1.5)
+polygon(density(GOepi), col = "#ff000066")
+
+legend("topleft", legend=paste("p-value", denspval, "   "), cex = 1.5)
+
+mtext = mtext("C", side = 3, line = 1, outer = FALSE, cex = 3, adj = 0,
+              at = par("usr")[1] - (par("usr")[2]-par("usr")[1])*0.1)
+
+lines(density(unlist(GOall)), col = "#00000000")
+polygon(density(unlist(GOall)), col = "#00ffff66")
+```
+```{r, eval=FALSE}
+GOepi2 <- numeric()
+
+for (i in 1:ncol(samscreen$ll)) {
+    if (i %in% grep("fus3|ptp2.ptc2", colnames(samscreen$ll))) { next() }
+    pair <- toupper(unlist(strsplit(colnames(samscreen$ll)[i], "\\.")))
+    for (j in which(!is.infinite(samscreen$ll[, i]) == TRUE &
+                    samscreen$ll[, i] != 0)) {
+        tmp <- clusterSim(pair, toupper(rownames(samscreen$ll)[j]),
+                       semData = ystGO, combine = "max")
+        if (!is.na(tmp[1])) {
+            GOepi2 <- c(GOepi2, tmp)
+        }
+    }
+}
+
+GOall2 <- numeric()
+
+for (i in colnames(samscreen$ll)) {
+    pair <- toupper(unlist(strsplit(i, "\\.")))
+    for (j in rownames(samscreen$ll)) {
+        tmp <- clusterSim(pair, toupper(j), semData = ystGO, combine = "max")
+        if (!is.na(tmp[1])) {
+            GOall2 <- c(GOall2, tmp)
+        }
+    }
+}
+```
+```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap13}
+data(sameith_GO)
+
+GOepi2 <- sameith_GO$epi
+GOall2 <- sameith_GO$all
+
+denspval <- wilcox.test(GOepi2, GOall2, alternative = "greater")$p.value
+
+for (i in 100:1) {
+    if (i <= 2) {
+        for (j in 1:9) {
+            if (denspval < j*10^(-i)) {
+                denspval <- paste("< ", j*10^(-i), sep = "")
+            }
+        }
+    } else {
+        if (denspval < 10^(-i)) {
+            denspval <- paste("< ", 10^(-i), sep = "")
+        }
+    }
+}
+
+plot(density(GOepi2), col = "#00000000",
+     ylim = c(0, max(c(max(density(GOepi2)$y),
+                       max(density(unlist(GOall2))$y)))),
+     main = "Sameith Go similarity scores",
+     xlab = "",
+     cex.main = 1.5)
+polygon(density(GOepi2), col = "#ff000066")
+
+legend("topleft", legend=paste("p-value", denspval, "   "), cex = 1.5)
+
+mtext = mtext("D", side = 3, line = 1, outer = FALSE, cex = 3, adj = 0,
+              at = par("usr")[1] - (par("usr")[2]-par("usr")[1])*0.1)
+
+lines(density(unlist(GOall2)), col = "#00000000")
+polygon(density(unlist(GOall2)), col = "#00ffff66")
+```
+
+## Enrichment analysis
+
+### Enrichment of identified sets of modulators for each double knock-out
 
 In addition to STRINGdb interaction scores, we have a look at enriched
 GO terms for each set of identified modulators. For this analysis we
@@ -556,8 +752,6 @@ pairs for the van Wageningen and the Sameith data sets.
 
 ```{r, eval=FALSE}
 ## van Wageningen:
-
-## STRINGdb$help("get_enrichment")
 
 string_db$set_background(
     string_db$mp(unique(c(unlist(strsplit(colnames(wagscreen$ll), "\\.")),
@@ -573,7 +767,7 @@ for (i in 1:ncol(wagscreen$ll)) {
         category = "KEGG", methodMT = "fdr", iea = TRUE)
 }
 ```
-```{r, fig.width = 8, fig.height = 7}
+```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap14}
 data(wageningen_GO)
 
 golist <- wageningen_GO$golist
@@ -595,8 +789,6 @@ gomat <- matrix(NA, length(unique(goterms)), ncol(wagscreen$ll))
 rownames(gomat) <- sort(unique(goterms))
 colnames(gomat) <- colnames(wagscreen$ll)
 
-## there is a strong cutoff for fdr >= 0.05 !?! realy??? no!
-
 for (i in 1:ncol(wagscreen$ll)) {
 
     gotmp <- golist[[i]]
@@ -611,14 +803,10 @@ if (nrow(gomat) > 20) {
     rownames(gomat) <- NULL
 }
 
-gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
-
-## gomat <- gomat[, -grep("fus3|ptp2.ptc2", colnames(gomat))]
-
-HeatmapOP(gomat, breaks = seq(-max(gomat),max(gomat), length = 100),
+HeatmapOP(gomat,
           bordercol = "transparent",
           main = "", sub = "",
-          xrot = 45, col = "RdYlBu")
+          xrot = 45, col = "RdYlBu", breaks = 100)
 ```
 ```{r, eval=FALSE}
 ## Sameith:
@@ -636,7 +824,7 @@ for (i in 1:ncol(samscreen$ll)) {
         category = "KEGG", methodMT = "fdr", iea = TRUE)
 }
 ```
-```{r, fig.width = 8, fig.height = 7}
+```{r, fig.width = 12, fig.height = 3, fig.cap = fig.cap15}
 data(sameith_GO)
 
 golist2 <- sameith_GO$golist
@@ -671,156 +859,19 @@ if (nrow(gomat) > 20) {
     rownames(gomat) <- NULL
 }
 
-gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
-
 colnames(gomat) <- tolower(colnames(gomat))
 
-HeatmapOP(gomat, breaks = seq(-max(gomat), max(gomat), length = 100),
+HeatmapOP(gomat,
           bordercol = "transparent",
           main = "", sub = "",
-          xrot = 45, cexCol = 0.5, col = "RdYlBu")
-
-## HeatmapOP(cor(gomat), breaks = seq(0, 1, length=100), dendrogram = "col")
+          xrot = 45, cexCol = 0.5, col = "RdYlBu", breaks = 100)
 ```
 
-The next analysis is similar to the STRINGdb interaction scores. However,
-instead of these we use Graph-based GO term similarity scores. Additionally,
-we do not compare a pair of genes, but we compare the GO similarity between
-the pair of the double knock-out and the third modulator.
+### Enrichment of effect reporters for each identified modulator
 
-```{r}
-library(GOSemSim)
-library(AnnotationHub)
-library(org.Sc.sgd.db)
-
-ystGO <- godata("org.Sc.sgd.db", ont = "BP",
-                keytype = keytypes(org.Sc.sgd.db)[11], computeIC = FALSE)
-
-```
-```{r, eval=FALSE}
-GOepi <- numeric()
-
-for (i in 1:ncol(wagscreen$ll)) {
-    if (i %in% grep("fus3|ptp2.ptc2", colnames(wagscreen$ll))) { next() }
-    pair <- toupper(unlist(strsplit(colnames(wagscreen$ll)[i], "\\.")))
-    for (j in which(!is.infinite(wagscreen$ll[, i]) == TRUE &
-                    wagscreen$ll[, i] != 0)) {
-        tmp <- clusterSim(pair, toupper(rownames(wagscreen$ll)[j]),
-                       semData = ystGO, combine = "max")
-        if (!is.na(tmp[1])) {
-            GOepi <- c(GOepi, tmp)
-        }
-    }
-}
-
-GOall <- numeric()
-
-for (i in colnames(wagscreen$ll)) {
-    pair <- toupper(unlist(strsplit(i, "\\.")))
-    for (j in rownames(wagscreen$ll)) {
-        tmp <- clusterSim(pair, toupper(j), semData = ystGO, combine = "max")
-        if (!is.na(tmp[1])) {
-            GOall <- c(GOall, tmp)
-        }
-    }
-}
-```
-```{r}
-data(wageningen_GO)
-
-GOepi <- wageningen_GO$epi
-GOall <- wageningen_GO$all
-
-denspval <- wilcox.test(GOepi, GOall, alternative = "greater")$p.value
-
-for (i in 100:1) {
-    if (i <= 2) {
-        for (j in 1:9) {
-            if (denspval < j*10^(-i)) {
-                denspval <- paste("< ", j*10^(-i), sep = "")
-            }
-        }
-    } else {
-        if (denspval < 10^(-i)) {
-            denspval <- paste("< ", 10^(-i), sep = "")
-        }
-    }
-}
-
-plot(density(GOepi), col = "#00000000",
-     ylim = c(0, max(c(max(density(GOepi)$y),
-                       max(density(unlist(GOall))$y)))),
-     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
-     cex.main = 1.5)
-polygon(density(GOepi), col = "#ff000066")
-
-lines(density(unlist(GOall)), col = "#00000000")
-polygon(density(unlist(GOall)), col = "#00ffff66")
-```
-```{r, eval=FALSE}
-GOepi2 <- numeric()
-
-for (i in 1:ncol(samscreen$ll)) {
-    if (i %in% grep("fus3|ptp2.ptc2", colnames(samscreen$ll))) { next() }
-    pair <- toupper(unlist(strsplit(colnames(samscreen$ll)[i], "\\.")))
-    for (j in which(!is.infinite(samscreen$ll[, i]) == TRUE &
-                    samscreen$ll[, i] != 0)) {
-        tmp <- clusterSim(pair, toupper(rownames(samscreen$ll)[j]),
-                       semData = ystGO, combine = "max")
-        if (!is.na(tmp[1])) {
-            GOepi2 <- c(GOepi2, tmp)
-        }
-    }
-}
-
-GOall2 <- numeric()
-
-for (i in colnames(samscreen$ll)) {
-    pair <- toupper(unlist(strsplit(i, "\\.")))
-    for (j in rownames(samscreen$ll)) {
-        tmp <- clusterSim(pair, toupper(j), semData = ystGO, combine = "max")
-        if (!is.na(tmp[1])) {
-            GOall2 <- c(GOall2, tmp)
-        }
-    }
-}
-```
-```{r}
-data(sameith_GO)
-
-GOepi2 <- sameith_GO$epi
-GOall2 <- sameith_GO$all
-
-denspval <- wilcox.test(GOepi2, GOall2, alternative = "greater")$p.value
-
- for (i in 100:1) {
-     if (i <= 2) {
-         for (j in 1:9) {
-             if (denspval < j*10^(-i)) {
-                 denspval <- paste("< ", j*10^(-i), sep = "")
-             }
-         }
-     } else {
-         if (denspval < 10^(-i)) {
-             denspval <- paste("< ", 10^(-i), sep = "")
-         }
-     }
-}
-
-plot(density(GOepi2), col = "#00000000",
-     ylim = c(0, max(c(max(density(GOepi2)$y),
-                       max(density(unlist(GOall2))$y)))),
-     main = paste("Mann-Whitney test p-value ", denspval, sep = ""), xlab = "",
-     cex.main = 1.5)
-polygon(density(GOepi2), col = "#ff000066")
-
-lines(density(unlist(GOall2)), col = "#00000000")
-polygon(density(unlist(GOall2)), col = "#00ffff66")
-```
-
-In the final analysis, we investigate the GO enrichment of the modulators E-gene
-targets. These E-gene are identified by epiNEM to be directly regulated by the
-modulator and not the parent genes.
+In the final analysis, we investigate the GO enrichment of the modulators'
+E-gene targets. These E-gene are identified by epiNEM to be directly
+regulated by the modulator and not the parent genes.
 
 ```{r, eval=FALSE}
 string_db$set_background(string_db$mp(rownames(wagscreen$dataWag)))
@@ -842,7 +893,7 @@ for (i in 1:length(wagscreen$targets)) {
     }
 }
 ```
-```{r}
+```{r, fig.height = 7, fig.width = 14, fig.cap = fig.cap16}
 gos <- unique(wageningen_GO$gos)
 
 egenego <- wageningen_GO$egenego
@@ -877,12 +928,11 @@ gomat <- gomat[order(apply(gomat, 1, function(x)
 gomat <- gomat[, rev(order(apply(gomat, 2, function(x)
     return(sum(is.na(x) == FALSE)))))]
 
-gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
-
-gomat <- gomat[, -which(apply(gomat, 2, max) < 0)]
+gomat <- gomat[, which(apply(gomat, 2,
+                             function(x) return(any(is.na(x) == FALSE))))]
 
 HeatmapOP(gomat, xrot = 45, Colv = FALSE, Rowv = FALSE,
-          col = "RdYlBu", main = "", sub = "")
+          col = "RdYlBu", main = "", sub = "", breaks = 100)
 ```
 
 We do the same analysis with the Sameith et al., results.
@@ -907,7 +957,7 @@ for (i in 1:length(samscreen$targets)) {
     }
 }
 ```
-```{r}
+```{r, fig.height = 9, fig.width = 16, fig.cap = fig.cap17}
 gos2 <- unique(sameith_GO$gos)
 
 egenego2 <- sameith_GO$egenego
@@ -943,23 +993,57 @@ gomat <- gomat[order(apply(gomat, 1, function(x)
 gomat <- gomat[, rev(order(apply(gomat, 2, function(x)
     return(sum(is.na(x) == FALSE)))))]
 
-gomat[which(is.na(gomat) == TRUE)] <- -max(gomat, na.rm = TRUE)
+gomat <- gomat[, which(apply(gomat, 2,
+                             function(x) return(any(is.na(x) == FALSE))))]
 
-gomat <- gomat[, -which(apply(gomat, 2, max) < 0)]
+colnames(gomat) <- tolower(colnames(gomat))
 
 HeatmapOP(gomat, xrot = 45, Colv = FALSE, Rowv = FALSE,
-          col = "RdYlBu", main = "", sub = "")
+          col = "RdYlBu", main = "", sub = "", breaks = 100)
 ```
+
+We perform a similar analysis to the STRING interactions with a graph-based
+GO term similarity score (Wang et al., 2007) implemented in the R-package
+GOSemSim (Yu et al., 2010). This score is more flexible and allows us to
+calculate the similarity of GO terms between the parent double knock-out
+pair and the identified modulator instead of just pairwise interactions. For
+the average GO term similarity epiNEMs did not identify more significant
+interactions. However, the maximum similar GO term between parents and modulator
+is significantly higher on average than by random guessing (Fig. 14, 15).
+
+We further analyze the set of identified modulators for each pair by KEGG
+pathway enrichment. Fig. 16, 17 show heatmaps of false discovery rates.
+Knock-out pairs are in the columns and enriched pathways in the rows. Red
+denotes no enrichment. The most significant pathways are meiosis, cell cycle
+and MAPK signaling, which are enriched for almost all pairs in both data sets.
+Interestingly, these are the only pathways we find for the
+Sameith \emph{et al.}, data set. For the van Wageningen \emph{et al.}, data set
+we find several more pathways, which are only enriched in a subset of knock-out
+pairs, e.g. glycerophospholipid metabolism is highly enriched for the
+__ptp2,ptp3__ and __hal5,sat4__ double mutants only.
+
+EpiNEM calculates the a posteriori attachment for each effect reporter. Thus,
+for each significant modulator and corresponding double mutant pair we can
+identify genes directly regulated by that modulator. As a summary of enriched
+GO terms, Fig. 18 shows enriched pathways (rows) for effect reporters of the
+respective modulators (columns). The false discovery rates are averaged over all
+double mutant pairs which identified the modulator as significant.
+Interestingly, we find the previously significant pathways like Meiosis and MAPK
+signaling, but at a lower rate than before (Fig. 16). However, overall all
+modulators in both data sets show strong enrichment in a similar set of
+pathways.
+
+# Session information
 
 ```{r}
 sessionInfo()
 ```
 
-*__Reference:__*
+# References
 
 Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel,
 Holger Fröhlich, Florian Markowetz. Inferring Modulators of Genetic
-Interactions with Epistatic Nested Effects Models. submitted.
+Interactions with Epistatic Nested Effects Models. In revision. 2017.
 
 Robinson MD, McCarthy DJ, Smyth GK. edgeR: a Bioconductor package for
 differential expression analysis of digital gene expression data.

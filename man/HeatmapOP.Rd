@@ -5,20 +5,22 @@
 \title{heatmap function based on the lattice package
 more information: ?xyplot}
 \usage{
-HeatmapOP(x, col = "RdYlGn", coln = 11, bordercol = "grey",
-  borderwidth = 0.1, breaks = "sym", main = "", sub = "",
-  dendrogram = "none", colorkey = list(space = "right"), Colv = TRUE,
-  Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1, 1), cexCol = 1,
-  cexRow = 1, cexMain = 1, cexSub = 1, colSideColors = NULL,
-  aspect = "fill", contour = FALSE, useRaster = FALSE, xlab = NULL,
-  ylab = NULL, colSideColorsPos = "top", clust = NULL, clusterx = NULL,
-  ...)
+HeatmapOP(x, col = "RdYlGn", colNA = "grey", coln = 11,
+  bordercol = "grey", borderwidth = 0.1, breaks = "sym", main = "",
+  sub = "", dendrogram = "none", colorkey = list(space = "right"),
+  Colv = TRUE, Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1, 1),
+  cexCol = 1, cexRow = 1, cexMain = 1, cexSub = 1,
+  colSideColors = NULL, aspect = "fill", contour = FALSE,
+  useRaster = FALSE, xlab = NULL, ylab = NULL, colSideColorsPos = "top",
+  clust = NULL, clusterx = NULL, ...)
 }
 \arguments{
 \item{x}{Matrix.}
 
 \item{col}{Color. See brewer.pal.info for all available
 color schemes.}
+
+\item{colNA}{color for NAs; defaul is grey}
 
 \item{coln}{Number of colors.}
 

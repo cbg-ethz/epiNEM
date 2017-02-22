@@ -4,7 +4,8 @@
 \alias{plot.epiScreen}
 \title{Plots the sresults of a systematic knock-out screen}
 \usage{
-\method{plot}{epiScreen}(x, global = TRUE, ind = NULL, ...)
+\method{plot}{epiScreen}(x, global = TRUE, ind = NULL, colorkey = TRUE,
+  cexGene = 1, off = 0.05, cexLegend = 1, ...)
 }
 \arguments{
 \item{x}{object of class epiScreen}
@@ -12,6 +13,14 @@
 \item{global}{plot global distribution or for each pair (FALSE)}
 
 \item{ind}{index of pairs to plot}
+
+\item{colorkey}{if TRUE prints colorkey}
+
+\item{cexGene}{size of modulator annotation}
+
+\item{off}{relative distance from the gene names to the respective likelihoods}
+
+\item{cexLegend}{font size of the legend}
 
 \item{...}{other arguments}
 }

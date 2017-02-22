@@ -91,6 +91,11 @@ plot.epiNEM <- function(x, ...) {
 #' @param x object of class epiScreen
 #' @param global plot global distribution or for each pair (FALSE)
 #' @param ind index of pairs to plot
+#' @param colorkey if TRUE prints colorkey
+#' @param cexGene size of modulator annotation
+#' @param off relative distance from the gene names to the respective
+#' likelihoods
+#' @param cexLegend font size of the legend
 #' @param ... other arguments
 #' @export
 #' @method plot epiScreen
@@ -102,8 +107,9 @@ plot.epiNEM <- function(x, ...) {
 #' plot(res)
 #' plot(res, global = FALSE, ind = 1:3)
 #' @return plot(s) of an epiNEM screen analysis
-plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
-
+plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
+                           cexGene = 1, off = 0.05, cexLegend = 1, ...) {
+    
     doubles <- x$doubles
 
     if (is.null(ind)) { ind <- 1:length(doubles) }
@@ -149,28 +155,35 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
             }))]
 
         y[which(y == 5)] <- 4
-        if (nrow(y) > 20) {
+        ## if (nrow(y) > 20) {
             rownames(distmat) <- NULL
-        }
+        ## }
         
         labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                        "masking (NOT B)\n\n\n",
                        "masking (NOT A)\n\n\n", "XOR\n\n\n",
                        "OR\n\n\n", "AND\n\n\n")
 
+        if (colorkey) {
+            colorkey <- list(space = "right",
+                                  labels = rev(labeltext), width = 1,
+                             at = seq(1.5,7.5, length.out = 8))
+        } else {
+            colorkey <- NULL
+        }
+
         HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE,
                   main = "logic gate distribution",
                   sub = "", col = "Paired", breaks =
                                                 seq(0.5,7.5, length.out = 8),
-                  cexRow = 0, cexCol = 0.4, aspect = "fill",
-                  colorkey = list(space = "right",
-                                  labels = rev(labeltext), width = 1,
-                                  at = seq(1.5,7.5, length.out = 8)),
+                  colorkey = colorkey,
                   xlab = "double knock-outs",
-                  ylab = "modulators\n(different order for each pair)",
-                  xrot = 45, bordercol = "transparent")
+                  ylab = "modulators\n(different order for each pair)", ...)
 
     } else {
+        
+        palette(c("#4444cc", "#77aa77", "#009933",
+                  "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
         logicmat0 <- x$logic
 
@@ -207,7 +220,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
             colvec <- pchvec
             
             thetop <- sum(!(logicvec %in% c("UNCON", "NOINFO", "NOINF")))
-            
+
             if (all(is.infinite(llvec) == TRUE)) {
 
                 llvec[1:length(llvec)] <- -1000
@@ -220,10 +233,29 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
                 
                 range <- max(llvec[1:thetop]) - min(llvec[1:thetop])
 
-                offset <- range*0.05
+                if (range == 0) {
 
-                margin <- range*0.25
+                    range <- 10
+                    
+                    margin <- range*0.25
+                    
+                    offset <- range*off
+                    
+                    ylim <- c(llvec[1], llvec[1]+10)
 
+                } else {
+                   
+                    margin <- range*0.25
+                    
+                    offset <- range*off
+                    
+                    ylim <- c(min(llvec[1:thetop]),
+                              max(llvec[1:thetop])+margin*0.2+offset+margin*3/5)
+                    
+                }
+                
+                offset <- range*off
+                
             }
 
             mark <- ""
@@ -233,29 +265,32 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, ...) {
                 p2max <- p2max+margin*0.2
             }
             legendtext <- c("AND", "OR", "XOR",
-                            paste(parents[1]," masks ", parents[2], sep = ""),
-                            paste(parents[2], " masks ", parents[1], sep = ""),
+                            paste(tolower(parents[1])," masks ",
+                                  tolower(parents[2]), sep = ""),
+                            paste(tolower(parents[2]), " masks ",
+                                  tolower(parents[1]), sep = ""),
                             "no epistasis")
             if (thetop == 0) { next() }
             plot = plot(llvec[1:thetop], pch = pchvec[1:thetop],
                         col = colvec[1:thetop],
                         ylab = "likelihood", xlab = "ranked single knockouts",
-                        ylim = c(min(llvec[1:thetop]),
-                                 max(llvec[1:thetop])+margin*0.2),
+                        ylim = ylim,
                         xlim = c(1, thetop+(thetop/100)),
-                        main = paste(unlist(strsplit(doubles[i], "\\.")),
-                                     collapse = " and "))
+                        main = tolower(paste(unlist(strsplit(doubles[i],
+                                                             "\\.")),
+                                             collapse = " and ")))
             text = text((1:thetop)+(thetop/100),
                         llvec[1:thetop]+offset,
-                        labels = names(llvec)[1:thetop], cex = 0.6,
+                        labels = tolower(names(llvec)[1:thetop]),
                         srt = 45, pos = 3,
-                        offset = 0)
+                        offset = 0, cex = cexGene, ...)
             mtext = mtext(mark, side = 3, line = 1, outer = FALSE,
-                          cex = 4, adj = 0)
-            legend = legend(legendx, p2max,
-                            legend = legendtext,
-                            col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
-                            cex = 0.7)
+                          cex = 4, adj = 0, ...)
+            legend = legend("topright",
+                ## legendx, p2max,
+                legend = legendtext,
+                col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
+                cex = cexLegend)
             
         }
 

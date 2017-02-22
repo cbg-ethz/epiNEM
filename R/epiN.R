@@ -723,6 +723,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' @param x Matrix.
 #' @param col Color. See brewer.pal.info for all available
 #' color schemes.
+#' @param colNA color for NAs; defaul is grey
 #' @param coln Number of colors.
 #' @param bordercol Border color.
 #' @param borderwidth Border width.
@@ -770,7 +771,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' x <- matrix(rnorm(50), 10, 5)
 #' HeatmapOP(x, dendrogram = "both", aspect = "iso", xrot = 45)
 HeatmapOP <-
-    function(x, col = "RdYlGn", coln = 11, bordercol = "grey",
+    function(x, col = "RdYlGn", colNA = "grey", coln = 11, bordercol = "grey",
              borderwidth = 0.1, breaks = "sym",
              main = "",
              sub = "",
@@ -780,15 +781,35 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
-        if (sum(is.na(x)) > 0) {
-            print("NAs detected; set to 0")
-            x[is.na(x)] <- 0
-        }
-
-        if (max(x) == min(x)) {
+        if (max(x, na.rm = TRUE) == min(x, na.rm = TRUE)) {
             x <- matrix(rnorm(100), 10, 10)
             main <- "max value equals min value"
             sub <- "random matrix plotted"
+        }
+
+        if (is.null(breaks)) {
+            breaks <- seq(min(x, na.rm = TRUE),max(x, na.rm = TRUE),
+            (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))/45)
+        }
+        if ("sym" %in% breaks) {
+            breaks <- max(abs(x), na.rm = TRUE)
+            breaks2 <- breaks/45
+            breaks <- seq(-breaks,breaks,breaks2)
+        }
+        if (length(breaks) == 1) {
+            at <- seq(min(x, na.rm = TRUE), max(x, na.rm = TRUE),
+            (max(x, na.rm = TRUE)-min(x, na.rm = TRUE))/breaks)
+        } else {
+            at <- breaks
+            x[x < breaks[1]] <- breaks[1]
+            x[x > breaks[length(breaks)]] <- breaks[length(breaks)]
+        }
+
+        xorg <- x # this may use lot of memory?
+        
+        if ((Colv | Rowv) & any(is.na(x) == TRUE)) {
+            x[which(is.na(x) == TRUE)] <- mean(x, na.rm = TRUE)
+            
         }
 
         dd.col <- NULL
@@ -797,22 +818,6 @@ HeatmapOP <-
             colorkey = list(space = "left")
         }
 
-        if (is.null(breaks)) {
-            breaks <- seq(min(x),max(x),(max(x) - min(x))/45)
-        }
-        if ("sym" %in% breaks) {
-            breaks <- max(abs(x))
-            breaks2 <- breaks/45
-            breaks <- seq(-breaks,breaks,breaks2)
-        }
-        if (length(breaks) == 1) {
-            at <- seq(min(x), max(x), (max(x)-min(x))/breaks)
-        } else {
-            at <- breaks
-            x[x < breaks[1]] <- breaks[1]
-            x[x > breaks[length(breaks)]] <- breaks[length(breaks)]
-        }
-        
         if (Colv) {
             if (is.null(clust)) {
                 if (is.null(clusterx)) {
@@ -868,6 +873,9 @@ HeatmapOP <-
             row.ord <- 1:nrow(x)
             legend = NULL
         }
+
+        
+        x <- xorg
 
         add <- list(rect = list(col = "transparent",
                                 fill = colSideColors[sort(col.ord)]))
@@ -1057,15 +1065,30 @@ HeatmapOP <-
         levelplot(d,
                   main = list(label = main, cex = cexMain), 
                   sub = list(label = sub, cex = cexSub),
-                  aspect = aspect, xlab=xlab, ylab=ylab,
+                  aspect = aspect,
+                  xlab=xlab,
+                  ylab=ylab,
                   scales = list(x = xtck, y = ytck, tck = c(1,0)),
                   par.settings=myTheme,
-                  border=bordercol, border.lwd=borderwidth,
+                  border=bordercol,
+                  border.lwd=borderwidth,
                   shrink=shrink,
                   legend = legend,
                   at = at,
                   colorkey = colorkey,
-                  contour = contour)
+                  contour = contour,
+                  panel = if (useRaster) {
+                              function(...) {
+                                  panel.fill(col = colNA)
+                                  panel.levelplot.raster(...)
+                              }
+                          } else {
+                              function(...) {
+                                  panel.fill(col = colNA)
+                                  panel.levelplot(...)
+                              }
+                          }
+                  )
     }
 
 #' This function is used to analyse knock-out screens with multiple
@@ -1246,3 +1269,15 @@ epiAnno <- function() {
 }
 
 ###--- END OF HELPER FUNCTIONS ---###
+
+
+col = "RdYlGn"; colNA = "grey"; coln = 11; bordercol = "grey";
+             borderwidth = 0.1; breaks = "sym";
+             main = "";
+             sub = "";
+             dendrogram = "none"; colorkey = list(space = "right"); Colv = TRUE;
+             Rowv = TRUE; xrot = 90; yrot = 0; shrink = c(1,1); cexCol = 1;
+             cexRow = 1; cexMain = 1; cexSub = 1;
+             colSideColors = NULL; aspect = "fill";
+             contour = FALSE; useRaster = FALSE; xlab = NULL; ylab = NULL;
+             colSideColorsPos = "top"; clust = NULL; clusterx = NULL;
