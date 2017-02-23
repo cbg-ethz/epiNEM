@@ -18,7 +18,8 @@
 
 \item{cexGene}{size of modulator annotation}
 
-\item{off}{relative distance from the gene names to the respective likelihoods}
+\item{off}{relative distance from the gene names to the respective
+likelihoods}
 
 \item{cexLegend}{font size of the legend}
 

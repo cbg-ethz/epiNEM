@@ -2,18 +2,26 @@
 % Please edit documentation in R/epiN.R
 \name{epiAnno}
 \alias{epiAnno}
-\title{Plots logical gate data annotation.}
+\title{Plots logical gate data annotation. The 8 heatmaps visualize what perfect
+data would look like in respective to each logical gate. Perfect data is
+equivalent to Boolean truth tables.}
 \usage{
 epiAnno()
 }
 \value{
-plot of heatmats showing the silencing scheme (expected data)
+plot of heatmaps showing the silencing scheme (=expected data,
+truth tables)
 }
 \description{
-Plots logical gate data annotation.
+Plots logical gate data annotation. The 8 heatmaps visualize what perfect
+data would look like in respective to each logical gate. Perfect data is
+equivalent to Boolean truth tables.
 }
 \examples{
 epiAnno()
+}
+\references{
+\url{https://en.wikipedia.org/wiki/Boolean_algebra}
 }
 \author{
 Martin Pirkl

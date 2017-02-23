@@ -1211,10 +1211,14 @@ epiScreen <- function(data, ...) {
 
 }
 
-#' Plots logical gate data annotation.
+#' Plots logical gate data annotation. The 8 heatmaps visualize what perfect
+#' data would look like in respective to each logical gate. Perfect data is
+#' equivalent to Boolean truth tables. 
+#' @references \url{https://en.wikipedia.org/wiki/Boolean_algebra}
 #' @export
 #' @author Martin Pirkl
-#' @return plot of heatmats showing the silencing scheme (expected data)
+#' @return plot of heatmaps showing the silencing scheme (=expected data,
+#' truth tables)
 #' @examples
 #' epiAnno()
 epiAnno <- function() {
