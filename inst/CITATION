@@ -1,0 +1,9 @@
+citHeader("To cite epiNEM in publications use:")
+
+citEntry(entry = "Article",
+
+  textVersion  =
+  paste("Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fr ̈ohlich, Florian Markowetz (2016).",
+        "Inferring Modulators of Genetic Interactions with Epistatic Nested Effects Models.",
+        "submitted")
+)

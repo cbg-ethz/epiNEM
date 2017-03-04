@@ -1,0 +1,11 @@
+\#*
+.smb*
+.Rproj.user
+.Rhistory
+.RData
+martin/
+._*
+.#*
+*.timestamp
+
+*.timestamp
