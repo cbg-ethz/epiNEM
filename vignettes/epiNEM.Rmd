@@ -1,7 +1,7 @@
 ---
-title: "Epistatic Nested Effects Models
-- Inferring mixed epistatis from indirect measurements of knockout screens."
-author: "Martin Pirkl & Madeline Diekmann"
+title: "Epistatic Nested Effects Models  \n
+Inferring mixed epistasis from indirect measurements of knock-out screens."
+author: "Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
 date: "`r Sys.Date()`"
 output: BiocStyle::pdf_document
 vignette: >
@@ -9,15 +9,16 @@ vignette: >
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
+	
 # Introduction
 
 The method in this package is an extension of the classic Nested Effects
 Models provided in the package \emph{nem}. Nested Effects Models is a pathway
 reconstruction method, which takes into account effects of downstream genes.
-Those effects are observed for every knockout of an upstream pathway gene, and
+Those effects are observed for every knock-out of an upstream pathway gene, and
 the nested structure of observed effects can then be used to reconstruct the
 pathway structure.
-However, classic Nested Effects Models do not account for double knockouts.
+However, classic Nested Effects Models do not account for double knock-outs.
 In this package \emph{epiNEM}, one additional layer of complexity is added.
 For every two genes, acting on one gene together, the relationship is evaluated
 and added to the model as a logical gate. Genetic relationships are represented
@@ -38,7 +39,7 @@ fig.cap2 <- "Distribution of inferred logics for each double knock-out."
 fig.cap3 <- "Ranked modulators for one double knock-out."
 fig.cap4 <- "Perfect binary effects matrix for each logic."
 fig.cap5 <- ""
-fig.cap6 <- "Global results for the van Wageningen data set. See the help page
+fig.cap6 <- "Global results for the van Wageningen data set. See the help pages
 of plot.epiScreen() and HeatmapOP() for additional parameters."
 fig.cap7 <- "Results for one double knock-out of the van Wageningen data set.
 See ?plot.epiScreen for further parameters."
@@ -52,13 +53,13 @@ fig.cap12 <- "Density plot for graph-based GO similarity score
 (van Wageningen)."
 fig.cap13 <- "Density plot for graph-based GO similarity score (Sameith)."
 fig.cap14 <- "Enrichment of van Wageningen modulators by KEGG pathways.
-Colors refer to fals discovery rates. NAs are colored in grey."
+Colors refer to false discovery rates. NAs are colored in grey."
 fig.cap15 <- "Enrichment of Sameith modulators by KEGG pathways. Colors
-refer to fals discovery rates. NAs are colored in grey."
+refer to false discovery rates. NAs are colored in grey."
 fig.cap16 <- "Effect reporter KEGG pathway enrichment (van Wageningen).
-Colors refer to fals discovery rates. NAs are colored in grey."
+Colors refer to false discovery rates. NAs are colored in grey."
 fig.cap17 <- "Effect reporter KEGG pathway enrichment (Sameith). Colors
-refer to fals discovery rates. NAs are colored in grey."
+refer to false discovery rates. NAs are colored in grey."
 ```
 ```{r}
 library(devtools)
@@ -76,7 +77,7 @@ effect reporters, e.g. genes, as rows and perturbations as columns.
 A one in row i and column j denotes an effect of reporter i for
 perturbation j. These effects are usually derived from comparing
 control/wild-type experiments with respective perturbation experiments
-(e.g. differential expression with edgeR).
+(e.g. differential expression with edgeR, Robinson *et al.*, 2010).
 The binary data is the main input for the epiNEM function, which
 contains the inference algorithm to estimate the underlying network
 structure of the data. For up to four signalling genes (=different
@@ -99,8 +100,8 @@ the inferred logic (green) and attachment of the number of effect
 reporters (grey).
 
 Alternatively the input can be a larger matrix with single and double
-knock-downs. EpiNEM can perform a systematic analysis to identify most
-likely modulators for a signaling gene pair of a double knock-down.
+knock-outs. EpiNEM can perform a systematic analysis to identify most
+likely modulators for a signaling gene pair of a double knock-out.
 
 ```{r}
 data <- matrix(sample(c(0,1), 100*9, replace = TRUE), 100, 9)
@@ -116,13 +117,13 @@ plot(res, global = FALSE, ind = 1)
 ```
 
 If the "global" parameter is set to FALSE, detailed results are plotted
-for each or a specific ("ind" parameter) pair of a double knock-down.
+for each or a specific ("ind" parameter) pair of a double knock-out.
 
-The results (logics) of the knockout screens have been annotated
+The results (logics) of the knock-out screens have been annotated
 according to the following legend of effects (black), where the
 x-axis denotes the gene and the y-axis denotes the type of knock-out. E.g.
 if C is regulated via the OR gate, it is effected by by both single and
-the double knockdown.
+the double knock-out.
 
 ```{r, warning=FALSE, fig.width = 9, fig.height=5, fig.cap = fig.cap4}
 epiAnno()
@@ -130,9 +131,10 @@ epiAnno()
 
 # Simulations
 
-We compare epiNEM to original NEMs, Boolean Nested Effects Models (B-NEM,
-[link](https://github.com/MartinFXP/B-NEM)),
-Aracne and the PC algorithm for 100 four node networks and respective data
+We compare epiNEM to original NEMs (Markowetz *et al.*, 2005), Boolean Nested
+Effects Models (B-NEM, [link](https://github.com/MartinFXP/B-NEM),
+Pirkl *et al.*, 2016), Aracne (Margolin *et al.*, 2006) and the PC algorithm
+(Kalisch *et al.*, 2007) for 100 four node networks and respective data
 experiencing different levels of noise. The evaluation is done by accounting
 for the accuracy of discovered edges and in the case of B-NEM and epiNEM also
 the truth tables and logical gates.
@@ -146,7 +148,7 @@ necessary for epiNEM to function.
 
 B-NEM is a method for general Boolean network inference based on multivariate
 read-out from combinatorial perturbation experiments. EpiNEM is specifically
-designed for knock-out screen including double and single knock-outs. Thus
+designed for knock-out screens including double and single knock-outs. Thus
 epiNEM is faster especially for large scale screens and more
 accurate, because it is designed for triples.
 
@@ -169,11 +171,11 @@ B-NEM show almost equally high accuracy of inferred edges and truth tables
 logic gates, which is due to the much higher degree of equivalent network
 structures in the case of B-NEM.
 
-# Yeast knockout screens
+# Yeast knock-out screens
 
-In this section we analyse previously published yeast knockout
+In this section we analyse previously published yeast knock-out
 screens. The screens consist of gene expression data derived from
-double and single knockout mutants. We use epiNEM on each double
+double and single knock-out mutants. We use epiNEM on each double
 mutant combined with each single mutant.
 
 ## Identification of significant modulators for pairs of double knock-outs
@@ -447,7 +449,7 @@ Interestingly, these are the only pathways we find for the
 Sameith \emph{et al.}, data set. For the van Wageningen \emph{et al.}, data set
 we find several more pathways, which are only enriched in a subset of knock-out
 pairs, e.g. glycerophospholipid metabolism is highly enriched for the
-__ptp2,ptp3__ and __hal5,sat4__ double mutants only.
+*ptp2,ptp3* and *hal5,sat4* double mutants only.
 
 ```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap14}
 data(wageningen_GO)
@@ -538,9 +540,9 @@ HeatmapOP(gomat,
 EpiNEM calculates the a posteriori attachment for each effect reporter. Thus,
 for each significant modulator and corresponding double mutant pair we can
 identify genes directly regulated by that modulator. As a summary of enriched
-GO terms, Fig. 16 and 17 show enriched pathways (rows) for effect reporters of the
-respective modulators (columns). The false discovery rates are averaged over all
-double mutant pairs which identified the modulator as significant.
+GO terms, Fig. 16 and 17 show enriched pathways (rows) for effect reporters of
+the respective modulators (columns). The false discovery rates are averaged
+over all double mutant pairs which identified the modulator as significant.
 Interestingly, we find the previously significant pathways like Meiosis and MAPK
 signaling, but at a lower rate than before (Fig. 16). However, overall all
 modulators in both data sets show strong enrichment in a similar set of
