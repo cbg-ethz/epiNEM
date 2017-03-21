@@ -1,15 +1,17 @@
 ---
 title: "Epistatic Nested Effects Models  \n
 Inferring mixed epistasis from indirect measurements of knock-out screens."
-author: "Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
+author: "Martin Pirkl, Madeline Diekmann, Marlies van der Wees,
+Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
 date: "`r Sys.Date()`"
+graphics: yes
 output: BiocStyle::pdf_document
 vignette: >
     %\VignetteIndexEntry{epiNEM}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
-	
+
 # Introduction
 
 The method in this package is an extension of the classic Nested Effects
@@ -62,10 +64,6 @@ fig.cap17 <- "Effect reporter KEGG pathway enrichment (Sameith). Colors
 refer to false discovery rates. NAs are colored in grey."
 ```
 ```{r}
-library(devtools)
-
-library(rmarkdown)
-
 library(epiNEM)
 ```
 
@@ -1018,14 +1016,14 @@ sessionInfo()
 
 Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel,
 Holger Fröhlich, Florian Markowetz. Inferring Modulators of Genetic
-Interactions with Epistatic Nested Effects Models. In revision. 2017.
+Interactions with Epistatic Nested Effects Models. Under review. 2017.
 
 Robinson MD, McCarthy DJ, Smyth GK. edgeR: a Bioconductor package for
 differential expression analysis of digital gene expression data.
 Bioinformatics. 2010;26(1):139-140. doi:10.1093/bioinformatics/btp616.
 
 Margolin AA, Nemenman I, Basso K, Wiggins C, Stolovitzky G, {Dalla Favera} R,
-et~al. ARACNE: an algorithm for the reconstruction of gene regulatory networks
+et al. ARACNE: an algorithm for the reconstruction of gene regulatory networks
 in a mammalian cellular context. BMC Bioinformatics. 2006;7 Suppl 1:S7.
 
 Kalisch M, B\"{u}hlmann P. Estimating High-Dimensional Directed Acyclic Graphs
@@ -1040,10 +1038,10 @@ interactions in signalling pathways using Boolean Nested Effect Models.
 Bioinformatics. 2016;32(6):893--900.
 
 van Wageningen S, Kemmeren P, Lijnzaad P, Margaritis T, Benschop JJ,
-de Castro IJ, et~al. Functional overlap and regulatory links shape genetic
+de Castro IJ, et al. Functional overlap and regulatory links shape genetic
 interactions between signaling pathways. Cell. 2010 Dec;143(6):991--1004.
 
-Sameith K, Amini S, Groot~Koerkamp MJA, van Leenen D, Brok M, Brabers N, et~al.
+Sameith K, Amini S, Groot-Koerkamp MJA, van Leenen D, Brok M, Brabers N, et al.
 A high-resolution gene expression atlas of epistasis between gene-specific
 transcription factors exposes potential mechanisms for genetic interactions.
 BMC biology. 2015 Dec;13:112.
