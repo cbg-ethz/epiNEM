@@ -1,9 +1,15 @@
-citHeader("To cite epiNEM in publications use:")
-
-citEntry(entry = "Article",
-
-  textVersion  =
-  paste("Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fr ̈ohlich, Florian Markowetz (2016).",
-        "Inferring Modulators of Genetic Interactions with Epistatic Nested Effects Models.",
-        "submitted")
-)
+bibentry(bibtype = "Article",
+         author = c(
+                    person(given = "Martin", family = "Pirkl"),
+                    person(given = "Madeline", family = "Diekmann"),
+                    person(given = "Marlies", family = "van der Wees"),
+                    person(given = "Niko", family = "Beerenwinkel"),
+                    person(given = "Holger", family = "Fröhlich"),
+                    person(given = "Florian", family = "Markowetz")),
+         title = "Inferring modulators of genetic interactions with epistatic nested effects models",
+         year="2017",   
+         volume="13",
+         pages="1-18",
+         doi="10.1371/journal.pcbi.1005496",
+         journal = "PLOS Computational Biology"   
+         )
