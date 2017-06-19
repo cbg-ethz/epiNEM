@@ -1,15 +1,17 @@
 ---
 title: "Epistatic Nested Effects Models  \n
 Inferring mixed epistasis from indirect measurements of knock-out screens."
-author: "Martin Pirkl, Madeline Diekmann, Marlies van der Wees, Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
+author: "Martin Pirkl, Madeline Diekmann, Marlies van der Wees,
+Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
 date: "`r Sys.Date()`"
+graphics: yes
 output: BiocStyle::pdf_document
 vignette: >
     %\VignetteIndexEntry{epiNEM}
     %\VignetteEngine{knitr::rmarkdown}
     %\VignetteEncoding{UTF-8}
 ---
-	
+
 # Introduction
 
 The method in this package is an extension of the classic Nested Effects
