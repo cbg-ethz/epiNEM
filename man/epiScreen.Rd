@@ -2,8 +2,7 @@
 % Please edit documentation in R/epiN.R
 \name{epiScreen}
 \alias{epiScreen}
-\title{This function is used to analyse knock-out screens with multiple
-double and single knock-outs combined in one data set.}
+\title{Analyse large double knock-out screen.}
 \usage{
 epiScreen(data, ...)
 }

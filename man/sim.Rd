@@ -3,18 +3,8 @@
 \docType{data}
 \name{sim}
 \alias{sim}
-\title{Example data: simulation results
-Contains simulation results. How they were
-aquired is explained in the vignette.
-The data conists of a list of data matrices holding
-sensitivity and specificity
-(spec, sens) of network edges for the variious methods compared to
-the ground truth, sensitivity and specificity (sens2, spec2)
-of the expected data for epiNEM and Boolean NEMs and accuracy
-of the inferred logics for both. The different methods are in the
-rows and the columns denote the different independent simulation runs.}
+\title{Example data: simulation results}
 \description{
-Example data: simulation results
 Contains simulation results. How they were
 aquired is explained in the vignette.
 The data conists of a list of data matrices holding

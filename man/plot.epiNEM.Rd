@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_results.R
 \name{plot.epiNEM}
 \alias{plot.epiNEM}
-\title{Plots the winning pathway structure}
+\title{Plot pathway.}
 \usage{
 \method{plot}{epiNEM}(x, ...)
 }

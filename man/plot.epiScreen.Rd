@@ -2,10 +2,10 @@
 % Please edit documentation in R/plot_results.R
 \name{plot.epiScreen}
 \alias{plot.epiScreen}
-\title{Plots the sresults of a systematic knock-out screen}
+\title{Plot screen.}
 \usage{
-\method{plot}{epiScreen}(x, global = TRUE, ind = NULL, colorkey = TRUE,
-  cexGene = 1, off = 0.05, cexLegend = 1, ...)
+\method{plot}{epiScreen}(x, global = TRUE, ind = NULL,
+  colorkey = TRUE, cexGene = 1, off = 0.05, cexLegend = 1, ...)
 }
 \arguments{
 \item{x}{object of class epiScreen}

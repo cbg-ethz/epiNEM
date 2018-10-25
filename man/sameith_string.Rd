@@ -4,14 +4,8 @@
 \name{sameith_string}
 \alias{sameith_string}
 \title{sig. of string interaction scores
-for Sameith et al., 2015 data
-The data consists of a list including a vectors of pairs (for interactions)
-and a corresponding list of interaction scores derived form the
-string database.
-For details see the vignette.}
+for Sameith et al., 2015 data}
 \description{
-sig. of string interaction scores
-for Sameith et al., 2015 data
 The data consists of a list including a vectors of pairs (for interactions)
 and a corresponding list of interaction scores derived form the
 string database.

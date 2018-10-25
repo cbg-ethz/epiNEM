@@ -1,5 +1,7 @@
 ## functions for plotting
 
+#' Add logic.
+#'
 #' extend model with node representing logic gate
 #' @export
 #' @param child define the child
@@ -27,6 +29,8 @@ AddLogicGates <- function(child, logic, model) {
     return(model)
 }
 
+#' Plot pathway.
+#'
 #' Plots the winning pathway structure
 #' @param x object of class epiNEM
 #' @param ... other arguments
@@ -87,6 +91,8 @@ plot.epiNEM <- function(x, ...) {
                 layout = layout.fruchterman.reingold)
 }
 
+#' Plot screen.
+#'
 #' Plots the sresults of a systematic knock-out screen
 #' @param x object of class epiScreen
 #' @param global plot global distribution or for each pair (FALSE)
@@ -109,7 +115,7 @@ plot.epiNEM <- function(x, ...) {
 #' @return plot(s) of an epiNEM screen analysis
 plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                            cexGene = 1, off = 0.05, cexLegend = 1, ...) {
-    
+
     doubles <- x$doubles
 
     if (is.null(ind)) { ind <- 1:length(doubles) }
@@ -129,12 +135,12 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
         for (i in 1:ncol(distmat)) {
 
             genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
-            
+
             distmat[which(distmat[, i] %in%
                           paste(genes[1], " masks the effect of ", genes[2],
                                 sep = "")), i] <- 4
 
-            
+
             distmat[which(distmat[, i] %in%
                           paste(genes[2], " masks the effect of ", genes[1],
                                 sep = "")), i] <- 5
@@ -158,7 +164,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
         ## if (nrow(y) > 20) {
             rownames(distmat) <- NULL
         ## }
-        
+
         labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                        "masking (NOT B)\n\n\n",
                        "masking (NOT A)\n\n\n", "XOR\n\n\n",
@@ -181,7 +187,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                   ylab = "modulators\n(different order for each pair)", ...)
 
     } else {
-        
+
         palette(c("#4444cc", "#77aa77", "#009933",
                   "#ff0000", "#dd8811", "#aa44bb", "#999900"))
 
@@ -192,7 +198,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
         for (i in 1:length(x$doubles)) {
 
             if (!(i %in% ind)) { next() }
-            
+
             logicvec <- logicmat0[, i]
 
             llvec <- llmat0[, i]
@@ -212,13 +218,13 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
             pchvec[grep(paste("^", parents[2], sep = ""), logicvec)] <- 5
             pchvec[which(logicvec %in% "NOEPI")] <- 6
             pchvec[which(logicvec %in% c("NOINFO", "NOINF"))] <- 7
-            
+
             logicvec <- logicvec[-which(logicvec %in% "0")]
             pchvec <- pchvec[-which(pchvec == 0)]
             llvec <- llvec[-which(llvec == 0)]
 
             colvec <- pchvec
-            
+
             thetop <- sum(!(logicvec %in% c("UNCON", "NOINFO", "NOINF")))
 
             if (all(is.infinite(llvec) == TRUE)) {
@@ -230,32 +236,32 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                 donames <- 30
 
             } else {
-                
+
                 range <- max(llvec[1:thetop]) - min(llvec[1:thetop])
 
                 if (range == 0) {
 
                     range <- 10
-                    
+
                     margin <- range*0.25
-                    
+
                     offset <- range*off
-                    
+
                     ylim <- c(llvec[1], llvec[1]+10)
 
                 } else {
-                   
+
                     margin <- range*0.25
-                    
+
                     offset <- range*off
-                    
+
                     ylim <- c(min(llvec[1:thetop]),
                               max(llvec[1:thetop])+margin*0.2+offset+margin*3/5)
-                    
+
                 }
-                
+
                 offset <- range*off
-                
+
             }
 
             mark <- ""
@@ -291,13 +297,15 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                 legend = legendtext,
                 col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
                 cex = cexLegend)
-            
+
         }
 
     }
 
 }
 
+#' Plot simulations.
+#'
 #' Plots the simulation results
 #' @param x object of class epiSim
 #' @param ... other arguments
@@ -308,7 +316,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
 #' plot(res)
 #' @return plot(s) of an epiNEM simulation analysis
 plot.epiSim <- function(x, ...) {
-    
+
     sens <- sim$sens
     spec <- sim$spec
     sens2 <- sim$sens2
@@ -331,7 +339,7 @@ plot.epiSim <- function(x, ...) {
                 gsub("^e", "epiNEM",
                      gsub("^n", "NEM", gsub("^p", "PC algorithm",
                                             gsub("^a", "Aracne", sim$do)))))
-    
+
     colvec <- accframe2 <- timeframe <- accframe <- logicsframe <- NULL
 
     colvecorg <- c("orange", "blue", "darkgreen", "brown", "darkgrey")
@@ -343,7 +351,7 @@ plot.epiSim <- function(x, ...) {
         timeframe[[do2[i]]] <- data.frame(time[i,,])
 
         colnames(timeframe[[do2[i]]]) <- noiselvls
-        
+
         accframe2[[do2[i]]] <- data.frame(acc2[i,,])
 
         colnames(accframe2[[do2[i]]]) <- noiselvls
@@ -351,11 +359,11 @@ plot.epiSim <- function(x, ...) {
     }
 
     timeframe <- as.data.frame(timeframe)
-    
+
     accframe2 <- as.data.frame(accframe2)
 
     colnames(timeframe) <- colnames(accframe2) <- rep(noiselvls, length(do2))
-    
+
     boxplot(as.data.frame(timeframe), col = colvec, main = "running time",
             ylab = "seconds")
 
@@ -381,31 +389,31 @@ plot.epiSim <- function(x, ...) {
         colvec2 <- unique(colvec)[which(do %in% c("b", "e"))]
 
         colvec2 <- rep(colvec2, each = length(noiselvls))
-        
+
         for (i in 1:sum(do %in% c("b", "e"))) {
-            
+
             accframe[[do2[i]]] <- data.frame(acc[i,,])
-            
+
             colnames(accframe[[do2[i]]]) <- noiselvls
-            
+
             logicsframe[[do2[i]]] <- data.frame(logics[i,,])
-            
+
             colnames(logicsframe[[do2[i]]]) <- noiselvls
-            
+
         }
 
         accframe <- as.data.frame(accframe)
-        
+
         logicsframe <- as.data.frame(logicsframe)
-        
+
         colnames(logicsframe) <- colnames(accframe) <- rep(noiselvls, 2)
 
         boxplot(logicsframe, col = colvec2,
                 main = "accuracy of the inferred logic gate",
                 ylim = c(0,1))
-        
+
         abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
-        
+
         axis(1, 4+(0:(sum(do %in% c("b", "e"))-1))*8,
              do2[which(do %in% c("b", "e"))],
              tick = FALSE, pos = -0.2)
@@ -413,9 +421,9 @@ plot.epiSim <- function(x, ...) {
         boxplot(accframe, col = colvec2,
                 main = "accuracy of the expected data",
                 ylim = c(0,1))
-        
+
         abline(v=length(noiselvls)+0.5, col = "black", lty = 6)
-        
+
         axis(1, 4+(0:(sum(do %in% c("b", "e"))-1))*8,
              do2[which(do %in% c("b", "e"))],
              tick = FALSE, pos = -0.2)

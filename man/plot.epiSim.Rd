@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_results.R
 \name{plot.epiSim}
 \alias{plot.epiSim}
-\title{Plots the simulation results}
+\title{Plot simulations.}
 \usage{
 \method{plot}{epiSim}(x, ...)
 }

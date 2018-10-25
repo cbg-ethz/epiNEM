@@ -1,4 +1,5 @@
 #' Example data: simulation results
+#'
 #' Contains simulation results. How they were
 #' aquired is explained in the vignette.
 #' The data conists of a list of data matrices holding
@@ -9,13 +10,14 @@
 #' of the inferred logics for both. The different methods are in the
 #' rows and the columns denote the different independent simulation runs.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(sim)
 #' @name sim
 NA
 
 #' Example data: epiNEM results for
 #' the Sameith et al., 2015 knock-out screen
+#'
 #' The result of the epiNEM analysis of the data from
 #' "http://www.holstegelab.nl/publications/
 #' sv/signaling_redundancy/downloads/DataS1.txt".
@@ -25,7 +27,7 @@ NA
 #' rows and the signalling genes from the double knock-downs are in the columns.
 #' For details see the vignette.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(samscreen)
 #' @name samscreen
 NA
@@ -34,65 +36,72 @@ NA
 #' the Wageningen et al., 2010 knock-out screen
 #' "http://www.holstegelab.nl/publications/GSTF_geneticinteractions/
 #' downloads/del_mutants_limma.txt"
+#'
 #' The data consists of a list of matrices with the likelihoods (ll)
 #' for each analysed triple of signalling genes and the inferred logic
 #' (logic) for each triple. The signalling genes or modulators C are the
 #' rows and the signalling genes from the double knock-downs are in the columns.
 #' For details see the vignette.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(wagscreen)
 #' @name wagscreen
 NA
 
 #' sig. of string interaction scores
 #' for Sameith et al., 2015 data
+#'
 #' The data consists of a list including a vectors of pairs (for interactions)
 #' and a corresponding list of interaction scores derived form the
 #' string database.
 #' For details see the vignette.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(sameith_string)
 #' @name sameith_string
 NA
 
 #' sig. of string interaction scores
 #' for van Wageningen et al., 2010 data
+#'
 #' The data consists of a list including a vectors of pairs (for interactions)
 #' and a corresponding list of interaction scores derived form the
 #' string database.
 #' For details see the vignette.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(wageningen_string)
 #' @name wageningen_string
 NA
 
 #' graph-based GO similarity scores, string GO annotations
 #' for Sameith et al., 2015 data
+#'
 #' The data consists of lists including epiNEM identified and
 #' general similarity scores and GO annotations for each triple.
 #' For details see the vignette.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(sameith_GO)
 #' @name sameith_GO
 NA
 
 #' graph-based GO similarity scores, string GO annotations
 #' for van Wageningen et al., 2015 data
+#'
 #' The data consists of lists including epiNEM identified and
 #' general similarity scores and GO annotations for each triple.
 #' For details see the vignette.
 #' @docType data
-#' @examples 
+#' @examples
 #' data(wageningen_GO)
 #' @name wageningen_GO
 NA
 
 ###--- MAIN SCRIPT ---###
-#' Epistatic NEMs - main function. This function contains the inference
+#' Epistatic NEMs - main function.
+#'
+#' This function contains the inference
 #' algorithm to learn logical networks from knock-down data including
 #' double knock-downs.
 #' @param filename A binary, tab-delimited matrix.
@@ -128,7 +137,7 @@ NA
 #' are signalling genes), a string with the inferred logial gates,
 #' a column indices denoting position of logical gates, the log transformed
 #' likelihood and the effect reporter distribution (rows are the signalling
-#' genes including the null node). 
+#' genes including the null node).
 #' @examples
 #' data <- matrix(sample(c(0,1), 100*4, replace = TRUE), 100, 4)
 #' colnames(data) <- c("A", "A.B", "B", "C")
@@ -148,7 +157,7 @@ epiNEM <- function(filename="random",
                    ltype = "marginal",
                    para = c(0.13, 0.05),
                    init = NULL) {
-    
+
     ##--- Sanity checks ---#
     methods <- c("greedy", "exhaustive")
     if (!method %in% methods)
@@ -266,7 +275,7 @@ epiNEM <- function(filename="random",
         }
 
         class(results) <- "epiNEM"
-        
+
         return(results)
     }
 }
@@ -299,7 +308,9 @@ ExtendTopology <- function(topology, nReporters) {
     return(extTopology)
 }
 
-#' Generate data from extended model. Given a model created from
+#' Generate data from extended model.
+#'
+#' Given a model created from
 #' CreateTopology and ExtendTopology, this function creeates acorresponding
 #' artificial data matrix, which is used as a ground truth for simulation
 #' studies.
@@ -341,6 +352,8 @@ IsBestModel <- function(thisModel, bestModel) {
     return(TRUE)
 }
 
+#' Compare algorithms.
+#'
 #' Compares different network reconstruction algorithm on
 #' simulated data.
 #' @param runs number simulation runs
@@ -366,6 +379,7 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @import
 #' pcalg
 #' minet
+#' @importFrom graph adj
 #' @examples
 #' res <- SimEpiNEM(runs = 1)
 SimEpiNEM <- function(runs = 10, do = c("n", "e"),
@@ -376,7 +390,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                       bnemsearch = "genetic", ...) {
 
     noiselvls <- random$FNrate
-    
+
     spec <- sens  <- logics <- array(0, dim = c(2, runs, length(noiselvls)))
 
     sens2 <- spec2 <- time <- array(0, dim = c(5, runs, length(noiselvls)))
@@ -384,7 +398,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
     logicgate <- matrix("", runs, length(noiselvls))
 
     edgenr <- matrix(0, runs, length(noiselvls))
-    
+
     for (i in 1:runs) {
 
         print(paste("run ", i, sep = ""))
@@ -392,7 +406,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
         for (j in 1:length(noiselvls)) {
 
             print(paste("noiselvl ", j, sep = ""))
-            
+
             topology <- CreateTopology(random$single, random$double,
                                        force = forcelogic)
 
@@ -400,7 +414,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 
             extTopology <- ExtendTopology(topology$model, random$reporters)
 
-            sortedData <- GenerateData(topology$model, extTopology, 
+            sortedData <- GenerateData(topology$model, extTopology,
                                        random$FPrate, random$FNrate[j],
                                        random$replicates)
 
@@ -446,7 +460,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                 print(spec[1, i, j])
                 print(sens2[1, i, j])
                 print(spec2[1, i, j])
-                print(logics[1, i, j])    
+                print(logics[1, i, j])
 
             }
 
@@ -459,9 +473,9 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 
                 bnemnoise <-
                     sample(1:nrow(fc), floor(nrow(fc)*random$FNrate[j]))
-                
+
                 fc[bnemnoise, 1] <- 0
-                
+
                 ers <- t(topology$model)*(-1)
                 colnames(ers) <-
                     paste("S_vs_S_", gsub("\\.", "_", colnames(ers)), sep = "")
@@ -503,15 +517,15 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                             row.names = FALSE, col.names = FALSE, quote = FALSE)
                 PKN <- readSIF(randfile)
                 unlink(randfile)
-                
+
                 model <- preprocessing(CNOlist, PKN)
-                
+
                 initBstring <- absorption(rep(1, length(model$reacID)), model)
-                
+
                 if (maxTime) {
                     maxTime2 <- time[1, i, j]
                 } else { maxTime2 <- Inf }
-                
+
                 start <- Sys.time()
                 bga <- bnem(search = bnemsearch,
                             fc=fc,
@@ -526,14 +540,14 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                             )
                 time[2, i, j] <- difftime(Sys.time(), start, units = "secs")
                 print(time[2, i, j])
-                
+
                 ers2 <-
                     computeFc(CNOlist,
                               t(simulateStatesRecursive(CNOlist,
                                                         model, bga$bString)))
                 ers2 <- ers2[, unique(colnames(fc))]
                 ers2 <- ers2[, order(colnames(ers2))]
-                
+
                 tp <- sum(ers == -1 & ers2 == -1)
                 tn <- sum(ers == 0 & ers2 == 0)
                 fn <- sum(ers == -1 & ers2 == 0)
@@ -661,7 +675,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                         adj.matrix[graph::nodes(gR)[i],
                                    adj(gR,graph::nodes(gR)[i])[[1]]] <- 1
                     }
-                    
+
                     return(adj.matrix)
                 }
                 pcadj <- graph2adj(pc.fit@graph)
@@ -678,7 +692,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                 print(spec2[4, i, j])
 
             }
-            
+
             if ("a" %in% do) {
                 print("Aracne")
 
@@ -718,7 +732,9 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 
 }
 
-#' heatmap function based on the lattice package
+#' Heatmap.
+#'
+#' Heatmap function based on the lattice package
 #' more information: ?xyplot
 #' @param x Matrix.
 #' @param col Color. See brewer.pal.info for all available
@@ -806,10 +822,10 @@ HeatmapOP <-
         }
 
         xorg <- x # this may use lot of memory?
-        
+
         if ((Colv | Rowv) & any(is.na(x) == TRUE)) {
             x[which(is.na(x) == TRUE)] <- mean(x, na.rm = TRUE)
-            
+
         }
 
         dd.col <- NULL
@@ -874,7 +890,7 @@ HeatmapOP <-
             legend = NULL
         }
 
-        
+
         x <- xorg
 
         add <- list(rect = list(col = "transparent",
@@ -984,7 +1000,7 @@ HeatmapOP <-
                     legend <-
                         list(bottom =
                                  list(fun = dendrogramGrob,
-                                      args = list(x = dd.col, ord = col.ord, 
+                                      args = list(x = dd.col, ord = col.ord,
                                                   side = "top", size = size,
                                                   size.add= 0.5,
                                                   add = add,
@@ -1037,7 +1053,7 @@ HeatmapOP <-
                 legend <- NULL
             }
         }
-        
+
         d <- t(x[row.ord, col.ord])
 
         d <- d[, ncol(d):1]
@@ -1063,7 +1079,7 @@ HeatmapOP <-
         }
 
         levelplot(d,
-                  main = list(label = main, cex = cexMain), 
+                  main = list(label = main, cex = cexMain),
                   sub = list(label = sub, cex = cexSub),
                   aspect = aspect,
                   xlab=xlab,
@@ -1091,6 +1107,8 @@ HeatmapOP <-
                   )
     }
 
+#' Analyse large double knock-out screen.
+#'
 #' This function is used to analyse knock-out screens with multiple
 #' double and single knock-outs combined in one data set.
 #' @param data data matrix containing multiple single and double kock-downs
@@ -1110,7 +1128,7 @@ HeatmapOP <-
 epiScreen <- function(data, ...) {
 
     dataBin <- data
-    
+
     doubles <- colnames(dataBin)[grep("\\.", colnames(dataBin))]
 
     if (length(grep("vs", doubles)) > 0) {
@@ -1122,7 +1140,7 @@ epiScreen <- function(data, ...) {
     if (length(grep("\\.", colnames(dataBin))) > 0) {
         singles <- colnames(dataBin)[-grep("\\.", colnames(dataBin))]
     } else { singles <- sort(singles) }
-    
+
     singles <- unique(sort(singles))
 
     llmat <- logicmat <- matrix(0, length(singles), length(doubles))
@@ -1152,14 +1170,14 @@ epiScreen <- function(data, ...) {
                 colnames(dataBin))]
 
             dataTmp <- dataTmp[egenes, ]
-            
+
             i1 <- which(singles %in% j)
             i2 <- which(doubles %in% i)
 
             if (!(is.null(dim(dataTmp)))) {
-                
+
                 if (any(dataTmp[, j] != 0)) {
-                    
+
                     epires <- epiNEM(dataTmp, method = "exhaustive")
 
                     targets[[i]][[j]] <-
@@ -1167,7 +1185,7 @@ epiScreen <- function(data, ...) {
                                                       which.max) ==
                                                 which(colnames(epires$PostScore)
                                                       %in% j))]
-                    
+
                     tmp <- epires$logics
                     if ("OR" %in% tmp) {
                         if (sum(epires$origModel[, j]) != 2) {
@@ -1180,40 +1198,42 @@ epiScreen <- function(data, ...) {
                             }
                         }
                     }
-                    
+
                     logicmat[i1, i2] <- tmp
                     llmat[i1, i2] <- epires$score
-                    
+
                 } else {
 
                     logicmat[i1, i2] <- "UNCON"
                     llmat[i1, i2] <- -Inf
-                    
+
                 }
-                
+
             } else {
-                
+
                 logicmat[i1, i2] <- "UNCON"
                 llmat[i1, i2] <- -Inf
-                
+
             }
-            
+
         }
-        
+
     }
 
     results <- list(doubles = doubles, singles = singles,
                     logic = logicmat, ll = llmat, targets = targets)
 
     class(results) <- "epiScreen"
-    
+
     return(results)
 
 }
 
+#' Gate visualisation.
+#'
 #' Plots logical gate data annotation. The 8 heatmaps visualize what perfect
 #' data would look like in respective to each logical gate. Perfect data is
-#' equivalent to Boolean truth tables. 
+#' equivalent to Boolean truth tables.
 #' @references \url{https://en.wikipedia.org/wiki/Boolean_algebra}
 #' @export
 #' @author Martin Pirkl

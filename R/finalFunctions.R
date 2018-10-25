@@ -202,7 +202,7 @@ includeLogic <- function(adj, experiments, mutants){
             liste[[notriples]] <- "OR"
             column <- cbind(column, c)
         }
-        if (length(parents) > 2) { 
+        if (length(parents) > 2) {
             notriples <- notriples + 1
             liste[[notriples]] <- "OR"
             column <- cbind(column, c)
@@ -238,7 +238,7 @@ includeLogic <- function(adj, experiments, mutants){
                 for (r in experiments) {
                     if (adj[r,c]==1) {
                         if ((count==1) &&
-                            (which(rownames(adj)==c) %in% column)) { 
+                            (which(rownames(adj)==c) %in% column)) {
                             help <- r
                             count <- count+1
                             if (sum(adj[, c]) == 1) {
@@ -361,18 +361,14 @@ net2bool <- function(network) {
     return(booln)
 }
 
-## to do: sehr unschoen!!!
 #' create with logics extended adjacency matrix
 #' @importFrom BoolNet loadNetwork
 #' @noRd
 getExtendedAdjacency <-function(modelno, logicmatrix,
                                 column, adj, mutants,
-                                experiments, networks) { # randomnames) {
-    ## randomnames <- sort(randomnames)
-    ## path <- paste("temp/outfile_", randomnames[modelno], ".txt", sep="")
-    network <- net2bool(networks[[modelno]]) # loadNetwork(path)
+                                experiments, networks) {
+    network <- net2bool(networks[[modelno]])
     extadj2 <- CreateExtendedAdjacency(network, unique(mutants), experiments)
-    ## unlink(path)
     return(list(list(origModel=adj, model=extadj2,
                      logics=logicmatrix[modelno,], column=column)))
 }
@@ -428,7 +424,9 @@ AttachEGenes <- function(posterior, experiments){
     return(Egeneset)
 }
 
-#' create topology for a randomly generated pathway topology
+#' Create Topology.
+#'
+#' Create topology for a randomly generated pathway topology
 #' @param single number of single knockouts
 #' @param double number of double knockouts
 #' @param force if true the random model will have a sophisticated logical gate
@@ -497,11 +495,13 @@ CreateTopology <- function(single, double, force = TRUE) {
 
     selectedModel <- sample(1:length(extendedModels), 1, prob = prob)
     topology      <- extendedModels[[selectedModel]]
-    
+
     return(topology)
 }
 
-#' generate a random double mutant for artificial data
+#' Generate double knock-out.
+#'
+#' Generate a random double mutant for artificial data
 #' @param singleKOs: vector of single mutants
 #' @importFrom gtools combinations
 #' @noRd

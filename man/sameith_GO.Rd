@@ -4,13 +4,8 @@
 \name{sameith_GO}
 \alias{sameith_GO}
 \title{graph-based GO similarity scores, string GO annotations
-for Sameith et al., 2015 data
-The data consists of lists including epiNEM identified and
-general similarity scores and GO annotations for each triple.
-For details see the vignette.}
+for Sameith et al., 2015 data}
 \description{
-graph-based GO similarity scores, string GO annotations
-for Sameith et al., 2015 data
 The data consists of lists including epiNEM identified and
 general similarity scores and GO annotations for each triple.
 For details see the vignette.

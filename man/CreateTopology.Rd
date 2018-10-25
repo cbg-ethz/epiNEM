@@ -2,7 +2,7 @@
 % Please edit documentation in R/finalFunctions.R
 \name{CreateTopology}
 \alias{CreateTopology}
-\title{create topology for a randomly generated pathway topology}
+\title{Create Topology.}
 \usage{
 CreateTopology(single, double, force = TRUE)
 }
@@ -17,7 +17,7 @@ CreateTopology(single, double, force = TRUE)
 adjacency matrix
 }
 \description{
-create topology for a randomly generated pathway topology
+Create topology for a randomly generated pathway topology
 }
 \examples{
 model <- CreateTopology(3, 1)

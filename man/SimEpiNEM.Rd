@@ -2,12 +2,11 @@
 % Please edit documentation in R/epiN.R
 \name{SimEpiNEM}
 \alias{SimEpiNEM}
-\title{Compares different network reconstruction algorithm on
-simulated data.}
+\title{Compare algorithms.}
 \usage{
-SimEpiNEM(runs = 10, do = c("n", "e"), random = list(FPrate = 0.1, FNrate
-  = c(0.1, 0.5), single = 3, double = 1, reporters = 10, replicates = 2),
-  maxTime = FALSE, forcelogic = TRUE, epinemsearch = "greedy",
+SimEpiNEM(runs = 10, do = c("n", "e"), random = list(FPrate = 0.1,
+  FNrate = c(0.1, 0.5), single = 3, double = 1, reporters = 10, replicates
+  = 2), maxTime = FALSE, forcelogic = TRUE, epinemsearch = "greedy",
   bnemsearch = "genetic", ...)
 }
 \arguments{

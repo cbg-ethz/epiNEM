@@ -4,14 +4,8 @@
 \name{wageningen_string}
 \alias{wageningen_string}
 \title{sig. of string interaction scores
-for van Wageningen et al., 2010 data
-The data consists of a list including a vectors of pairs (for interactions)
-and a corresponding list of interaction scores derived form the
-string database.
-For details see the vignette.}
+for van Wageningen et al., 2010 data}
 \description{
-sig. of string interaction scores
-for van Wageningen et al., 2010 data
 The data consists of a list including a vectors of pairs (for interactions)
 and a corresponding list of interaction scores derived form the
 string database.

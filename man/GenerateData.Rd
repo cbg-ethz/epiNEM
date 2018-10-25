@@ -2,10 +2,7 @@
 % Please edit documentation in R/epiN.R
 \name{GenerateData}
 \alias{GenerateData}
-\title{Generate data from extended model. Given a model created from
-CreateTopology and ExtendTopology, this function creeates acorresponding
-artificial data matrix, which is used as a ground truth for simulation
-studies.}
+\title{Generate data from extended model.}
 \usage{
 GenerateData(model, extTopology, FPrate, FNrate, replicates)
 }
@@ -26,7 +23,7 @@ data matrix with effect reporters as rows and knock-downs
 (including double kock-downs) as columns.
 }
 \description{
-Generate data from extended model. Given a model created from
+Given a model created from
 CreateTopology and ExtendTopology, this function creeates acorresponding
 artificial data matrix, which is used as a ground truth for simulation
 studies.

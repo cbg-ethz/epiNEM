@@ -2,9 +2,7 @@
 % Please edit documentation in R/epiN.R
 \name{epiAnno}
 \alias{epiAnno}
-\title{Plots logical gate data annotation. The 8 heatmaps visualize what perfect
-data would look like in respective to each logical gate. Perfect data is
-equivalent to Boolean truth tables.}
+\title{Gate visualisation.}
 \usage{
 epiAnno()
 }

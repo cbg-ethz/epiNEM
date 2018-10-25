@@ -2,14 +2,12 @@
 % Please edit documentation in R/epiN.R
 \name{epiNEM}
 \alias{epiNEM}
-\title{Epistatic NEMs - main function. This function contains the inference
-algorithm to learn logical networks from knock-down data including
-double knock-downs.}
+\title{Epistatic NEMs - main function.}
 \usage{
 epiNEM(filename = "random", method = "greedy", nIterations = 10,
-  nModels = 0, random = list(single = 4, double = 1, reporters = 100, FPrate
-  = 0.1, FNrate = 0.1, replicates = 1), ltype = "marginal", para = c(0.13,
-  0.05), init = NULL)
+  nModels = 0, random = list(single = 4, double = 1, reporters = 100,
+  FPrate = 0.1, FNrate = 0.1, replicates = 1), ltype = "marginal",
+  para = c(0.13, 0.05), init = NULL)
 }
 \arguments{
 \item{filename}{A binary, tab-delimited matrix.
@@ -49,7 +47,7 @@ likelihood and the effect reporter distribution (rows are the signalling
 genes including the null node).
 }
 \description{
-Epistatic NEMs - main function. This function contains the inference
+This function contains the inference
 algorithm to learn logical networks from knock-down data including
 double knock-downs.
 }

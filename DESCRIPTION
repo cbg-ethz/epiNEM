@@ -1,7 +1,7 @@
 Package: epiNEM
 Type: Package
 Title: epiNEM
-Version: 1.5.1
+Version: 1.5.2
 Author: Madeline Diekmann & Martin Pirkl
 Maintainer: Martin Pirkl <martin.pirkl@bsse.ethz.ch>
 Description: epiNEM is an extension of the original Nested Effects
@@ -12,7 +12,7 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews: Pathways, SystemsBiology, NetworkInference, Network
-RoxygenNote: 6.0.1
+RoxygenNote: 6.1.0
 Imports: BoolNet, e1071, gtools, stats, igraph, nem, utils, lattice,
         latticeExtra, RColorBrewer, pcalg, minet, grDevices, graph
 VignetteBuilder: knitr

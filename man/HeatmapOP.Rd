@@ -2,17 +2,16 @@
 % Please edit documentation in R/epiN.R
 \name{HeatmapOP}
 \alias{HeatmapOP}
-\title{heatmap function based on the lattice package
-more information: ?xyplot}
+\title{Heatmap.}
 \usage{
 HeatmapOP(x, col = "RdYlGn", colNA = "grey", coln = 11,
   bordercol = "grey", borderwidth = 0.1, breaks = "sym", main = "",
   sub = "", dendrogram = "none", colorkey = list(space = "right"),
-  Colv = TRUE, Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1, 1),
-  cexCol = 1, cexRow = 1, cexMain = 1, cexSub = 1,
+  Colv = TRUE, Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1,
+  1), cexCol = 1, cexRow = 1, cexMain = 1, cexSub = 1,
   colSideColors = NULL, aspect = "fill", contour = FALSE,
-  useRaster = FALSE, xlab = NULL, ylab = NULL, colSideColorsPos = "top",
-  clust = NULL, clusterx = NULL, ...)
+  useRaster = FALSE, xlab = NULL, ylab = NULL,
+  colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...)
 }
 \arguments{
 \item{x}{Matrix.}
@@ -87,7 +86,7 @@ as x. x is columns or rows are sorted by the cluster information of y.}
 lattice object/matrix
 }
 \description{
-heatmap function based on the lattice package
+Heatmap function based on the lattice package
 more information: ?xyplot
 }
 \examples{

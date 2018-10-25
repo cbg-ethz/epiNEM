@@ -2,7 +2,7 @@
 % Please edit documentation in R/plot_results.R
 \name{AddLogicGates}
 \alias{AddLogicGates}
-\title{extend model with node representing logic gate}
+\title{Add logic.}
 \usage{
 AddLogicGates(child, logic, model)
 }
