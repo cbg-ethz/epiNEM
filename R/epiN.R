@@ -130,7 +130,6 @@ NA
 #' @import
 #' stats
 #' e1071
-#' nem
 #' utils
 #' @return List object with an adjacency matrix denoting the network,
 #' the model of the silencing scheme (rows are knock-downs, columns

@@ -12,8 +12,8 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews: Pathways, SystemsBiology, NetworkInference, Network
-RoxygenNote: 6.1.0
-Imports: BoolNet, e1071, gtools, stats, igraph, nem, utils, lattice,
+RoxygenNote: 7.0.2
+Imports: BoolNet, e1071, gtools, stats, igraph, utils, lattice,
         latticeExtra, RColorBrewer, pcalg, minet, grDevices, graph
 VignetteBuilder: knitr
 Suggests: knitr, RUnit, BiocGenerics, STRINGdb, devtools, rmarkdown,
