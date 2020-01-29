@@ -263,7 +263,7 @@ data sets.
 ```{r, fig.width = 8, fig.height = 5, fig.cap = fig.cap10}
 library(STRINGdb)
 
-get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
+## get_STRING_species(version="10", species_name=NULL)[26, ] # 4932
 
 string_db <- STRINGdb$new( version="10", species=4932, score_threshold=0,
                           input_directory="")
