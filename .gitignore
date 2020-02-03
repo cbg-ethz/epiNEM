@@ -8,4 +8,4 @@ martin/
 .#*
 *.timestamp
 
-*.timestamp
+*.DS_Store

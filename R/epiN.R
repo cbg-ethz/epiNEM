@@ -131,6 +131,7 @@ NA
 #' stats
 #' e1071
 #' utils
+#' @importFrom mnem mnem
 #' @return List object with an adjacency matrix denoting the network,
 #' the model of the silencing scheme (rows are knock-downs, columns
 #' are signalling genes), a string with the inferred logial gates,
@@ -206,13 +207,7 @@ epiNEM <- function(filename="random",
     }
     if (length(doubleKOs) == 0) {
         print("No double perturbations available --> computing NEM")
-        if (method == "exhaustive") { inference <- "search" }
-        if (method == "greedy") { inference <- "nem.greedy" }
-        options <-
-            set.default.parameters(setdiff(unique(colnames(sortedData)),
-                                           "time"))
-        options$para <- para
-        return(nem::nem(sortedData, inference = inference, control=options))
+        return(mnem::mnem(sortedData, search=inference, fpfn=para, k=1))
     } else {
         if (method == "greedy") {
             print(paste("Progress (of ", nIterations, " iterations):",
@@ -378,6 +373,7 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @import
 #' pcalg
 #' minet
+#' @importFrom mnem mnem
 #' @importFrom graph adj
 #' @examples
 #' res <- SimEpiNEM(runs = 1)
@@ -634,9 +630,9 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 
                 start <- Sys.time()
                 if (epinemsearch %in% "greedy") {
-                    nemres <- nem(reddata, inference = "nem.greedy")
+                    nemres <- mnem::mnem(reddata, k = 1)
                 } else {
-                    nemres <- nem(reddata, inference = "search")
+                    nemres <- mnem::mnem(reddata, k = 1, search = "exhaustive")
                 }
                 nadj <- transitive.reduction(nemres$graph)
                 time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
