@@ -373,7 +373,7 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @import
 #' pcalg
 #' minet
-#' @importFrom mnem mnem
+#' @importFrom mnem mnem transitive.reduction
 #' @importFrom graph adj
 #' @examples
 #' res <- SimEpiNEM(runs = 1)
@@ -634,7 +634,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                 } else {
                     nemres <- mnem::mnem(reddata, k = 1, search = "exhaustive")
                 }
-                nadj <- transitive.reduction(nemres$graph)
+                nadj <- mnem::transitive.reduction(nemres$graph)
                 time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
                 print(time[3, i, j])
 
