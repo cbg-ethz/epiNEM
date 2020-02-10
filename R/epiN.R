@@ -634,7 +634,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
                 } else {
                     nemres <- mnem::mnem(reddata, k = 1, search = "exhaustive")
                 }
-                nadj <- mnem::transitive.reduction(nemres$graph)
+                nadj <- mnem::transitive.reduction(nemres$comp[[1]]$phi)
                 time[3, i, j] <- difftime(Sys.time(), start, units = "secs")
                 print(time[3, i, j])
 
