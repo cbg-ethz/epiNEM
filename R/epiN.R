@@ -856,7 +856,7 @@ HeatmapOP <-
             col.ord <- 1:ncol(x)
             legend = NULL
         }
-
+        
         if (Rowv) {
             if (is.null(clust)) {
                 if (is.null(clusterx)) {
@@ -884,7 +884,6 @@ HeatmapOP <-
             row.ord <- 1:nrow(x)
             legend = NULL
         }
-
 
         x <- xorg
 
@@ -1018,9 +1017,13 @@ HeatmapOP <-
                     col.ord <- 1:length(colSideColors)
                 }
                 if (is.null(clusterx)) {
-                    dd.col <- as.dendrogram(hclust(dist(t(x))*0))
+                    dtx <- dist(t(x))
+                    dtx[is.na(dtx)] <- 0
+                    dd.col <- as.dendrogram(hclust(dtx*0))
                 } else {
-                    dd.col <- as.dendrogram(hclust(dist(t(clusterx))*0))
+                    dist(t(clusterx))
+                    dtcx[is.na(dtcx)] <- 0
+                    dd.col <- as.dendrogram(hclust(dtcx*0))
                 }
                 if (colSideColorsPos %in% "bottom") {
                     legend <-
