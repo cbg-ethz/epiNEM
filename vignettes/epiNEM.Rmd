@@ -5,6 +5,11 @@ author: "Martin Pirkl, Madeline Diekmann, Marlies van der Wees,
 Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
 date: "`r Sys.Date()`"
 graphics: yes
+header-includes:
+    - |
+    ```{=latex}
+    \usepackage{xcolor}
+    ```
 output: BiocStyle::pdf_document
 vignette: >
     %\VignetteIndexEntry{epiNEM}
