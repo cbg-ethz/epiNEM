@@ -6,10 +6,7 @@ Niko Beerenwinkel, Holger Fröhlich, Florian Markowetz"
 date: "`r Sys.Date()`"
 graphics: yes
 header-includes:
-    - |
-    ```{=latex}
-    \usepackage{xcolor}
-    ```
+    - \usepackage{xcolor}
 output: BiocStyle::pdf_document
 vignette: >
     %\VignetteIndexEntry{epiNEM}
