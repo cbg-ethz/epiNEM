@@ -1,7 +1,7 @@
 Package: epiNEM
 Type: Package
 Title: epiNEM
-Version: 1.13.0
+Version: 1.14.0
 Author: Madeline Diekmann & Martin Pirkl
 Maintainer: Martin Pirkl <martin.pirkl@bsse.ethz.ch>
 Description: epiNEM is an extension of the original Nested Effects
