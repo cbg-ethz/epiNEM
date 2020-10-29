@@ -1,5 +1,242 @@
-## functions for plotting
-
+#' Rank enrichment
+#'
+#' Infers a signalling pathway from peerturbation experiments.
+#' @param data m times l matrix with m observed genes and l
+#' variables with numeric values to rank the genes
+#' @param list list of of vectors of genes
+#' @param list2 optional list with same length as list
+#' @param n length of the gradient (maximum: m)
+#' @param col1 color of the gradient
+#' @param col2 color of the first list
+#' @param col3 color of the second list2
+#' @param blim numeric vector of length two with the lower
+#' and upper bounds for the gradient
+#' @param p numeric adjustment (length four) of the left side of the
+#' gradient (low means more to the left, high more to the right)
+#' the right side of the enrichment lines and the top positions
+#' of the additional matrices in case of vis='matrices'
+#' @param lwd line width of the enrichment lines
+#' @param test test function for the enrichment p-value (must
+#' have input argument and output values same as wilcoxon.test
+#' or ks.test
+#' @param vis method for visualisation: 'matrix' uses one
+#' matrix heatmap for; 'matrices' uses several matrices
+#' (experimental), 'colside'
+#' uses the colSideColors argument for the ticks of genes in
+#' list/list2 (can use a lot of memory; experimental)
+#' @param verbose if TRUE gives prints additional output
+#' @param ... additional arguments for epiNEM::HeatmapOP
+#' @return transitively closed matrix or graphNEL
+#' @author Martin Pirkl
+#' @export
+#' @import lattice
+#' @examples
+#' data <- matrix(rnorm(100*2),100,2)
+#' rownames(data) <- 1:100
+#' list <- list(first = sample(1:100, 10), second = sample(1:100, 20))
+#' rank.enrichment(data,list)
+rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
+                            col2=rgb(1,0,0,0.75),col3=rgb(0,0,1,0.75),
+                            blim=NULL,p=NULL,lwd=3,
+                            test=wilcox.test,vis="matrix",
+                            verbose=FALSE,...) {
+    if (is.null(p)) {
+        p <- c(0,1,0.466,0.333)
+    }
+    pvals <- matrix(NA,ncol(data),length(list))
+    ylim <- c(-0,1)
+    if (is.null(list2)) {
+        pvals <- matrix(NA,length(list)*ncol(data),3)
+        colnames(pvals) <- c("less","greater","two.sided")
+    } else {
+        pvals <- matrix(NA,length(list)*ncol(data),2*3)
+        colnames(pvals) <- rep(c("less","greater","two.sided"),2)
+    }
+    rownames(pvals) <- rep(colnames(data),each=length(list))
+    fdrs <- pvals
+    for (i in 1:ncol(data)) {
+        data.tmp <- sort(data[,i],decreasing=FALSE)
+        if (is.null(blim)) {
+            blim <- c(-max(abs(data.tmp)),max(abs(data.tmp)))
+        }
+        for (j in 1:length(list)) {
+            tmp <- match(list[[j]],names(data.tmp))
+            tmp <- tmp[which(is.na(tmp) == FALSE)]
+            pvals[j+length(list)*(i-1),1] <-
+                test(tmp,rank(data.tmp),alternative="less")$p.value
+            pvals[j+length(list)*(i-1),2] <-
+                test(tmp,rank(data.tmp),alternative="greater")$p.value
+            pvals[j+length(list)*(i-1),3] <-
+                test(tmp,rank(data.tmp))$p.value
+            mat.tmp <- rbind(data.tmp,NA)
+            mat.tmp[2,tmp] <- blim[1]
+            if (vis == 'colside') {
+                csc1 <- mat.tmp[2,]
+                csc1[tmp] <- col2
+                csc1[is.na(csc1)] <- "transparent"
+            }
+            xscore0 <- c(1,sort(tmp),length(data.tmp))
+            ## left:
+            scorel <- sort(tmp)/length(data.tmp)-
+                (1:length(tmp))/length(tmp)
+            score0 <- c(0,scorel,0)
+            aucl <-
+                sum(((score0[-length(score0)]+
+                          score0[-1])/2)*(xscore0[-1]-
+                                              xscore0[-length(xscore0)]))
+            ## right:
+            scorer <- (1:length(tmp))/length(tmp)-
+                sort(tmp)/length(data.tmp)
+            score0 <- c(0,scorer,0)
+            aucr <- sum(((score0[-length(score0)]+
+                              score0[-1])/2)*(xscore0[-1]-
+                                                  xscore0[-length(xscore0)]))
+            if (aucl >= aucr) {
+                score <- scorel
+            } else {
+                score <- scorer
+            }
+            ## two-sided?:
+            score <- abs(score)
+            ## all from here:
+            score0 <- c(0,score,0)
+            xscore0 <- c(1,sort(tmp),length(data.tmp))
+            ## auc:
+            auc <- sum(((score0[-length(score0)]+
+                             score0[-1])/2)*(xscore0[-1]-
+                                                 xscore0[-length(xscore0)]))
+            if (!is.null(list2)) {
+                tmp2 <- tmp
+                tmp <- match(list2[[j]],names(data.tmp))
+                tmp <- tmp[which(is.na(tmp) == FALSE)]
+                pvals[j+length(list)*(i-1),4] <-
+                    test(tmp,rank(data.tmp),alternative="less")$p.value
+                pvals[j+length(list)*(i-1),5] <-
+                    test(tmp,rank(data.tmp),alternative="greater")$p.value
+                pvals[j+length(list)*(i-1),6] <-
+                    test(tmp,rank(data.tmp))$p.value
+                mat.tmp <- rbind(mat.tmp,NA)
+                mat.tmp[3,tmp] <- blim[2]
+                if (vis == 'colside') {
+                    csc2 <- mat.tmp[3,]
+                    csc2[tmp] <- col3
+                    csc2[is.na(csc2)] <- "transparent"
+                }
+                score <- sort(tmp)/length(data.tmp)-
+                    (1:length(tmp))/length(tmp)
+                score <- c(0,abs(score),0)
+                xscore <- c(1,sort(tmp),length(data.tmp))
+                tmp <- c(tmp,tmp2)
+            } else {
+                score <- score0
+                xscore <- xscore0
+                col3 <- "transparent"
+            }
+            select <- sort(c(tmp,(1:n)*length(data.tmp)/n))
+            mat.tmp <- mat.tmp[,select]
+            csc0 <- NULL
+            if (vis == 'colside') {
+                csc1 <- csc1[select]
+                csc2 <- csc2[select]
+                csc0 <- rep("transparent",length(csc1))
+                csc0[which(csc1 != "transparent")] <- col2
+                csc0[which(csc2 != "transparent")] <- col3
+                csc0[which(csc1 != "transparent" & csc2 != "transparent")] <-
+                    "black"
+            }
+            colnames(mat.tmp) <- NULL
+            rownames(mat.tmp) <- NULL
+    a <- lattice::xyplot(score0~xscore0,
+                         strip=FALSE,type="l",ylim=ylim,
+                         ylab="enrichment score",xlab="",col=col2,
+                         key=list(corner=c(0.5,1),
+                                  lines=list(col=c(col2,col3),
+                                             lty=c(1,1),lwd=10),
+    ext=list(c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
+                      format(pvals[j+length(list)*(i-1),2],digits=3),
+                      " (greater), ",
+                      format(pvals[j+length(list)*(i-1),1],digits=3),
+                      " (less))"),
+               paste0(gsub("_"," ",names(list2)[j]), " (p-value: ",
+          format(pvals[j+length(list)*(i-1),5],digits=3), " (greater), ",
+          format(pvals[j+length(list)*(i-1),4],digits=3)," (less))")))),
+    lwd=lwd,par.settings=list(axis.line=list(lwd=0)),
+    scales=list(x=list(draw=FALSE)),
+    panel = function(...) {
+        panel.xyplot(...)
+        panel.abline(h=seq(-0.8,0.8,length.out=9),lty=3,col=rgb(0,0,0,0.75))
+        panel.xyplot(x=xscore,y=score,type="l",lwd=lwd,col=col3)
+    },
+    main = colnames(data)[i]
+            )
+            if (!is.null(list2)) {
+                sub <- ""
+            } else {
+                sub <- NULL
+            }
+    more <- FALSE
+            if (vis == 'colside') {
+                mat.tmp <- mat.tmp[1,]
+            } else if (vis == 'matrices') {
+                mat.tmp1 <- mat.tmp[2,,drop=FALSE]
+                idxna <- which(is.na(mat.tmp1[1,])==TRUE)
+                mat.tmp1[1,which(mat.tmp1[1,]!=0)] <- NA
+                mat.tmp1[1,idxna] <-
+                    seq(-0.001,0.001,length.out=length(idxna))
+                if (!is.null(list2)) {
+                    mat.tmp2 <- mat.tmp[3,,drop=FALSE]
+                    idxna <- which(is.na(mat.tmp2[1,])==TRUE)
+                    mat.tmp2[1,which(mat.tmp2[1,]!=0)] <- NA
+                    mat.tmp2[1,idxna] <-
+                        seq(-0.001,0.001,length.out=length(idxna))
+                }
+                more <- TRUE
+                mat.tmp <- mat.tmp[1,,drop=FALSE]
+            }
+            b <- HeatmapOP(mat.tmp,Colv=0,Rowv=0,
+                                   bordercol="transparent",col=col1,
+                                   borderwidth=0,colNA="transparent",
+                                   breaks=seq(blim[1],blim[2],
+                                              length.out=100),
+                                   sub = sub, colSideColors = csc0, ...)
+            print(a,position=c(0,0.5,p[2],1),more=TRUE)
+            print(b,position=c(p[1],0,1,0.6),more=more)
+            if (vis == 'matrices') {
+                c1 <- HeatmapOP(mat.tmp1,Colv=0,Rowv=0,
+                                        bordercol="white",col=col1,
+                                        borderwidth=0,colNA=col2,
+                                        breaks=seq(blim[1],blim[2],
+                                                   length.out=100),
+                                        sub = sub, ...)
+                more2 <- FALSE
+                if (!is.null(list2)) {
+                    c2 <- HeatmapOP(mat.tmp2,Colv=0,Rowv=0,
+                                            bordercol="white",col=col1,
+                                            borderwidth=0,colNA=col3,
+                                            breaks=seq(blim[1],blim[2],
+                                                       length.out=100),
+                                            sub = sub, ...)
+                    more2 <- TRUE
+                }
+                print(c1,position=c(p[1],0,1,p[3]),more=more2)
+                if (!is.null(list2)) {
+                    print(c2,position=c(p[1],0,1,p[4]))
+                }
+            }
+            if (verbose) {
+                print("Proliferative:")
+                print(pvals[j+length(list)*(i-1),1:3])
+                if (!is.null(list2)) {
+                    print("Invasive:")
+                    print(pvals[j+length(list)*(i-1),4:6])
+                }
+            }
+        }
+    }
+    fdrs <- pvals
+    fdrs[1:length(fdrs)] <- p.adjust(as.vector(pvals),method="BH")
+    return(list(pvals=pvals,fdrs=fdrs))
+}
 #' Add logic.
 #'
 #' extend model with node representing logic gate

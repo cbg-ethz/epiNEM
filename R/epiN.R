@@ -148,12 +148,8 @@ epiNEM <- function(filename="random",
                    method="greedy",
                    nIterations=10,
                    nModels=0,
-                   random=list(single=4,
-                               double=1,
-                               reporters=100,
-                               FPrate=0.1,
-                               FNrate=0.1,
-                               replicates=1),
+                   random=list(single=4,double=1,reporters=100,
+                               FPrate=0.1,FNrate=0.1,replicates=1),
                    ltype = "marginal",
                    para = c(0.13, 0.05),
                    init = NULL) {
@@ -378,10 +374,14 @@ IsBestModel <- function(thisModel, bestModel) {
 #' @examples
 #' res <- SimEpiNEM(runs = 1)
 SimEpiNEM <- function(runs = 10, do = c("n", "e"),
-                      random = list(FPrate = 0.1, FNrate = c(0.1, 0.5),
-                                    single = 3, double = 1, reporters = 10,
-                                    replicates = 2), maxTime = FALSE,
-                      forcelogic = TRUE, epinemsearch = "greedy",
+                      random = list(FPrate = 0.1,
+                                    FNrate = c(0.1, 0.5),
+                                    single = 3, double = 1,
+                                    reporters = 10,
+                                    replicates = 2),
+                      maxTime = FALSE,
+                      forcelogic = TRUE,
+                      epinemsearch = "greedy",
                       bnemsearch = "genetic", ...) {
 
     noiselvls <- random$FNrate
@@ -792,12 +792,17 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
+        if (nrow(x)==1) {
+            Rowv <- FALSE
+        }
+        if (ncol(x)==1) {
+            Colv <- FALSE
+        }
         if (max(x, na.rm = TRUE) == min(x, na.rm = TRUE)) {
             x <- matrix(rnorm(100), 10, 10)
             main <- "max value equals min value"
             sub <- "random matrix plotted"
         }
-
         if (is.null(breaks)) {
             breaks <- seq(min(x, na.rm = TRUE),max(x, na.rm = TRUE),
             (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))/45)
@@ -815,20 +820,16 @@ HeatmapOP <-
             x[x < breaks[1]] <- breaks[1]
             x[x > breaks[length(breaks)]] <- breaks[length(breaks)]
         }
-
-        xorg <- x # this may use lot of memory?
-
+        na.idx <- NULL
         if ((Colv | Rowv) & any(is.na(x) == TRUE)) {
-            x[which(is.na(x) == TRUE)] <- mean(x, na.rm = TRUE)
+            na.idx <- which(is.na(x) == TRUE)
+            x[na.idx] <- mean(x, na.rm = TRUE)
 
         }
-
         dd.col <- NULL
-
         if (dendrogram == "row" | dendrogram == "both" & !is.null(colorkey)) {
             colorkey = list(space = "left")
         }
-
         if (Colv) {
             if (is.null(clust)) {
                 if (is.null(clusterx)) {
@@ -856,7 +857,6 @@ HeatmapOP <-
             col.ord <- 1:ncol(x)
             legend = NULL
         }
-        
         if (Rowv) {
             if (is.null(clust)) {
                 if (is.null(clusterx)) {
@@ -884,12 +884,9 @@ HeatmapOP <-
             row.ord <- 1:nrow(x)
             legend = NULL
         }
-
-        x <- xorg
-
+        if (!is.null(na.idx)) x[na.idx] <- NA
         add <- list(rect = list(col = "transparent",
                                 fill = colSideColors[sort(col.ord)]))
-
         myTheme <- custom.theme(region=RColorBrewer::brewer.pal(n=coln, col))
         if (dendrogram != "none") {
             if (dendrogram == "both") {
@@ -1051,31 +1048,24 @@ HeatmapOP <-
                 legend <- NULL
             }
         }
-
-        d <- t(x[row.ord, col.ord])
-
-        d <- d[, ncol(d):1]
-
+        d <- t(x[row.ord, col.ord,drop=FALSE])
+        d <- d[, ncol(d):1, drop=FALSE]
         if (contour) {
             region <- TRUE
             col.regions <- terrain.colors(100)
         }
-
         ##  print(p, position=c(0,ypct-0.05,1,1), more=TRUE)
         ##  print(p2, position=c(0,0,1,ypct+0.05))
-
         if (is.null(rownames(x))) {
             ytck <- list(cex = 0, rot = 0, at = NULL)
         } else {
             ytck <- list(cex = cexRow, rot = yrot)
         }
-
         if (is.null(colnames(x))) {
             xtck <- list(cex = 0, rot = 0, at = NULL)
         } else {
             xtck <- list(cex = cexCol, rot = xrot)
         }
-
         levelplot(d,
                   main = list(label = main, cex = cexMain),
                   sub = list(label = sub, cex = cexSub),
