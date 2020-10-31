@@ -30,10 +30,12 @@
 #' @author Martin Pirkl
 #' @export
 #' @import lattice
+#' @importFrom latex2exp TeX
 #' @examples
 #' data <- matrix(rnorm(100*2),100,2)
 #' rownames(data) <- 1:100
-#' list <- list(first = sample(1:100, 10), second = sample(1:100, 20))
+#' colnames(data) <- LETTERS[1:2]
+#' list <- list(first = as.character(sample(1:100, 10)), second = as.character(sample(1:100, 20)))
 #' rank.enrichment(data,list)
 rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
                             col2=rgb(1,0,0,0.75),col3=rgb(0,0,1,0.75),
@@ -146,20 +148,39 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
             }
             colnames(mat.tmp) <- NULL
             rownames(mat.tmp) <- NULL
+            main <- TeX(gsub("alpha","$\\\\alpha$",colnames(data)[i]))
+            main <- TeX(gsub("beta","$\\\\beta$",colnames(data)[i]))
+            main <- TeX(gsub("gamma","$\\\\gamma$",colnames(data)[i]))
+            main <- TeX(gsub("delta","$\\\\delta$",colnames(data)[i]))
+            if (is.null(list2)) {
+                p.text <- c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
+                                   format(pvals[j+length(list)*(i-1),2],digits=3),
+                                   " (greater), ",
+                                   format(pvals[j+length(list)*(i-1),1],
+                                          digits=3),
+                                   " (less))"))
+            } else {
+                p.text <- c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
+                                   format(pvals[j+length(list)*(i-1),2],
+                                          digits=3),
+                                   " (greater), ",
+                                   format(pvals[j+length(list)*(i-1),1],
+                                          digits=3),
+                                   " (less))"),
+                            paste0(gsub("_"," ",names(list2)[j]),
+                                   " (p-value: ",
+                                   format(pvals[j+length(list)*(i-1),5],
+                                          digits=3), " (greater), ",
+                                   format(pvals[j+length(list)*(i-1),4],
+                                          digits=3)," (less))"))
+            }
     a <- lattice::xyplot(score0~xscore0,
                          strip=FALSE,type="l",ylim=ylim,
                          ylab="enrichment score",xlab="",col=col2,
                          key=list(corner=c(0.5,1),
                                   lines=list(col=c(col2,col3),
                                              lty=c(1,1),lwd=10),
-    ext=list(c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
-                      format(pvals[j+length(list)*(i-1),2],digits=3),
-                      " (greater), ",
-                      format(pvals[j+length(list)*(i-1),1],digits=3),
-                      " (less))"),
-               paste0(gsub("_"," ",names(list2)[j]), " (p-value: ",
-          format(pvals[j+length(list)*(i-1),5],digits=3), " (greater), ",
-          format(pvals[j+length(list)*(i-1),4],digits=3)," (less))")))),
+    text=list(p.text)),
     lwd=lwd,par.settings=list(axis.line=list(lwd=0)),
     scales=list(x=list(draw=FALSE)),
     panel = function(...) {
@@ -167,7 +188,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
         panel.abline(h=seq(-0.8,0.8,length.out=9),lty=3,col=rgb(0,0,0,0.75))
         panel.xyplot(x=xscore,y=score,type="l",lwd=lwd,col=col3)
     },
-    main = colnames(data)[i]
+    main =  main # colnames(data)[i]
             )
             if (!is.null(list2)) {
                 sub <- ""
@@ -178,20 +199,15 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
             if (vis == 'colside') {
                 mat.tmp <- mat.tmp[1,]
             } else if (vis == 'matrices') {
-                mat.tmp1 <- mat.tmp[2,,drop=FALSE]
-                idxna <- which(is.na(mat.tmp1[1,])==TRUE)
-                mat.tmp1[1,which(mat.tmp1[1,]!=0)] <- NA
-                mat.tmp1[1,idxna] <-
-                    seq(-0.001,0.001,length.out=length(idxna))
+                mat.tmp1 <- mat.tmp[2:3,]
+                mat.tmp1[which(is.na(mat.tmp1)==TRUE)] <- blim[2]
+                mat.tmp1[2,] <- NA
                 if (!is.null(list2)) {
                     mat.tmp2 <- mat.tmp[3,,drop=FALSE]
-                    idxna <- which(is.na(mat.tmp2[1,])==TRUE)
-                    mat.tmp2[1,which(mat.tmp2[1,]!=0)] <- NA
-                    mat.tmp2[1,idxna] <-
-                        seq(-0.001,0.001,length.out=length(idxna))
+                    mat.tmp2[which(is.na(mat.tmp2)==TRUE)] <- blim[1]
                 }
                 more <- TRUE
-                mat.tmp <- mat.tmp[1,,drop=FALSE]
+                mat.tmp[2:3,] <- NA
             }
             b <- HeatmapOP(mat.tmp,Colv=0,Rowv=0,
                                    bordercol="transparent",col=col1,
@@ -203,19 +219,21 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
             print(b,position=c(p[1],0,1,0.6),more=more)
             if (vis == 'matrices') {
                 c1 <- HeatmapOP(mat.tmp1,Colv=0,Rowv=0,
-                                        bordercol="white",col=col1,
-                                        borderwidth=0,colNA=col2,
-                                        breaks=seq(blim[1],blim[2],
-                                                   length.out=100),
-                                        sub = sub, ...)
+                                bordercol="transparent",
+                                col=c(col3,"white"),
+                                borderwidth=0,colNA="transparent",
+                                breaks=seq(blim[1],blim[2],
+                                           length.out=100),
+                                sub = sub, ...)
                 more2 <- FALSE
                 if (!is.null(list2)) {
                     c2 <- HeatmapOP(mat.tmp2,Colv=0,Rowv=0,
-                                            bordercol="white",col=col1,
-                                            borderwidth=0,colNA=col3,
-                                            breaks=seq(blim[1],blim[2],
-                                                       length.out=100),
-                                            sub = sub, ...)
+                                    bordercol="transparent",
+                                    col=c("white",col2),
+                                    borderwidth=0,colNA="transparent",
+                                    breaks=seq(blim[1],blim[2],
+                                               length.out=100),
+                                    sub = sub, ...)
                     more2 <- TRUE
                 }
                 print(c1,position=c(p[1],0,1,p[3]),more=more2)

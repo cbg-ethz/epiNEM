@@ -887,7 +887,12 @@ HeatmapOP <-
         if (!is.null(na.idx)) x[na.idx] <- NA
         add <- list(rect = list(col = "transparent",
                                 fill = colSideColors[sort(col.ord)]))
-        myTheme <- custom.theme(region=RColorBrewer::brewer.pal(n=coln, col))
+        if (length(col)==1) {
+            myTheme <-
+                custom.theme(region=RColorBrewer::brewer.pal(n=coln, col))
+        } else {
+            myTheme <- custom.theme(region=col)
+        }
         if (dendrogram != "none") {
             if (dendrogram == "both") {
                 if (colSideColorsPos %in% "bottom") {
