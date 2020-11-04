@@ -148,10 +148,15 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
             }
             colnames(mat.tmp) <- NULL
             rownames(mat.tmp) <- NULL
-            main <- TeX(gsub("alpha","$\\\\alpha$",colnames(data)[i]))
-            main <- TeX(gsub("beta","$\\\\beta$",colnames(data)[i]))
-            main <- TeX(gsub("gamma","$\\\\gamma$",colnames(data)[i]))
-            main <- TeX(gsub("delta","$\\\\delta$",colnames(data)[i]))
+            main <- TeX(gsub("_"," & ",colnames(data)[i]))
+            main <- TeX(gsub("alpha","$\\\\\\alpha$",
+                                        colnames(data)[i]))
+            main <- TeX(gsub("beta","$\\\\\\beta$",
+                                        colnames(data)[i]))
+            main <- TeX(gsub("gamma","$\\\\\\gamma$",
+                                        colnames(data)[i]))
+            main <- TeX(gsub("delta","$\\\\\\delta$",
+                                        colnames(data)[i]))
             if (is.null(list2)) {
                 p.text <- c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
                                    format(pvals[j+length(list)*(i-1),2],digits=3),

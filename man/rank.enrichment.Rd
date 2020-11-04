@@ -70,7 +70,8 @@ Infers a signalling pathway from peerturbation experiments.
 \examples{
 data <- matrix(rnorm(100*2),100,2)
 rownames(data) <- 1:100
-list <- list(first = sample(1:100, 10), second = sample(1:100, 20))
+colnames(data) <- LETTERS[1:2]
+list <- list(first = as.character(sample(1:100, 10)), second = as.character(sample(1:100, 20)))
 rank.enrichment(data,list)
 }
 \author{
