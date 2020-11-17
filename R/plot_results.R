@@ -6,6 +6,8 @@
 #' @param list list of of vectors of genes
 #' @param list2 optional list with same length as list
 #' @param n length of the gradient (maximum: m)
+#' @param main character string for main header; if NULL uses
+#' the column names of data by default
 #' @param col1 color of the gradient
 #' @param col2 color of the first list
 #' @param col3 color of the second list2
@@ -37,7 +39,7 @@
 #' colnames(data) <- LETTERS[1:2]
 #' list <- list(first = as.character(sample(1:100, 10)), second = as.character(sample(1:100, 20)))
 #' rank.enrichment(data,list)
-rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
+rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                             col2=rgb(1,0,0,0.75),col3=rgb(0,0,1,0.75),
                             blim=NULL,p=NULL,lwd=3,
                             test=wilcox.test,vis="matrix",
@@ -148,15 +150,9 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
             }
             colnames(mat.tmp) <- NULL
             rownames(mat.tmp) <- NULL
-            main <- TeX(gsub("_"," & ",colnames(data)[i]))
-            main <- TeX(gsub("alpha","$\\\\\\alpha$",
-                                        colnames(data)[i]))
-            main <- TeX(gsub("beta","$\\\\\\beta$",
-                                        colnames(data)[i]))
-            main <- TeX(gsub("gamma","$\\\\\\gamma$",
-                                        colnames(data)[i]))
-            main <- TeX(gsub("delta","$\\\\\\delta$",
-                                        colnames(data)[i]))
+            if (is.null(main)) {
+                main <- colnames(data)[i]
+            }
             if (is.null(list2)) {
                 p.text <- c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
                                    format(pvals[j+length(list)*(i-1),2],digits=3),
@@ -225,7 +221,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
             if (vis == 'matrices') {
                 c1 <- HeatmapOP(mat.tmp1,Colv=0,Rowv=0,
                                 bordercol="transparent",
-                                col=c(col3,"white"),
+                                col=c(col2,"white"),
                                 borderwidth=0,colNA="transparent",
                                 breaks=seq(blim[1],blim[2],
                                            length.out=100),
@@ -234,7 +230,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,col1="RdBu",
                 if (!is.null(list2)) {
                     c2 <- HeatmapOP(mat.tmp2,Colv=0,Rowv=0,
                                     bordercol="transparent",
-                                    col=c("white",col2),
+                                    col=c("white",col3),
                                     borderwidth=0,colNA="transparent",
                                     breaks=seq(blim[1],blim[2],
                                                length.out=100),

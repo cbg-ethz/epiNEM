@@ -744,8 +744,8 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' @param sub Subtitle.
 #' @param dendrogram Draw dendrogram with "both", "col" or
 #' "row", or do not draw with "none".
-#' @param colorkey Draw colorkey list(space="left") or
-#' list(space="right").
+#' @param colorkey Draw colorkey "left", "right" (default), "top", "bottom" 
+#' or NULL for no colorkey.
 #' @param Colv Cluster columns (TRUE) or not (FALSE).
 #' @param Rowv Cluster rows (TRUE) or not (FALSE).
 #' @param xrot Rotate the column names by degree.
@@ -786,12 +786,13 @@ HeatmapOP <-
              borderwidth = 0.1, breaks = "sym",
              main = "",
              sub = "",
-             dendrogram = "none", colorkey = list(space = "right"), Colv = TRUE,
+             dendrogram = "none", colorkey = "right", Colv = TRUE,
              Rowv = TRUE, xrot = 90, yrot = 0, shrink = c(1,1), cexCol = 1,
              cexRow = 1, cexMain = 1, cexSub = 1,
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
+        colorkey <- list(space = colorkey)
         if (nrow(x)==1) {
             Rowv <- FALSE
         }

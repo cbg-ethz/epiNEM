@@ -9,6 +9,7 @@ rank.enrichment(
   list,
   list2 = NULL,
   n = 1000,
+  main = NULL,
   col1 = "RdBu",
   col2 = rgb(1, 0, 0, 0.75),
   col3 = rgb(0, 0, 1, 0.75),
@@ -30,6 +31,9 @@ variables with numeric values to rank the genes}
 \item{list2}{optional list with same length as list}
 
 \item{n}{length of the gradient (maximum: m)}
+
+\item{main}{character string for main header; if NULL uses
+the column names of data by default}
 
 \item{col1}{color of the gradient}
 

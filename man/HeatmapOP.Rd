@@ -15,7 +15,7 @@ HeatmapOP(
   main = "",
   sub = "",
   dendrogram = "none",
-  colorkey = list(space = "right"),
+  colorkey = "right",
   Colv = TRUE,
   Rowv = TRUE,
   xrot = 90,
@@ -61,8 +61,8 @@ makes the breaks symmetric around 0.}
 \item{dendrogram}{Draw dendrogram with "both", "col" or
 "row", or do not draw with "none".}
 
-\item{colorkey}{Draw colorkey list(space="left") or
-list(space="right").}
+\item{colorkey}{Draw colorkey "left", "right" (default), "top", "bottom" 
+or NULL for no colorkey.}
 
 \item{Colv}{Cluster columns (TRUE) or not (FALSE).}
 

@@ -1,12 +1,18 @@
 Package: epiNEM
 Type: Package
 Title: epiNEM
-Version: 1.15.4
+Version: 1.15.5
+Authors@R: c(person("Martin", "Pirkl",
+    email = "martinpirkl@yahoo.de",
+    role = c("aut", "cre")),
+    person("Madeline", "Diekmann",
+    role = c("aut")))
 Author: Madeline Diekmann & Martin Pirkl
 Maintainer: Martin Pirkl <martinpirkl@yahoo.de>
 Description: epiNEM is an extension of the original Nested Effects
-        Models (NEM). EpiNEM is able to take into account double
-        knockouts and infer more complex network signalling pathways.
+    Models (NEM). EpiNEM is able to take into account double
+    knockouts and infer more complex network signalling pathways. 
+    It is tailored towards large scale double knock-out screens.
 Depends: R (>= 4.0)
 License: GPL-3
 Encoding: UTF-8
