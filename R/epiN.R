@@ -792,7 +792,9 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
-        colorkey <- list(space = colorkey)
+        if (!is.null(colorkey)) {
+            colorkey <- list(space = colorkey)
+        }
         if (nrow(x)==1) {
             Rowv <- FALSE
         }
