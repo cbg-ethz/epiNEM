@@ -1,3 +1,68 @@
+#' AUC permutation test
+#'
+#' computes the area under the rank enrichment score curve and does 
+#' a permutation test to compute the p-value
+#' @param x numeric vector of ranks
+#' @param y numeric vector of the superset of x
+#' @param alternative character for test type: 'less','greater','two.sided'
+#' @return p-value
+#' @author Martin Pirkl
+#' @export
+#' @examples
+#' x <- 1:10
+#' y <- 1:100
+#' perm.rank.test(x,y,alternative='less')
+#' perm.rank.test(x,y,alternative='greater')
+perm.rank.test <- function(x,y=NULL,
+                 alternative=c("two.sided", "less", "greater"),iter=1000,...) {
+    xscore0 <- c(1,sort(x),length(y))
+    scorel <- sort(x)/length(y)-
+        (1:length(x))/length(x)
+    score0 <- c(0,scorel,0)
+    aucr <-
+        sum(((score0[-length(score0)]+
+                  score0[-1])/2)*(xscore0[-1]-
+                                      xscore0[-length(xscore0)]))
+    scorer <- (1:length(x))/length(x)-
+        sort(x)/length(y)
+    score0 <- c(0,scorer,0)
+    aucl <- sum(((score0[-length(score0)]+
+                      score0[-1])/2)*(xscore0[-1]-
+                                          xscore0[-length(xscore0)]))
+    count <- c(0,0)
+    for (i in seq_len(iter)) {
+        x.p <- sample(y,length(x))
+        xscore0 <- c(1,sort(x.p),length(y))
+        scorel <- sort(x.p)/length(y)-
+            (1:length(x.p))/length(x.p)
+        score0 <- c(0,scorel,0)
+        aucr.p <-
+            sum(((score0[-length(score0)]+
+                      score0[-1])/2)*(xscore0[-1]-
+                                          xscore0[-length(xscore0)]))
+        scorer <- (1:length(x.p))/length(x.p)-
+            sort(x.p)/length(y)
+        score0 <- c(0,scorer,0)
+        aucl.p <- sum(((score0[-length(score0)]+
+                            score0[-1])/2)*(xscore0[-1]-
+                                                xscore0[-length(xscore0)]))
+        if (aucl<=aucl.p) {
+            count[1] <- count[1]+1
+        }
+        if (aucr<=aucr.p) {
+            count[2] <- count[2]+1
+        }
+    }
+    p.values <- count/iter
+    if (alternative[1]=='less') {
+        return(list(p.value=p.values[1]))
+    } else if (alternative[1]=='greater') {
+        return(list(p.value=p.values[2]))
+    } else if (alternative[1]=='two.sided') {
+        p.tmp <- 2*min(p.values)
+        return(list(p.value=p.tmp))
+    }
+}
 #' Rank enrichment
 #'
 #' Infers a signalling pathway from peerturbation experiments.
@@ -18,9 +83,9 @@
 #' the right side of the enrichment lines and the top positions
 #' of the additional matrices in case of vis='matrices'
 #' @param lwd line width of the enrichment lines
-#' @param test test function for the enrichment p-value (must
-#' have input argument and output values same as wilcoxon.test
-#' or ks.test
+#' @param test test function for the enrichment p-value; must
+#' have input argument and output values same as perm.rank.test;
+#' e.g., wilcox.test or ks.test (here 'less' and 'greater' are switched!)
 #' @param vis method for visualisation: 'matrix' uses one
 #' matrix heatmap for; 'matrices' uses several matrices
 #' (experimental), 'colside'
@@ -57,11 +122,12 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
         colnames(pvals) <- rep(c("less","greater","two.sided"),2)
     }
     rownames(pvals) <- rep(colnames(data),each=length(list))
-    fdrs <- pvals
     for (i in 1:ncol(data)) {
         data.tmp <- sort(data[,i],decreasing=FALSE)
         if (is.null(blim)) {
-            blim <- c(-max(abs(data.tmp)),max(abs(data.tmp)))
+            blim2 <- c(-max(abs(data.tmp)),max(abs(data.tmp)))
+        } else {
+            blim2 <- blim
         }
         for (j in 1:length(list)) {
             tmp <- match(list[[j]],names(data.tmp))
@@ -71,9 +137,9 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
             pvals[j+length(list)*(i-1),2] <-
                 test(tmp,rank(data.tmp),alternative="greater")$p.value
             pvals[j+length(list)*(i-1),3] <-
-                test(tmp,rank(data.tmp))$p.value
+                2*min(pvals[j+length(list)*(i-1),1:2])
             mat.tmp <- rbind(data.tmp,NA)
-            mat.tmp[2,tmp] <- blim[1]
+            mat.tmp[2,tmp] <- blim2[1]
             if (vis == 'colside') {
                 csc1 <- mat.tmp[2,]
                 csc1[tmp] <- col2
@@ -120,7 +186,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                 pvals[j+length(list)*(i-1),6] <-
                     test(tmp,rank(data.tmp))$p.value
                 mat.tmp <- rbind(mat.tmp,NA)
-                mat.tmp[3,tmp] <- blim[2]
+                mat.tmp[3,tmp] <- blim2[2]
                 if (vis == 'colside') {
                     csc2 <- mat.tmp[3,]
                     csc2[tmp] <- col3
@@ -151,7 +217,9 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
             colnames(mat.tmp) <- NULL
             rownames(mat.tmp) <- NULL
             if (is.null(main)) {
-                main <- colnames(data)[i]
+                main2 <- colnames(data)[i]
+            } else {
+                main2 <- main
             }
             if (is.null(list2)) {
                 p.text <- c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
@@ -189,7 +257,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
         panel.abline(h=seq(-0.8,0.8,length.out=9),lty=3,col=rgb(0,0,0,0.75))
         panel.xyplot(x=xscore,y=score,type="l",lwd=lwd,col=col3)
     },
-    main =  main # colnames(data)[i]
+    main =  main2
             )
             if (!is.null(list2)) {
                 sub <- ""
@@ -201,11 +269,11 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                 mat.tmp <- mat.tmp[1,]
             } else if (vis == 'matrices') {
                 mat.tmp1 <- mat.tmp[2:3,]
-                mat.tmp1[which(is.na(mat.tmp1)==TRUE)] <- blim[2]
+                mat.tmp1[which(is.na(mat.tmp1)==TRUE)] <- blim2[2]
                 mat.tmp1[2,] <- NA
                 if (!is.null(list2)) {
                     mat.tmp2 <- mat.tmp[3,,drop=FALSE]
-                    mat.tmp2[which(is.na(mat.tmp2)==TRUE)] <- blim[1]
+                    mat.tmp2[which(is.na(mat.tmp2)==TRUE)] <- blim2[1]
                 }
                 more <- TRUE
                 mat.tmp[2:3,] <- NA
@@ -213,7 +281,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
             b <- HeatmapOP(mat.tmp,Colv=0,Rowv=0,
                                    bordercol="transparent",col=col1,
                                    borderwidth=0,colNA="transparent",
-                                   breaks=seq(blim[1],blim[2],
+                                   breaks=seq(blim2[1],blim2[2],
                                               length.out=100),
                                    sub = sub, colSideColors = csc0, ...)
             print(a,position=c(0,0.5,p[2],1),more=TRUE)
@@ -223,7 +291,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                                 bordercol="transparent",
                                 col=c(col2,"white"),
                                 borderwidth=0,colNA="transparent",
-                                breaks=seq(blim[1],blim[2],
+                                breaks=seq(blim2[1],blim2[2],
                                            length.out=100),
                                 sub = sub, ...)
                 more2 <- FALSE
@@ -232,7 +300,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                                     bordercol="transparent",
                                     col=c("white",col3),
                                     borderwidth=0,colNA="transparent",
-                                    breaks=seq(blim[1],blim[2],
+                                    breaks=seq(blim2[1],blim2[2],
                                                length.out=100),
                                     sub = sub, ...)
                     more2 <- TRUE

@@ -51,9 +51,9 @@ of the additional matrices in case of vis='matrices'}
 
 \item{lwd}{line width of the enrichment lines}
 
-\item{test}{test function for the enrichment p-value (must
-have input argument and output values same as wilcoxon.test
-or ks.test}
+\item{test}{test function for the enrichment p-value; must
+have input argument and output values same as perm.rank.test;
+e.g., wilcox.test or ks.test (here 'less' and 'greater' are switched!)}
 
 \item{vis}{method for visualisation: 'matrix' uses one
 matrix heatmap for; 'matrices' uses several matrices
