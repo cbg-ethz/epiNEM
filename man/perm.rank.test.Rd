@@ -18,6 +18,8 @@ perm.rank.test(
 \item{y}{numeric vector of the superset of x}
 
 \item{alternative}{character for test type: 'less','greater','two.sided'}
+
+\item{iter}{integer number of iterations}
 }
 \value{
 p-value

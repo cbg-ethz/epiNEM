@@ -5,6 +5,7 @@
 #' @param x numeric vector of ranks
 #' @param y numeric vector of the superset of x
 #' @param alternative character for test type: 'less','greater','two.sided'
+#' @param iter integer number of iterations
 #' @return p-value
 #' @author Martin Pirkl
 #' @export
