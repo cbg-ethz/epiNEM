@@ -8,8 +8,7 @@ perm.rank.test(
   x,
   y = NULL,
   alternative = c("two.sided", "less", "greater"),
-  iter = 1000,
-  ...
+  iter = 1000
 )
 }
 \arguments{

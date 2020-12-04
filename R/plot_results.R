@@ -15,7 +15,7 @@
 #' perm.rank.test(x,y,alternative='less')
 #' perm.rank.test(x,y,alternative='greater')
 perm.rank.test <- function(x,y=NULL,
-                 alternative=c("two.sided", "less", "greater"),iter=1000,...) {
+                 alternative=c("two.sided", "less", "greater"),iter=1000) {
     xscore0 <- c(1,sort(x),length(y))
     scorel <- sort(x)/length(y)-
         (1:length(x))/length(x)
