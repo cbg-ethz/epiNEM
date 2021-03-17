@@ -733,7 +733,9 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' more information: ?xyplot
 #' @param x Matrix.
 #' @param col Color. See brewer.pal.info for all available
-#' color schemes.
+#' color schemes. Alternatively, any number of colors, which
+#'  are then used to create a color gradient. E.g., c('blue','red')
+#'   produces a color scheme with a gradient from blue to red.
 #' @param colNA color for NAs; defaul is grey
 #' @param coln Number of colors.
 #' @param bordercol Border color.
@@ -744,7 +746,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' @param sub Subtitle.
 #' @param dendrogram Draw dendrogram with "both", "col" or
 #' "row", or do not draw with "none".
-#' @param colorkey Draw colorkey "left", "right" (default), "top", "bottom" 
+#' @param colorkey Draw colorkey "left", "right" (default), "top", "bottom"
 #' or NULL for no colorkey.
 #' @param Colv Cluster columns (TRUE) or not (FALSE).
 #' @param Rowv Cluster rows (TRUE) or not (FALSE).
