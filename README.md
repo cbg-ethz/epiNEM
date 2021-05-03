@@ -11,7 +11,14 @@ EpiNEM is a direct extension of the NEM framework. epiNEM focuses on the epistas
 Install:
 --------
 
-Open R and input:
+```{r}
+if (!requireNamespace("BiocManager", quietly = TRUE))
+    install.packages("BiocManager")
+
+BiocManager::install("epiNEM")
+```
+
+Most recent (devel) version:
 
 ```r
 install.packages("devtools")
@@ -23,7 +30,7 @@ install_github("cbg-ethz/epiNEM")
 library(epiNEM)
 ```
 
-Check out the vignette for working examples.
+Check out the vignette for working examples and the reproduction of the publication.
 
 ```r
 vignette(package="epiNEM")
@@ -42,4 +49,6 @@ res <- epiNEM(data, method = "exhaustive")
 
 plot(res)
 ```
+## References
 
+Pirkl M, Diekmann M, van der Wees M, Beerenwinkel N, Fröhlich H, Markowetz F (2017). "Inferring modulators of genetic interactions with epistatic nested effects models." PLOS Computational Biology, 13, 1-18. doi: 10.1371/journal.pcbi.1005496.
