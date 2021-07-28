@@ -1,6 +1,6 @@
 #' AUC permutation test
 #'
-#' computes the area under the rank enrichment score curve and does 
+#' computes the area under the rank enrichment score curve and does
 #' a permutation test to compute the p-value
 #' @param x numeric vector of ranks
 #' @param y numeric vector of the superset of x
@@ -110,12 +110,12 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                             blim=NULL,p=NULL,lwd=3,
                             test=wilcox.test,vis="matrix",
                             verbose=FALSE,...) {
-    if (is.null(p)) {
+    if (is.null(p[1])) {
         p <- c(0,1,0.466,0.333)
     }
     pvals <- matrix(NA,ncol(data),length(list))
     ylim <- c(-0,1)
-    if (is.null(list2)) {
+    if (is.null(list2[1])) {
         pvals <- matrix(NA,length(list)*ncol(data),3)
         colnames(pvals) <- c("less","greater","two.sided")
     } else {
@@ -125,7 +125,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
     rownames(pvals) <- rep(colnames(data),each=length(list))
     for (i in 1:ncol(data)) {
         data.tmp <- sort(data[,i],decreasing=FALSE)
-        if (is.null(blim)) {
+        if (is.null(blim[1])) {
             blim2 <- c(-max(abs(data.tmp)),max(abs(data.tmp)))
         } else {
             blim2 <- blim
@@ -176,7 +176,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
             auc <- sum(((score0[-length(score0)]+
                              score0[-1])/2)*(xscore0[-1]-
                                                  xscore0[-length(xscore0)]))
-            if (!is.null(list2)) {
+            if (!is.null(list2[1])) {
                 tmp2 <- tmp
                 tmp <- match(list2[[j]],names(data.tmp))
                 tmp <- tmp[which(is.na(tmp) == FALSE)]
@@ -217,12 +217,12 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
             }
             colnames(mat.tmp) <- NULL
             rownames(mat.tmp) <- NULL
-            if (is.null(main)) {
+            if (is.null(main[1])) {
                 main2 <- colnames(data)[i]
             } else {
                 main2 <- main
             }
-            if (is.null(list2)) {
+            if (is.null(list2[1])) {
                 p.text <- c(paste0(gsub("_"," ",names(list)[j]), " (p-value: ",
                                    format(pvals[j+length(list)*(i-1),2],digits=3),
                                    " (greater), ",
@@ -260,7 +260,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
     },
     main =  main2
             )
-            if (!is.null(list2)) {
+            if (!is.null(list2[1])) {
                 sub <- ""
             } else {
                 sub <- NULL
@@ -272,7 +272,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                 mat.tmp1 <- mat.tmp[2:3,]
                 mat.tmp1[which(is.na(mat.tmp1)==TRUE)] <- blim2[2]
                 mat.tmp1[2,] <- NA
-                if (!is.null(list2)) {
+                if (!is.null(list2[1])) {
                     mat.tmp2 <- mat.tmp[3,,drop=FALSE]
                     mat.tmp2[which(is.na(mat.tmp2)==TRUE)] <- blim2[1]
                 }
@@ -296,7 +296,7 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                                            length.out=100),
                                 sub = sub, ...)
                 more2 <- FALSE
-                if (!is.null(list2)) {
+                if (!is.null(list2[1])) {
                     c2 <- HeatmapOP(mat.tmp2,Colv=0,Rowv=0,
                                     bordercol="transparent",
                                     col=c("white",col3),
@@ -307,14 +307,14 @@ rank.enrichment <- function(data,list,list2=NULL,n=1000,main=NULL,col1="RdBu",
                     more2 <- TRUE
                 }
                 print(c1,position=c(p[1],0,1,p[3]),more=more2)
-                if (!is.null(list2)) {
+                if (!is.null(list2[1])) {
                     print(c2,position=c(p[1],0,1,p[4]))
                 }
             }
             if (verbose) {
                 print("Proliferative:")
                 print(pvals[j+length(list)*(i-1),1:3])
-                if (!is.null(list2)) {
+                if (!is.null(list2[1])) {
                     print("Invasive:")
                     print(pvals[j+length(list)*(i-1),4:6])
                 }
@@ -443,7 +443,7 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
 
     doubles <- x$doubles
 
-    if (is.null(ind)) { ind <- 1:length(doubles) }
+    if (is.null(ind[1])) { ind <- 1:length(doubles) }
 
     if (global) {
 

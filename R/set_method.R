@@ -19,7 +19,7 @@ GreedyHillClimber <- function(n, experiments, data2,
     result <- sapply(extendedModels, Mll, data2, data0)
     mLLscores <- unlist(result["mLL",])
     score <- max(mLLscores)
-    if (is.null(init)) {
+    if (is.null(init[1])) {
         model <- startModel
     } else {
         model <- init

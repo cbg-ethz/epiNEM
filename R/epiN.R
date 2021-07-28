@@ -794,7 +794,7 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
-        if (!is.null(colorkey)) {
+        if (!is.null(colorkey[1])) {
             colorkey <- list(space = colorkey)
         }
         if (nrow(x)==1) {
@@ -808,7 +808,7 @@ HeatmapOP <-
             main <- "max value equals min value"
             sub <- "random matrix plotted"
         }
-        if (is.null(breaks)) {
+        if (is.null(breaks[1])) {
             breaks <- seq(min(x, na.rm = TRUE),max(x, na.rm = TRUE),
             (max(x, na.rm = TRUE) - min(x, na.rm = TRUE))/45)
         }
@@ -832,18 +832,18 @@ HeatmapOP <-
 
         }
         dd.col <- NULL
-        if (dendrogram == "row" | dendrogram == "both" & !is.null(colorkey)) {
+        if (dendrogram == "row" | dendrogram == "both" & !is.null(colorkey[1])) {
             colorkey = list(space = "left")
         }
         if (Colv) {
-            if (is.null(clust)) {
-                if (is.null(clusterx)) {
+            if (is.null(clust[1])) {
+                if (is.null(clusterx[1])) {
                     dd.col <- as.dendrogram(hclust(dist(t(x))))
                 } else {
                     dd.col <- as.dendrogram(hclust(dist(t(clusterx))))
                 }
             } else {
-                if (is.null(clusterx)) {
+                if (is.null(clusterx[1])) {
                     cor.tmp <- cor(x, method = clust)
                 } else {
                     cor.tmp <- cor(clusterx, method = clust)
@@ -863,14 +863,14 @@ HeatmapOP <-
             legend = NULL
         }
         if (Rowv) {
-            if (is.null(clust)) {
-                if (is.null(clusterx)) {
+            if (is.null(clust[1])) {
+                if (is.null(clusterx[1])) {
                     dd.row <- as.dendrogram(hclust(dist(x)))
                 } else {
                     dd.row <- as.dendrogram(hclust(dist(clusterx)))
                 }
             } else {
-                if (is.null(clusterx)) {
+                if (is.null(clusterx[1])) {
                     cor.tmp <- cor(t(x), method = clust)
                 } else {
                     cor.tmp <- cor(t(clusterx), method = clust)
@@ -889,7 +889,7 @@ HeatmapOP <-
             row.ord <- 1:nrow(x)
             legend = NULL
         }
-        if (!is.null(na.idx)) x[na.idx] <- NA
+        if (!is.null(na.idx[1])) x[na.idx] <- NA
         add <- list(rect = list(col = "transparent",
                                 fill = colSideColors[sort(col.ord)]))
         if (length(col)==1) {
@@ -901,7 +901,7 @@ HeatmapOP <-
         if (dendrogram != "none") {
             if (dendrogram == "both") {
                 if (colSideColorsPos %in% "bottom") {
-                    if (!is.null(colSideColors)) {
+                    if (!is.null(colSideColors[1])) {
                         size <- 2
                     } else {
                         size <- 10
@@ -939,11 +939,11 @@ HeatmapOP <-
                 }
             }
             if (dendrogram == "row") {
-                if (!is.null(colSideColors)) {
-                    if (is.null(dd.col)) {
+                if (!is.null(colSideColors[1])) {
+                    if (is.null(dd.col[1])) {
                         col.ord <- 1:length(colSideColors)
                     }
-                    if (is.null(clusterx)) {
+                    if (is.null(clusterx[1])) {
                         dd.col <- as.dendrogram(hclust(dist(t(x))*0))
                     } else {
                         dd.col <- as.dendrogram(hclust(dist(t(clusterx))*0))
@@ -993,7 +993,7 @@ HeatmapOP <-
             }
             if (dendrogram == "col") {
                 if (colSideColorsPos %in% "bottom") {
-                    if (!is.null(colSideColors)) {
+                    if (!is.null(colSideColors[1])) {
                         size <- 2
                     } else {
                         size <- 10
@@ -1019,11 +1019,11 @@ HeatmapOP <-
                 }
             }
         } else {
-            if (!is.null(colSideColors)) {
-                if (is.null(dd.col)) {
+            if (!is.null(colSideColors[1])) {
+                if (is.null(dd.col[1])) {
                     col.ord <- 1:length(colSideColors)
                 }
-                if (is.null(clusterx)) {
+                if (is.null(clusterx[1])) {
                     dtx <- dist(t(x))
                     dtx[is.na(dtx)] <- 0
                     dd.col <- as.dendrogram(hclust(dtx*0))
@@ -1066,12 +1066,12 @@ HeatmapOP <-
         }
         ##  print(p, position=c(0,ypct-0.05,1,1), more=TRUE)
         ##  print(p2, position=c(0,0,1,ypct+0.05))
-        if (is.null(rownames(x))) {
+        if (is.null(rownames(x)[1])) {
             ytck <- list(cex = 0, rot = 0, at = NULL)
         } else {
             ytck <- list(cex = cexRow, rot = yrot)
         }
-        if (is.null(colnames(x))) {
+        if (is.null(colnames(x)[1])) {
             xtck <- list(cex = 0, rot = 0, at = NULL)
         } else {
             xtck <- list(cex = cexCol, rot = xrot)
@@ -1172,7 +1172,7 @@ epiScreen <- function(data, ...) {
             i1 <- which(singles %in% j)
             i2 <- which(doubles %in% i)
 
-            if (!(is.null(dim(dataTmp)))) {
+            if (!(is.null(dim(dataTmp)[1]))) {
 
                 if (any(dataTmp[, j] != 0)) {
 
