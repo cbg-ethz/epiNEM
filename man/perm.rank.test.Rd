@@ -24,7 +24,7 @@ perm.rank.test(
 p-value
 }
 \description{
-computes the area under the rank enrichment score curve and does 
+computes the area under the rank enrichment score curve and does
 a permutation test to compute the p-value
 }
 \examples{

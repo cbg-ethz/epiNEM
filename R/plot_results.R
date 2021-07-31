@@ -440,61 +440,42 @@ plot.epiNEM <- function(x, ...) {
 #' @return plot(s) of an epiNEM screen analysis
 plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                            cexGene = 1, off = 0.05, cexLegend = 1, ...) {
-
     doubles <- x$doubles
-
     if (is.null(ind[1])) { ind <- 1:length(doubles) }
-
     if (global) {
-
         distmat <- x$logic
-
         distmat[which(distmat == 0)] <- 7
-
         distmat[which(distmat %in% "AND")] <- 1
         distmat[which(distmat %in% "OR")] <- 2
         distmat[which(distmat %in% "XOR")] <- 3
         distmat[which(distmat %in% "NOEPI")] <- 6
         distmat[which(distmat %in% c("UNCON", "NOINFO", "NOINF"))] <- 7
-
         for (i in 1:ncol(distmat)) {
-
             genes <- unlist(strsplit(colnames(distmat)[i], "\\."))
-
             distmat[which(distmat[, i] %in%
                           paste(genes[1], " masks the effect of ", genes[2],
                                 sep = "")), i] <- 4
-
-
             distmat[which(distmat[, i] %in%
                           paste(genes[2], " masks the effect of ", genes[1],
                                 sep = "")), i] <- 5
-
         }
-
         distmat <- apply(distmat, c(1,2), as.numeric)
-
         for (i in 1:ncol(distmat)) {
             distmat[, i] <- rev(sort(distmat[, i]))
         }
-
         y <- distmat
-
         distmat <-
             distmat[, order(apply(distmat, 2, function(x) {
                 return(sum(x == 1))
             }))]
-
         y[which(y == 5)] <- 4
         ## if (nrow(y) > 20) {
             rownames(distmat) <- NULL
         ## }
-
         labeltext <- c("", "no information\n\n\n", "no epistasis\n\n\n",
                        "masking (NOT B)\n\n\n",
                        "masking (NOT A)\n\n\n", "XOR\n\n\n",
                        "OR\n\n\n", "AND\n\n\n")
-
         if (colorkey) {
             colorkey <- list(space = "right",
                                   labels = rev(labeltext), width = 1,
@@ -502,7 +483,6 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
         } else {
             colorkey <- NULL
         }
-
         HeatmapOP(distmat, Colv = FALSE, Rowv = FALSE,
                   main = "logic gate distribution",
                   sub = "", col = "Paired", breaks =
@@ -510,32 +490,19 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                   colorkey = colorkey,
                   xlab = "double knock-outs",
                   ylab = "modulators\n(different order for each pair)", ...)
-
     } else {
-
         palette(c("#4444cc", "#77aa77", "#009933",
                   "#ff0000", "#dd8811", "#aa44bb", "#999900"))
-
         logicmat0 <- x$logic
-
         llmat0 <- x$ll
-
         for (i in 1:length(x$doubles)) {
-
             if (!(i %in% ind)) { next() }
-
             logicvec <- logicmat0[, i]
-
             llvec <- llmat0[, i]
-
             logicvec <- logicvec[order(llvec, decreasing = TRUE)]
-
             llvec <- llvec[order(llvec, decreasing = TRUE)]
-
             parents <- unlist(strsplit(doubles[i], "\\."))
-
             pchvec <- numeric(length(llvec))
-
             pchvec[which(logicvec %in% "AND")] <- 1
             pchvec[which(logicvec %in% "OR")] <- 2
             pchvec[which(logicvec %in% "XOR")] <- 3
@@ -543,52 +510,30 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
             pchvec[grep(paste("^", parents[2], sep = ""), logicvec)] <- 5
             pchvec[which(logicvec %in% "NOEPI")] <- 6
             pchvec[which(logicvec %in% c("NOINFO", "NOINF"))] <- 7
-
             logicvec <- logicvec[-which(logicvec %in% "0")]
             pchvec <- pchvec[-which(pchvec == 0)]
             llvec <- llvec[-which(llvec == 0)]
-
             colvec <- pchvec
-
             thetop <- sum(!(logicvec %in% c("UNCON", "NOINFO", "NOINF")))
-
             if (all(is.infinite(llvec) == TRUE)) {
-
                 llvec[1:length(llvec)] <- -1000
-
                 margin <- 100
-
                 donames <- 30
-
             } else {
-
                 range <- max(llvec[1:thetop]) - min(llvec[1:thetop])
-
                 if (range == 0) {
-
                     range <- 10
-
                     margin <- range*0.25
-
                     offset <- range*off
-
                     ylim <- c(llvec[1], llvec[1]+10)
-
                 } else {
-
                     margin <- range*0.25
-
                     offset <- range*off
-
                     ylim <- c(min(llvec[1:thetop]),
                               max(llvec[1:thetop])+margin*0.2+offset+margin*3/5)
-
                 }
-
                 offset <- range*off
-
             }
-
             mark <- ""
             legendx <- length(llvec[1:thetop])
             p2max <- max(llvec[1:thetop])
@@ -622,11 +567,8 @@ plot.epiScreen <- function(x, global = TRUE, ind = NULL, colorkey = TRUE,
                 legend = legendtext,
                 col = 1:6, pch = 1:6, xjust = 1, yjust = 1,
                 cex = cexLegend)
-
         }
-
     }
-
 }
 
 #' Plot simulations.

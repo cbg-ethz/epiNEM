@@ -747,7 +747,8 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' @param dendrogram Draw dendrogram with "both", "col" or
 #' "row", or do not draw with "none".
 #' @param colorkey Draw colorkey "left", "right" (default), "top", "bottom"
-#' or NULL for no colorkey.
+#' or NULL for no colorkey. See ?lattice::levelplot for more complex colorkey
+#' options.
 #' @param Colv Cluster columns (TRUE) or not (FALSE).
 #' @param Rowv Cluster rows (TRUE) or not (FALSE).
 #' @param xrot Rotate the column names by degree.
@@ -794,7 +795,7 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
-        if (!is.null(colorkey[1])) {
+        if (colorkey %in% c("left","right","top","bottom")) {
             colorkey <- list(space = colorkey)
         }
         if (nrow(x)==1) {

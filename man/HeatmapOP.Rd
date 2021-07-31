@@ -64,7 +64,8 @@ makes the breaks symmetric around 0.}
 "row", or do not draw with "none".}
 
 \item{colorkey}{Draw colorkey "left", "right" (default), "top", "bottom"
-or NULL for no colorkey.}
+or NULL for no colorkey. See ?lattice::levelplot for more complex colorkey
+options.}
 
 \item{Colv}{Cluster columns (TRUE) or not (FALSE).}
 
