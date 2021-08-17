@@ -795,7 +795,7 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
-        if (colorkey %in% c("left","right","top","bottom")) {
+        if (!is.list(colorkey) & colorkey[1] %in% c("left", "right", "top", "bottom")) {
             colorkey <- list(space = colorkey)
         }
         if (nrow(x)==1) {
