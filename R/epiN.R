@@ -834,6 +834,12 @@ HeatmapOP <-
             x[na.idx] <- mean(x, na.rm = TRUE)
 
         }
+        if ((Colv | Rowv) & any(is.na(clusterx) == TRUE)) {
+          print("test")
+          na.idx.tmp <- which(is.na(clusterx) == TRUE)
+          clusterx[na.idx.tmp] <- mean(clusterx, na.rm = TRUE)
+
+        }
         dd.col <- NULL
         if (dendrogram == "row" | dendrogram == "both" & !is.null(colorkey[1])) {
             colorkey = list(space = "left")
@@ -1031,7 +1037,7 @@ HeatmapOP <-
                     dtx[is.na(dtx)] <- 0
                     dd.col <- as.dendrogram(hclust(dtx*0))
                 } else {
-                    dist(t(clusterx))
+                    dtcx <- dist(t(clusterx))
                     dtcx[is.na(dtcx)] <- 0
                     dd.col <- as.dendrogram(hclust(dtcx*0))
                 }
