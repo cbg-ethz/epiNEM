@@ -832,13 +832,10 @@ HeatmapOP <-
         if ((Colv | Rowv) & any(is.na(x) == TRUE)) {
             na.idx <- which(is.na(x) == TRUE)
             x[na.idx] <- mean(x, na.rm = TRUE)
-
         }
         if ((Colv | Rowv) & any(is.na(clusterx) == TRUE)) {
-          print("test")
           na.idx.tmp <- which(is.na(clusterx) == TRUE)
           clusterx[na.idx.tmp] <- mean(clusterx, na.rm = TRUE)
-
         }
         dd.col <- NULL
         if (dendrogram == "row" | dendrogram == "both" & !is.null(colorkey[1])) {
