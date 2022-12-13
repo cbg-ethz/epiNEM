@@ -770,7 +770,8 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' @param colSideColorsPos Place colSideColors at the "top" or "bottom".
 #' @param clust p, s, or k for correlation clustering
 #' @param clusterx Optional data matrix y with the same dimensions
-#' as x. x is columns or rows are sorted by the cluster information of y.
+#' as x. x's columns or rows are sorted by the cluster information of y.
+#' Col- and rownames of y must be in the same order as in x.
 #' @param \dots Optional arguments.
 #' @author Martin Pirkl & Oscar Perpinan
 #' at http://oscarperpinan.github.io/rastervis/
@@ -1115,7 +1116,7 @@ HeatmapOP <-
 #'
 #' This function is used to analyse knock-out screens with multiple
 #' double and single knock-outs combined in one data set.
-#' @param data data matrix containing multiple single and double kock-downs
+#' @param data data matrix containing multiple single and double knock-downs
 #' in columns and effect reporters in the rows
 #' @param ... additional parameters, e.g. for the main epiNEM function
 #' @export
