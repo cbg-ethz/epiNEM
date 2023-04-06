@@ -23,6 +23,6 @@ Imports: BoolNet, e1071, gtools, stats, igraph, utils, lattice,
         latticeExtra, RColorBrewer, pcalg, minet, grDevices, graph, mnem, latex2exp
 VignetteBuilder: knitr
 Suggests: knitr, RUnit, BiocGenerics, STRINGdb, devtools, rmarkdown,
-        GOSemSim, AnnotationHub, org.Sc.sgd.db
+        GOSemSim, AnnotationHub, org.Sc.sgd.db, BiocStyle
 BugReports: https://github.com/cbg-ethz/epiNEM/issues
 URL: https://github.com/cbg-ethz/epiNEM/
