@@ -1,7 +1,7 @@
 Package: epiNEM
 Type: Package
 Title: epiNEM
-Version: 1.23.0
+Version: 1.24.0
 Authors@R: c(person("Martin", "Pirkl",
     email = "martinpirkl@yahoo.de",
     role = c("aut", "cre")),
