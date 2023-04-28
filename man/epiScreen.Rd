@@ -7,7 +7,7 @@
 epiScreen(data, ...)
 }
 \arguments{
-\item{data}{data matrix containing multiple single and double kock-downs
+\item{data}{data matrix containing multiple single and double knock-downs
 in columns and effect reporters in the rows}
 
 \item{...}{additional parameters, e.g. for the main epiNEM function}

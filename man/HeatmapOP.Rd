@@ -34,6 +34,7 @@ HeatmapOP(
   colSideColorsPos = "top",
   clust = NULL,
   clusterx = NULL,
+  axis.padding = 0.5,
   ...
 )
 }
@@ -105,7 +106,11 @@ streched boxes.}
 \item{clust}{p, s, or k for correlation clustering}
 
 \item{clusterx}{Optional data matrix y with the same dimensions
-as x. x is columns or rows are sorted by the cluster information of y.}
+as x. x's columns or rows are sorted by the cluster information of y.
+Col- and rownames of y must be in the same order as in x.}
+
+\item{axis.padding}{padding around the heatmap (0.5 is no padding,
+default)}
 
 \item{\dots}{Optional arguments.}
 }

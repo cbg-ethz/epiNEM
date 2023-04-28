@@ -772,6 +772,8 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' @param clusterx Optional data matrix y with the same dimensions
 #' as x. x's columns or rows are sorted by the cluster information of y.
 #' Col- and rownames of y must be in the same order as in x.
+#' @param axis.padding padding around the heatmap (0.5 is no padding,
+#' default)
 #' @param \dots Optional arguments.
 #' @author Martin Pirkl & Oscar Perpinan
 #' at http://oscarperpinan.github.io/rastervis/
@@ -795,7 +797,8 @@ HeatmapOP <-
              cexRow = 1, cexMain = 1, cexSub = 1,
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
-             colSideColorsPos = "top", clust = NULL, clusterx = NULL, ...) {
+             colSideColorsPos = "top", clust = NULL, clusterx = NULL,
+             axis.padding = 0.5, ...) {
         if (!is.null(colorkey)) {
             if (!is.list(colorkey) & colorkey[1] %in% c("left", "right", "top", "bottom")) {
                 colorkey <- list(space = colorkey)
@@ -1098,6 +1101,7 @@ HeatmapOP <-
                   at = at,
                   colorkey = colorkey,
                   contour = contour,
+                  lattice.options=list(axis.padding=list(factor=axis.padding)),
                   panel = if (useRaster) {
                               function(...) {
                                   panel.fill(col = colNA)
