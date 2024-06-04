@@ -35,6 +35,7 @@ HeatmapOP(
   clust = NULL,
   clusterx = NULL,
   axis.padding = 0.5,
+  legend = NULL,
   ...
 )
 }
@@ -111,6 +112,8 @@ Col- and rownames of y must be in the same order as in x.}
 
 \item{axis.padding}{padding around the heatmap (0.5 is no padding,
 default)}
+
+\item{legend}{list obejct. For parameters see base function ?legend for details. x and y parameters are relative to the inside of the heatmap and are between 0 and 1. E.g., to place the legend outside of the heatmap x and y need to be either less than 0 or greater than 1.}
 
 \item{\dots}{Optional arguments.}
 }

@@ -774,6 +774,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' Col- and rownames of y must be in the same order as in x.
 #' @param axis.padding padding around the heatmap (0.5 is no padding,
 #' default)
+#' @param legend list obejct. For parameters see base function ?legend for details. x and y parameters are relative to the inside of the heatmap and are between 0 and 1. E.g., to place the legend outside of the heatmap x and y need to be either less than 0 or greater than 1.
 #' @param \dots Optional arguments.
 #' @author Martin Pirkl & Oscar Perpinan
 #' at http://oscarperpinan.github.io/rastervis/
@@ -784,6 +785,7 @@ SimEpiNEM <- function(runs = 10, do = c("n", "e"),
 #' latticeExtra
 #' RColorBrewer
 #' grDevices
+#' @importFrom BoutrosLab.plotting.general legend.grob
 #' @examples
 #' x <- matrix(rnorm(50), 10, 5)
 #' HeatmapOP(x, dendrogram = "both", aspect = "iso", xrot = 45)
@@ -798,7 +800,17 @@ HeatmapOP <-
              colSideColors = NULL, aspect = "fill",
              contour = FALSE, useRaster = FALSE, xlab = NULL, ylab = NULL,
              colSideColorsPos = "top", clust = NULL, clusterx = NULL,
-             axis.padding = 0.5, ...) {
+             axis.padding = 0.5, legend = NULL, ...) {
+        if (!is.null(legend)) {
+            legend0 <- list(inside=list(fun=legend.grob,
+                                        x=legend$x,y=legend$y,
+                                        args=list(legends=list(
+                                            legend=list(colours=legend$fill,labels=legend$legend,
+                                                        border=legend$border,title=legend$title)
+                                        ))))
+        } else {
+            legend0 <- NULL
+        }
         if (!is.null(colorkey)) {
             if (!is.list(colorkey) & colorkey[1] %in% c("left", "right", "top", "bottom")) {
                 colorkey <- list(space = colorkey)
@@ -1086,6 +1098,7 @@ HeatmapOP <-
         } else {
             xtck <- list(cex = cexCol, rot = xrot)
         }
+        legend <- c(legend,legend0)
         levelplot(d,
                   main = list(label = main, cex = cexMain),
                   sub = list(label = sub, cex = cexSub),

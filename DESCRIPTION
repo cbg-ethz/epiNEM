@@ -18,8 +18,8 @@ License: GPL-3
 Encoding: UTF-8
 LazyData: true
 biocViews: Pathways, SystemsBiology, NetworkInference, Network
-RoxygenNote: 7.2.3
-Imports: BoolNet, e1071, gtools, stats, igraph, utils, lattice,
+RoxygenNote: 7.3.1
+Imports: BoutrosLab.plotting.general, BoolNet, e1071, gtools, stats, igraph, utils, lattice,
         latticeExtra, RColorBrewer, pcalg, minet, grDevices, graph, mnem, latex2exp
 VignetteBuilder: knitr
 Suggests: knitr, RUnit, BiocGenerics, STRINGdb, devtools, rmarkdown,
